@@ -39,5 +39,4 @@
         android:layout_alignLeft="@+id/listView2"
         android:text="@string/list_of_devices"
         android:textAppearance="?android:attr/textAppearanceLarge"/>
-
 </RelativeLayout>
