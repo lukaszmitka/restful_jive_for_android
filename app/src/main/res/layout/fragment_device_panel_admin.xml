@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/gray">
+
+    <TextView
+        android:id="@+id/devicePanel_adminFragment_sourceLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="40dp"
+        android:text="@string/devicepanel_adminfragment_source_label"
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+    <TextView
+        android:id="@+id/devicePanel_adminFragment_timeoutLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/devicePanel_adminFragment_timeoutButton"
+        android:layout_alignParentLeft="true"
+        android:text="@string/devicepanel_adminfragment_timeout_label"
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+    <TextView
+        android:id="@+id/devicePanel_adminFragment_blackBoxLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/devicePanel_adminFragment_BlackBoxButton"
+        android:layout_alignParentLeft="true"
+        android:text="@string/devicepanel_adminfragment_blascbox_label"
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+    <TextView
+        android:id="@+id/devicePanel_adminFragment_limiMinLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/devicePanel_adminFragment_LimitMinButton"
+        android:layout_alignParentLeft="true"
+        android:text="@string/devicepanel_adminfragment_answer_min_label"
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+    <TextView
+        android:id="@+id/devicePanel_adminFragment_limitMaxLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/devicePanel_adminFragment_LimitMaxButton"
+        android:layout_alignParentLeft="true"
+        android:text="@string/devicepanel_adminfragment_answer_max_label"
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+    <Spinner
+        android:id="@+id/devicePanel_adminFragment_sourceSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/devicePanel_adminFragment_sourceLabel"
+        android:entries="@array/devicepanel_adminfragment_source_array"/>
+
+    <Button
+        android:id="@+id/devicePanel_adminFragment_timeoutButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/devicePanel_adminFragment_sourceSpinner"
+        android:minHeight="30dp"
+        android:text="@string/apply"/>
+
+    <Button
+        android:id="@+id/devicePanel_adminFragment_BlackBoxButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/devicePanel_adminFragment_timeoutButton"
+        android:minHeight="30dp"
+        android:text="@string/execute"/>
+
+    <Button
+        android:id="@+id/devicePanel_adminFragment_LimitMinButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/devicePanel_adminFragment_BlackBoxButton"
+        android:minHeight="30dp"
+        android:text="@string/apply"/>
+
+    <Button
+        android:id="@+id/devicePanel_adminFragment_LimitMaxButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/devicePanel_adminFragment_LimitMinButton"
+        android:minHeight="30dp"
+        android:text="@string/apply"/>
+
+    <EditText
+        android:id="@+id/devicePanel_adminFragment_timeoutEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/devicePanel_adminFragment_timeoutButton"
+        android:layout_toLeftOf="@id/devicePanel_adminFragment_BlackBoxButton"
+        android:layout_toRightOf="@id/devicePanel_adminFragment_timeoutLabel"
+        android:ems="10"
+        android:inputType="number">
+
+        <requestFocus/>
+    </EditText>
+
+    <EditText
+        android:id="@+id/devicePanel_adminFragment_blackboxEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/devicePanel_adminFragment_BlackBoxButton"
+        android:layout_toLeftOf="@id/devicePanel_adminFragment_BlackBoxButton"
+        android:layout_toRightOf="@id/devicePanel_adminFragment_blackBoxLabel"
+        android:ems="10"
+        android:inputType="number"/>
+
+    <EditText
+        android:id="@+id/devicePanel_adminFragment_limitMinEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/devicePanel_adminFragment_LimitMinButton"
+        android:layout_toLeftOf="@+id/devicePanel_adminFragment_BlackBoxButton"
+        android:layout_toRightOf="@+id/devicePanel_adminFragment_limiMinLabel"
+        android:ems="10"
+        android:inputType="number"/>
+
+    <EditText
+        android:id="@+id/devicePanel_adminFragment_limitMaxEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/devicePanel_adminFragment_LimitMaxButton"
+        android:layout_toLeftOf="@+id/devicePanel_adminFragment_BlackBoxButton"
+        android:layout_toRightOf="@+id/devicePanel_adminFragment_limitMaxLabel"
+        android:ems="10"
+        android:inputType="number"/>
+
+    <Button
+        android:id="@+id/devicePanel_adminFragment_pingDeviceButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/devicePanel_adminFragment_LimitMaxButton"
+        android:layout_toRightOf="@+id/devicePanel_adminFragment_deviceInfoButton"
+        android:maxWidth="80dp"
+        android:minHeight="50dp"
+        android:minWidth="80dp"
+        android:text="@string/devicepanel_adminfragment_pingDevice_button"
+        android:textSize="16sp"/>
+
+    <Button
+        android:id="@+id/devicePanel_adminFragment_restartButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/devicePanel_adminFragment_LimitMaxButton"
+        android:layout_toRightOf="@+id/devicePanel_adminFragment_pollStButton"
+        android:maxWidth="80dp"
+        android:minHeight="50dp"
+        android:minWidth="80dp"
+        android:text="@string/devicepanel_adminfregment_restart_button"
+        android:textSize="16sp"/>
+
+    <Button
+        android:id="@+id/devicePanel_adminFragment_deviceInfoButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/devicePanel_adminFragment_LimitMaxButton"
+        android:maxWidth="80dp"
+        android:minHeight="50dp"
+        android:minWidth="80dp"
+        android:text="@string/devicepanel_adminfragment_deviceInfo_button"
+        android:textSize="16sp"/>
+
+    <Button
+        android:id="@+id/devicePanel_adminFragment_pollStButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/devicePanel_adminFragment_LimitMaxButton"
+        android:layout_toRightOf="@+id/devicePanel_adminFragment_pingDeviceButton"
+        android:maxWidth="80dp"
+        android:minHeight="50dp"
+        android:minWidth="80dp"
+        android:text="@string/devicepanel_adminfragment_polling_button"
+        android:textSize="16sp"/>
+
+</RelativeLayout>

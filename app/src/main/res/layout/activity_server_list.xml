@@ -1,0 +1,50 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/gray"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                tools:context=".ServerList">
+
+    <HorizontalScrollView
+        android:id="@+id/servListHorizontalScrollView1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/servListOkButton"
+        android:background="@color/white">
+
+        <ListView
+            android:id="@+id/servListListView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:fastScrollEnabled="true">
+        </ListView>
+    </HorizontalScrollView>
+
+    <Button
+        android:id="@+id/servListOkButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:onClick="buttonServerListRefresh"
+        android:text="@string/button_refresh"/>
+
+    <TextView
+        android:id="@+id/servListTextView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/servListOkButton"
+        android:layout_alignBottom="@+id/servListOkButton"
+        android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@+id/servListOkButton"
+        android:text="@string/server_list"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+</RelativeLayout>

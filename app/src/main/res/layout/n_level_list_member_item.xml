@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:id="@+id/RelativeLayout1"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/nLevelList_member_button"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_alignLeft="@+id/nLevelList_member_textView"
+        android:layout_below="@+id/nLevelList_member_textView"
+        android:onClick="buttonClick"
+        android:text="@string/details"
+        android:textSize="12sp"/>
+
+    <TextView
+        android:id="@+id/nLevelList_member_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="40dp"
+        android:text=""
+        android:textSize="16sp"/>
+
+    <Button
+        android:id="@+id/nLevelList_member_properties"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_alignBaseline="@+id/nLevelList_member_button"
+        android:layout_toRightOf="@+id/nLevelList_member_button"
+        android:onClick="buttonProperties"
+        android:text="@string/properties"
+        android:textSize="12sp"/>
+
+    <Button
+        android:id="@+id/nLevelList_member_attributes"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_alignBaseline="@+id/nLevelList_member_properties"
+        android:layout_toRightOf="@+id/nLevelList_member_properties"
+        android:onClick="buttonAttributes"
+        android:text="@string/attributes"
+        android:textSize="12sp"/>
+
+</RelativeLayout>

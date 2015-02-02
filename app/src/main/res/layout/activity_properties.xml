@@ -1,0 +1,79 @@
+<RelativeLayout
+    android:id="@+id/RelativeLayout1"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_vertical"
+    android:background="@color/gray"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".PropertiesActivity">
+
+    <TextView
+        android:id="@+id/devicePropertiesTextView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/devicePropertiesRefreshButton"
+        android:layout_alignParentLeft="true"
+        android:text="@string/device_properties"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textSize="22sp"/>
+
+    <Button
+        android:id="@+id/devicePropertiesRefreshButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="25dp"
+        android:onClick="propertiesListRefreshButton"
+        android:text="@string/refresh_button"
+        android:textSize="22sp"/>
+
+    <RelativeLayout
+        android:id="@+id/devicePropertiesRelativeLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true">
+
+        <Button
+            android:id="@+id/devicePropertiedCancelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="devicePropertiesCancelButton"
+            android:text="@string/cancel_button"/>
+
+        <Button
+            android:id="@+id/devicePropertiesUpdateButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/devicePropertiedCancelButton"
+            android:layout_toRightOf="@+id/devicePropertiedCancelButton"
+            android:onClick="devicePropertiesUpdateButton"
+            android:text="@string/update_button"/>
+    </RelativeLayout>
+
+    <ScrollView
+        android:id="@+id/scrollView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/devicePropertiesRelativeLayout"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/devicePropertiesRefreshButton">
+
+        <LinearLayout
+            android:id="@+id/properties_activity_linear_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:orientation="vertical">
+
+        </LinearLayout>
+    </ScrollView>
+
+</RelativeLayout>

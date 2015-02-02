@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/gray">
+
+    <TextView
+        android:id="@+id/devicePanel_attributes_device"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/device_panel_device"
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+    <TextView
+        android:id="@+id/devicePanel_attributes_deviceName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/devicePanel_attributes_device"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/devicePanel_attributes_device"
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+    <ListView
+        android:id="@+id/devicePanel_attributes_listView"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_above="@+id/devicePanel_attributes_arginValueEditText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/devicePanel_attributes_device"
+        android:background="@color/white">
+    </ListView>
+
+    <EditText
+        android:id="@+id/devicePanel_attributes_arginValueEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/devicePanel_attributes_descriptionButton"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:ems="10"
+        android:hint="@string/hint_argin_value">
+    </EditText>
+
+    <Button
+        android:id="@+id/devicePanel_attributes_descriptionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:clickable="false"
+        android:enabled="false"
+        android:text="@string/devicePanel_showDescription"/>
+
+    <Button
+        android:id="@+id/devicePanel_attributes_readButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/devicePanel_attributes_descriptionButton"
+        android:layout_toRightOf="@+id/devicePanel_attributes_descriptionButton"
+        android:clickable="false"
+        android:enabled="false"
+        android:text="@string/read_button"/>
+
+    <Button
+        android:id="@+id/devicePanel_attributes_writeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/devicePanel_attributes_descriptionButton"
+        android:layout_toRightOf="@+id/devicePanel_attributes_readButton"
+        android:clickable="false"
+        android:enabled="false"
+        android:text="@string/write_button"/>
+
+    <Button
+        android:id="@+id/devicePanel_attributes_plotButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/devicePanel_attributes_descriptionButton"
+        android:layout_toRightOf="@+id/devicePanel_attributes_writeButton"
+        android:clickable="false"
+        android:enabled="false"
+        android:text="@string/devicePanel_plot"/>
+
+</RelativeLayout>
