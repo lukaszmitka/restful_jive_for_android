@@ -16,5 +16,13 @@
         android:id="@+id/action_server_list"
         android:orderInCategory="3"
         android:title="@string/action_server_list"/>
+    <item
+        android:id="@+id/action_sort_by_devices"
+        android:orderInCategory="4"
+        android:title="@string/menu_item_sort_by_devices"/>
+    <item
+        android:id="@+id/action_sort_by_classes"
+        android:orderInCategory="4"
+        android:title="@string/menu_item_sort_by_classes"/>
 
 </menu>

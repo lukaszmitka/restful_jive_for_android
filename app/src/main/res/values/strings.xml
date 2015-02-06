@@ -21,6 +21,9 @@
     <color name="gray">#FFDDDDDD</color>
     <color name="white">#FFFFFFFF</color>
 
+
+    <string name="menu_item_sort_by_classes">Sort by Classes</string>
+    <string name="menu_item_sort_by_devices">Sort by Devices</string>
     <string name="list_of_devices">List of devices</string>
     <string name="title_activity_sorted_list">SortedList</string>
     <string name="details">Details</string>
