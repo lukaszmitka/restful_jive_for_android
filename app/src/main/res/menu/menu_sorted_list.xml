@@ -1,9 +1,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!--
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"/>
+        -->
     <item
         android:id="@+id/action_set_host"
         android:orderInCategory="1"
@@ -12,10 +14,6 @@
         android:id="@+id/action_full_list"
         android:orderInCategory="2"
         android:title="@string/action_full_list"/>
-    <item
-        android:id="@+id/action_server_list"
-        android:orderInCategory="3"
-        android:title="@string/action_server_list"/>
     <item
         android:id="@+id/action_sort_by_devices"
         android:orderInCategory="4"
