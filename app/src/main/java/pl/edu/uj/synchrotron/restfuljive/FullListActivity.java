@@ -64,9 +64,6 @@ public class FullListActivity extends Activity {
 			case R.id.action_sorted_list:
 				showSortedList();
 				return true;
-			case R.id.action_server_list:
-				showServerList();
-				return true;
 			default:
 				return super.onOptionsItemSelected(item);
 		}
@@ -100,14 +97,6 @@ public class FullListActivity extends Activity {
 		startActivity(i);
 	}
 
-	/**
-	 * Start new activity with device server list.
-	 */
-	private void showServerList() {
-		Intent i = new Intent(this, ServerList.class);
-		i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-		startActivity(i);
-	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -145,7 +134,7 @@ public class FullListActivity extends Activity {
 							if (response.getString("connectionStatus").equals("OK")) {
 								//System.out.println("Device connection OK");
 
-								int deviceCount = 0;
+								int deviceCount;
 								deviceCount = response.getInt("numberOfDevices");
 								String devices[] = new String[deviceCount];
 								for (int i = 0; i < deviceCount; i++) {

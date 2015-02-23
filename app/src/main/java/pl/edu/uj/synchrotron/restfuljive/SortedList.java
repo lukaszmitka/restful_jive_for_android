@@ -66,7 +66,7 @@ public class SortedList extends Activity {
 		String tangoHost = settings.getString("RESTfulTangoHost", "");
 		System.out.println("Found tango host: " + tangoHost);
 		if (tangoHost.equals("")) {
-			System.out.println("Requesting new tahgo host");
+			System.out.println("Requesting new tango host");
 			setHost();
 		} else {
 
@@ -106,9 +106,6 @@ public class SortedList extends Activity {
 			case R.id.action_full_list:
 				showFullList();
 				return true;
-			case R.id.action_server_list:
-				showServerList();
-				return true;
 			case R.id.action_sort_by_classes:
 				sortType = SORT_BY_CLASS;
 				refreshDeviceList(pTangoHost);
@@ -139,15 +136,6 @@ public class SortedList extends Activity {
 	 */
 	private void showFullList() {
 		Intent i = new Intent(this, FullListActivity.class);
-		i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-		startActivity(i);
-	}
-
-	/**
-	 * Start new activity with device server list.
-	 */
-	private void showServerList() {
-		Intent i = new Intent(this, ServerList.class);
 		i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 		startActivity(i);
 	}
@@ -261,7 +249,6 @@ public class SortedList extends Activity {
 											list[i] = response.getString("device" + i);
 										}
 										int i = deviceCount - 1;
-										// System.out.println("Wykryto " + i + " urzadzen");
 										String devDomain = new String("");
 										String devClass = new String("");
 										int j = 0;
@@ -834,15 +821,6 @@ class DevClassList {
 	 */
 	public void addToMap(String key, ArrayList<String> dc) {
 		deviceClassList.put(key, dc);
-	}
-
-	/**
-	 * Get list of stored classes.
-	 *
-	 * @return String containing names of classes comma separated.
-	 */
-	public String getClassList() {
-		return deviceClassList.keySet().toString();
 	}
 
 	/**
