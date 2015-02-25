@@ -8,8 +8,10 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -54,22 +56,7 @@ public class DevicePanelAdminFragment extends Fragment {
 		answerLimitMaxEditText = (EditText) rootView.findViewById(R.id.devicePanel_adminFragment_limitMaxEditText);
 		answerLimitMaxEditText.setText("" + answerLimitMax);
 		timeoutEditText = (EditText) rootView.findViewById(R.id.devicePanel_adminFragment_timeoutEditText);
-		//device = new DeviceProxy(deviceName, dbHost, dbPort);
-			/*try {
-				device.ping();
-				deviceAdm = device.get_adm_dev();
-			} catch (DevFailed e) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(rootView.getContext());
-				builder.setTitle("Admin error");
-				builder.setMessage(e.getMessage());
-				builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-					}
-				});
-				AlertDialog dialog = builder.create();
-				dialog.show();
-				e.printStackTrace();
-			}*/
+
 		//timeoutEditText.setText(Integer.toString(device.get_timeout_millis()));
 		blackBoxEditText = (EditText) rootView.findViewById(R.id.devicePanel_adminFragment_blackboxEditText);
 		blackBoxEditText.setText("10");
@@ -131,6 +118,7 @@ public class DevicePanelAdminFragment extends Fragment {
 				queue.add(jsObjRequest);
 			}
 		});
+
 
 		Button setAnswerLimitMin = (Button) rootView.findViewById(R.id.devicePanel_adminFragment_LimitMinButton);
 		setAnswerLimitMin.setOnClickListener(new View.OnClickListener() {
@@ -430,6 +418,47 @@ public class DevicePanelAdminFragment extends Fragment {
 				queue.add(jsObjRequest);
 			}
 		});
+
+		RequestQueue queue = Volley.newRequestQueue(context);
+		queue.start();
+		String url = pTangoHost + "/RESTfulTangoApi/Device/" + deviceName + "/get_source.json";
+		System.out.println("Sending JSON request");
+		JsonObjectRequest jsObjRequest =
+				new JsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
+					@Override
+					public void onResponse(JSONObject response) {
+						try {
+							if (response.getString("connectionStatus").equals("OK")) {
+								System.out.println("Device connection OK");
+								int source = response.getInt("source");
+								populateSpinner(source);
+							} else {
+								System.out.println("Tango database API returned message:");
+								System.out.println(response.getString("connectionStatus"));
+								AlertDialog.Builder builder = new AlertDialog.Builder(rootView.getContext());
+								builder.setTitle("Command error");
+								String message = response.getString("message");
+								builder.setMessage(message);
+								builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog, int id) {
+									}
+								});
+								AlertDialog dialog = builder.create();
+								dialog.show();
+							}
+						} catch (JSONException e) {
+							System.out.println("Problem with JSON object");
+							e.printStackTrace();
+						}
+					}
+				}, new Response.ErrorListener() {
+					@Override
+					public void onErrorResponse(VolleyError error) {
+						System.out.println("Connection error!");
+						error.printStackTrace();
+					}
+				});
+		queue.add(jsObjRequest);
 		return rootView;
 	}
 
@@ -439,5 +468,76 @@ public class DevicePanelAdminFragment extends Fragment {
 
 	public int getAnswerLimitMax() {
 		return answerLimitMax;
+	}
+
+	private void populateSpinner(int source) {
+		Spinner spinner = (Spinner) rootView.findViewById(R.id.devicePanel_adminFragment_sourceSpinner);
+		spinner.setSelection(source);
+		spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+				int sourceId;
+				String devName = ((DevicePanelActivity) getActivity()).getDeviceName();
+				if (position == 0) // source = CACHE
+				{
+					sourceId = 0;
+					System.out.println("Selected CACHE");
+
+				} else if (position == 1) // source = CACHE_DEVICE
+				{
+					sourceId = 1;
+					System.out.println("Selected CACHE_DEVICE");
+				} else if (position == 2) // source = DEVICE
+				{
+					sourceId = 2;
+					System.out.println("Selected DEVICE");
+				} else {
+					sourceId = -1;
+				}
+				RequestQueue queue = Volley.newRequestQueue(context);
+				queue.start();
+
+				String url = pTangoHost + "/RESTfulTangoApi/Device/" + devName + "/set_source.json/" + sourceId;
+				JsonObjectRequest jsObjRequest =
+						new JsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
+							@Override
+							public void onResponse(JSONObject response) {
+								try {
+									if (response.getString("connectionStatus").equals("OK")) {
+										System.out.println("Device connection OK");
+									} else {
+										System.out.println("Tango database API returned message:");
+										System.out.println(response.getString("connectionStatus"));
+										AlertDialog.Builder builder = new AlertDialog.Builder(rootView.getContext());
+										builder.setTitle("Command error");
+										String message = response.getString("connectionStatus");
+										builder.setMessage(message);
+										builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+											public void onClick(DialogInterface dialog, int id) {
+											}
+										});
+										AlertDialog dialog = builder.create();
+										dialog.show();
+									}
+								} catch (JSONException e) {
+									System.out.println("Problem with JSON object");
+									e.printStackTrace();
+								}
+							}
+						}, new Response.ErrorListener() {
+							@Override
+							public void onErrorResponse(VolleyError error) {
+								System.out.println("Connection error!");
+								error.printStackTrace();
+							}
+						});
+				queue.add(jsObjRequest);
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parentView) {
+			}
+
+		});
 	}
 }

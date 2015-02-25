@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Jive on Android</string>
+    <string name="app_name">RESTful Jive</string>
     <string name="action_settings">Settings</string>
     <string name="action_sorted_list">Show sorted list</string>
     <string name="hello_world">Hello world!</string>
