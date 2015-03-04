@@ -32,9 +32,15 @@ public class SetHostActivity extends Activity {
 	 */
 	public void buttonClickOk(View view) {
 		Intent returnIntent = new Intent();
-		EditText host = (EditText) findViewById(R.id.textNewHost);
-		String sHost = host.getText().toString();
-		returnIntent.putExtra("restHost", sHost);
+		EditText RESTfulHost = (EditText) findViewById(R.id.textNewHost);
+		String RESTfulHostString = RESTfulHost.getText().toString();
+		EditText tangoHost = (EditText) findViewById(R.id.editTextTangoHost);
+		String tangoHostString = tangoHost.getText().toString();
+		EditText tangoPort = (EditText) findViewById(R.id.editTextTangoPort);
+		String tangoPortString = tangoPort.getText().toString();
+		returnIntent.putExtra("restHost", RESTfulHostString);
+		returnIntent.putExtra("TangoHost", tangoHostString);
+		returnIntent.putExtra("TangoPort", tangoPortString);
 		setResult(RESULT_OK, returnIntent);
 		finish();
 	}

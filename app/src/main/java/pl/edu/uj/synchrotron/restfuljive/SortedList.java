@@ -52,7 +52,9 @@ public class SortedList extends Activity {
 	final Context context = this;
 	List<NLevelItem> list;
 	ListView listView;
-	private String pTangoHost;
+	private String RESTfulTangoHost;
+	private String tangoHost;
+	private String tangoPort;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -63,19 +65,24 @@ public class SortedList extends Activity {
 		StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder(old).permitNetwork().build());
 
 		SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-		String tangoHost = settings.getString("RESTfulTangoHost", "");
-		System.out.println("Found tango host: " + tangoHost);
-		if (tangoHost.equals("")) {
-			System.out.println("Requesting new tango host");
+		String settingsRestHost = settings.getString("RESTfulTangoHost", "");
+		String settingsTangoHost = settings.getString("TangoHost", "");
+		String settingsTangoPort = settings.getString("TangoPort", "");
+		System.out.println("Found RESTful host: " + settingsRestHost);
+		System.out.println("Found Tango host: " + settingsTangoHost);
+		System.out.println("Found Tango port: " + settingsTangoPort);
+		if (settingsRestHost.equals("") || settingsTangoHost.equals("") || settingsTangoPort.equals("")) {
+			System.out.println("Requesting new tango host,port and RESTful host");
 			setHost();
 		} else {
-
-			pTangoHost = tangoHost;
-			System.out.println("Getting device list from server:  " + pTangoHost);
-
+			RESTfulTangoHost = settingsRestHost;
+			tangoHost = settingsTangoHost;
+			tangoPort = settingsTangoPort;
+			System.out.println("Getting device list from server:  " + RESTfulTangoHost + "at Tango Host: " +
+					settingsTangoHost + ":" +
+					settingsTangoPort);
 			try {
-				refreshDeviceList(pTangoHost);
-
+				refreshDeviceList(RESTfulTangoHost);
 			} catch (Exception e) {
 				AlertDialog.Builder builder = new AlertDialog.Builder(context);
 				builder.setMessage("Problem with connecting to REST server, check if internet connection is available and " +
@@ -84,9 +91,8 @@ public class SortedList extends Activity {
 				AlertDialog dialog = builder.create();
 				dialog.show();
 			}
-
 		}
-
+		setTitle("REST host: " + RESTfulTangoHost + ", TANGO_HOST: " + tangoHost + ":" + tangoPort);
 	}
 
 	@Override
@@ -108,15 +114,15 @@ public class SortedList extends Activity {
 				return true;
 			case R.id.action_sort_by_classes:
 				sortType = SORT_BY_CLASS;
-				refreshDeviceList(pTangoHost);
+				refreshDeviceList(RESTfulTangoHost);
 				return true;
 			case R.id.action_sort_by_devices:
 				sortType = SORT_BY_DEVICE;
-				refreshDeviceList(pTangoHost);
+				refreshDeviceList(RESTfulTangoHost);
 				return true;
 			case R.id.action_sort_by_servers:
 				sortType = SORT_BY_SERVER;
-				refreshDeviceList(pTangoHost);
+				refreshDeviceList(RESTfulTangoHost);
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
@@ -144,13 +150,18 @@ public class SortedList extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == 1) {
 			if (resultCode == RESULT_OK) {
-				pTangoHost = data.getStringExtra("restHost");
+				RESTfulTangoHost = data.getStringExtra("restHost");
+				tangoHost = data.getStringExtra("TangoHost");
+				tangoPort = data.getStringExtra("TangoPort");
 				SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 				SharedPreferences.Editor editor = settings.edit();
-				editor.putString("RESTfulTangoHost", pTangoHost);
+				editor.putString("RESTfulTangoHost", RESTfulTangoHost);
+				editor.putString("TangoHost", tangoHost);
+				editor.putString("TangoPort", tangoPort);
 				editor.commit();
-				System.out.println("Result: " + pTangoHost);
-				refreshDeviceList(pTangoHost);
+				System.out.println("Result: " + RESTfulTangoHost);
+				refreshDeviceList(RESTfulTangoHost);
+				setTitle("REST host: " + RESTfulTangoHost + ", TANGO_HOST: " + tangoHost + ":" + tangoPort);
 			}
 			if (resultCode == RESULT_CANCELED) {
 				System.out.println("Host not changed");
@@ -158,20 +169,19 @@ public class SortedList extends Activity {
 		}
 	}
 
-
 	/**
 	 * Get list of devices from databse, and sort them accordingly to their domain and class.
 	 *
-	 * @param RESTfulTangoHost Database host address.
+	 * @param RESTHost Database host address.
 	 * @return TreeMap with sorted list.
 	 */
-	private TreeMap<String, DevClassList> getSortedList(String RESTfulTangoHost) {
+	private TreeMap<String, DevClassList> getSortedList(String RESTHost) {
 		RequestQueue queue = Volley.newRequestQueue(this);
 
 		switch (sortType) {
 			case SORT_BY_CLASS:
 				queue.start();
-				String urlSortCase1 = RESTfulTangoHost + "/RESTfulTangoApi/SortedDeviceList.json/1";
+				String urlSortCase1 = RESTHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/SortedDeviceList.json/1";
 				JsonObjectRequest jsObjRequestCase1 =
 						new JsonObjectRequest(Request.Method.GET, urlSortCase1, null, new Response.Listener<JSONObject>() {
 							@Override
@@ -197,10 +207,12 @@ public class SortedList extends Activity {
 							}
 						});
 				queue.add(jsObjRequestCase1);
+				TextView hostTextView = (TextView) findViewById(R.id.sortedList_hostTextView);
+				hostTextView.setText(R.string.title_sort_by_classes);
 				break;
 			case SORT_BY_SERVER:
 				queue.start();
-				String urlSortCase2 = RESTfulTangoHost + "/RESTfulTangoApi/SortedDeviceList.json/2";
+				String urlSortCase2 = RESTHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/SortedDeviceList.json/2";
 				JsonObjectRequest jsObjRequestCase2 =
 						new JsonObjectRequest(Request.Method.GET, urlSortCase2, null, new Response.Listener<JSONObject>() {
 							@Override
@@ -226,11 +238,12 @@ public class SortedList extends Activity {
 							}
 						});
 				queue.add(jsObjRequestCase2);
+				TextView hostTextView2 = (TextView) findViewById(R.id.sortedList_hostTextView);
+				hostTextView2.setText(R.string.title_sort_by_servers);
 				break;
-			default:
+			default: //sort by devices
 				queue.start();
-				String url = RESTfulTangoHost + "/RESTfulTangoApi/Device.json";
-				//String url = "http://192.168.0.12:8080/RESTfulTangoApi/Device.json";
+				String url = RESTHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device.json";
 				JsonObjectRequest jsObjRequest =
 						new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 
@@ -300,6 +313,8 @@ public class SortedList extends Activity {
 							}
 						});
 				queue.add(jsObjRequest);
+				TextView hostTextView3 = (TextView) findViewById(R.id.sortedList_hostTextView);
+				hostTextView3.setText(R.string.title_sort_by_devices);
 		}
 
 		return null;
@@ -315,7 +330,8 @@ public class SortedList extends Activity {
 		System.out.println("Clicked object: " + devName);
 		RequestQueue queue = Volley.newRequestQueue(this);
 		queue.start();
-		String url = pTangoHost + "/RESTfulTangoApi/Device/" + devName + "/get_info.json";
+		String url =
+				RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + devName + "/get_info.json";
 		JsonObjectRequest jsObjRequest =
 				new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 					@Override
@@ -358,7 +374,9 @@ public class SortedList extends Activity {
 		System.out.println("Clicked object: " + devName);
 		Intent intent = new Intent(this, PropertiesActivity.class);
 		intent.putExtra("deviceName", devName);
-		intent.putExtra("restDatabaseHost", pTangoHost);
+		intent.putExtra("restHost", RESTfulTangoHost);
+		intent.putExtra("tangoHost", tangoHost);
+		intent.putExtra("tangoPort", tangoPort);
 		startActivity(intent);
 	}
 
@@ -375,7 +393,9 @@ public class SortedList extends Activity {
 		System.out.println("Clicked object: " + devName);
 		Intent intent = new Intent(this, AttributesActivity.class);
 		intent.putExtra("deviceName", devName);
-		intent.putExtra("restDatabaseHost", pTangoHost);
+		intent.putExtra("restHost", RESTfulTangoHost);
+		intent.putExtra("tangoHost", tangoHost);
+		intent.putExtra("tangoPort", tangoPort);
 		//intent.putExtra("dbPort", dbPort);
 		startActivity(intent);
 	}
@@ -386,7 +406,7 @@ public class SortedList extends Activity {
 	 * @param v Reference to the widget that was clicked.
 	 */
 	public void sortedListRefresh(View v) {
-		refreshDeviceList(pTangoHost);
+		refreshDeviceList(RESTfulTangoHost);
 	}
 
 	/**
@@ -462,7 +482,9 @@ public class SortedList extends Activity {
 																	if (choice == 1) {
 																		Intent i = new Intent(context, DevicePanelActivity.class);
 																		i.putExtra("devName", name);
-																		i.putExtra("restHost", pTangoHost);
+																		i.putExtra("restHost", RESTfulTangoHost);
+																		i.putExtra("tangoHost", tangoHost);
+																		i.putExtra("tangoPort", tangoPort);
 																		startActivity(i);
 																	}
 																}
@@ -607,7 +629,9 @@ public class SortedList extends Activity {
 																				if (choice == 1) {
 																					Intent i = new Intent(context, DevicePanelActivity.class);
 																					i.putExtra("devName", name);
-																					i.putExtra("restHost", pTangoHost);
+																					i.putExtra("restHost", RESTfulTangoHost);
+																					i.putExtra("tangoHost", tangoHost);
+																					i.putExtra("tangoPort", tangoPort);
 																					startActivity(i);
 																				}
 																			}
@@ -730,7 +754,9 @@ public class SortedList extends Activity {
 																	if (choice == 1) {
 																		Intent i = new Intent(context, DevicePanelActivity.class);
 																		i.putExtra("devName", name);
-																		i.putExtra("restHost", pTangoHost);
+																		i.putExtra("restHost", RESTfulTangoHost);
+																		i.putExtra("tangoHost", tangoHost);
+																		i.putExtra("tangoPort", tangoPort);
 																		startActivity(i);
 																	}
 																}

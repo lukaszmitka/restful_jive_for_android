@@ -49,7 +49,9 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 	private int[] commandOutType;
 	private boolean[] commandPlottable;
 	private Context context;
-	private String pTangoHost;
+	private String RESTfulTangoHost;
+	private String tangoHost;
+	private String tangoPort;
 	private String deviceName;
 
 	@Override
@@ -59,13 +61,16 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 		TextView tvDeviceName = (TextView) rootView.findViewById(R.id.devicePanel_deviceName);
 		tvDeviceName.setText(deviceName);
 		System.out.println("Device name: " + deviceName);
-		pTangoHost = ((DevicePanelActivity) getActivity()).getHost();
-		System.out.println("Host: " + pTangoHost);
+		RESTfulTangoHost = ((DevicePanelActivity) getActivity()).getRestHost();
+		tangoHost = ((DevicePanelActivity) getActivity()).getTangoHost();
+		tangoPort = ((DevicePanelActivity) getActivity()).getTangoPort();
+		System.out.println("Host: " + RESTfulTangoHost);
 		context = ((DevicePanelActivity) getActivity()).getContext();
 
 		RequestQueue queue = Volley.newRequestQueue(context);
 		queue.start();
-		String url = pTangoHost + "/RESTfulTangoApi/Device/" + deviceName + "/command_list_query.json";
+		String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+				"/command_list_query.json";
 		JsonObjectRequest jsObjRequest =
 				new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 					@Override
@@ -172,7 +177,8 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 				}
 				RequestQueue queue = Volley.newRequestQueue(context);
 				queue.start();
-				String url = pTangoHost + "/RESTfulTangoApi/Device/" + deviceName + "/command_inout.json/" +
+				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/command_inout.json/" +
 						commandNames[selectedCommandId] + "/" + arginStr;
 				JsonObjectRequest jsObjRequest =
 						new JsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
@@ -221,7 +227,8 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 				}
 				RequestQueue queue = Volley.newRequestQueue(context);
 				queue.start();
-				String url = pTangoHost + "/RESTfulTangoApi/Device/" + deviceName + "/extract_plot_data.json/" +
+				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/extract_plot_data.json/" +
 						commandNames[selectedCommandId] + "/" + arginStr;
 				JsonObjectRequest jsObjRequest =
 						new JsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {

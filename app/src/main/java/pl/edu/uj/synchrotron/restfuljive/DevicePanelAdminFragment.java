@@ -38,7 +38,9 @@ public class DevicePanelAdminFragment extends Fragment {
 	private int answerLimitMax = 1024;
 	private View rootView;
 	private Context context;
-	private String pTangoHost;
+	private String RESTfulTangoHost;
+	private String tangoHost;
+	private String tangoPort;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -46,11 +48,12 @@ public class DevicePanelAdminFragment extends Fragment {
 
 		final String deviceName = ((DevicePanelActivity) getActivity()).getDeviceName();
 		System.out.println("Device name: " + deviceName);
-		pTangoHost = ((DevicePanelActivity) getActivity()).getHost();
-		System.out.println("Host: " + pTangoHost);
+		RESTfulTangoHost = ((DevicePanelActivity) getActivity()).getRestHost();
+		tangoHost = ((DevicePanelActivity) getActivity()).getTangoHost();
+		tangoPort = ((DevicePanelActivity) getActivity()).getTangoPort();
+		System.out.println("Host: " + RESTfulTangoHost);
 		context = ((DevicePanelActivity) getActivity()).getContext();
 
-		//try {
 		answerLimitMinEditText = (EditText) rootView.findViewById(R.id.devicePanel_adminFragment_limitMinEditText);
 		answerLimitMinEditText.setText("" + answerLimitMin);
 		answerLimitMaxEditText = (EditText) rootView.findViewById(R.id.devicePanel_adminFragment_limitMaxEditText);
@@ -69,7 +72,8 @@ public class DevicePanelAdminFragment extends Fragment {
 				System.out.println("Processing BlackBox button");
 				RequestQueue queue = Volley.newRequestQueue(context);
 				queue.start();
-				String url = pTangoHost + "/RESTfulTangoApi/Device/" + deviceName + "/black_box.json/" +
+				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/black_box.json/" +
 						nbCmd;
 				System.out.println("Sending JSON request");
 				JsonObjectRequest jsObjRequest =
@@ -143,7 +147,8 @@ public class DevicePanelAdminFragment extends Fragment {
 				System.out.println("Processing timeout button");
 				RequestQueue queue = Volley.newRequestQueue(context);
 				queue.start();
-				String url = pTangoHost + "/RESTfulTangoApi/Device/" + deviceName + "/set_timeout_milis.json/" +
+				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/set_timeout_milis.json/" +
 						timeoutEditText.getText().toString();
 				System.out.println("Sending JSON request");
 				JsonObjectRequest jsObjRequest =
@@ -199,7 +204,8 @@ public class DevicePanelAdminFragment extends Fragment {
 				System.out.println("Processing deviceInfo button");
 				RequestQueue queue = Volley.newRequestQueue(context);
 				queue.start();
-				String url = pTangoHost + "/RESTfulTangoApi/Device/" + deviceName + "/get_device_info.json";
+				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/get_device_info.json";
 				System.out.println("Sending JSON request");
 				JsonObjectRequest jsObjRequest =
 						new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -256,7 +262,8 @@ public class DevicePanelAdminFragment extends Fragment {
 				System.out.println("Processing deviceInfo button");
 				RequestQueue queue = Volley.newRequestQueue(context);
 				queue.start();
-				String url = pTangoHost + "/RESTfulTangoApi/Device/" + deviceName + "/ping_device.json";
+				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/ping_device.json";
 				System.out.println("Sending JSON request");
 				JsonObjectRequest jsObjRequest =
 						new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -314,7 +321,8 @@ public class DevicePanelAdminFragment extends Fragment {
 				System.out.println("Processing deviceInfo button");
 				RequestQueue queue = Volley.newRequestQueue(context);
 				queue.start();
-				String url = pTangoHost + "/RESTfulTangoApi/Device/" + deviceName + "/poll_status.json";
+				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/poll_status.json";
 				System.out.println("Sending JSON request");
 				JsonObjectRequest jsObjRequest =
 						new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -371,7 +379,8 @@ public class DevicePanelAdminFragment extends Fragment {
 				System.out.println("Processing deviceInfo button");
 				RequestQueue queue = Volley.newRequestQueue(context);
 				queue.start();
-				String url = pTangoHost + "/RESTfulTangoApi/Device/" + deviceName + "/restart.json";
+				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/restart.json";
 				System.out.println("Sending JSON request");
 				JsonObjectRequest jsObjRequest =
 						new JsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
@@ -421,10 +430,11 @@ public class DevicePanelAdminFragment extends Fragment {
 
 		RequestQueue queue = Volley.newRequestQueue(context);
 		queue.start();
-		String url = pTangoHost + "/RESTfulTangoApi/Device/" + deviceName + "/get_source.json";
+		String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+				"/get_source.json";
 		System.out.println("Sending JSON request");
 		JsonObjectRequest jsObjRequest =
-				new JsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
+				new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 					@Override
 					public void onResponse(JSONObject response) {
 						try {
@@ -497,7 +507,8 @@ public class DevicePanelAdminFragment extends Fragment {
 				RequestQueue queue = Volley.newRequestQueue(context);
 				queue.start();
 
-				String url = pTangoHost + "/RESTfulTangoApi/Device/" + devName + "/set_source.json/" + sourceId;
+				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + devName +
+						"/set_source.json/" + sourceId;
 				JsonObjectRequest jsObjRequest =
 						new JsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
 							@Override

@@ -32,7 +32,6 @@ import org.json.JSONObject;
 
 import fr.esrf.Tango.AttrDataFormat;
 import fr.esrf.Tango.AttrWriteType;
-import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.AttributeInfo;
 import fr.esrf.TangoDs.TangoConst;
 
@@ -46,7 +45,11 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 	private String attributeNames[];
 	private View rootView;
 	private Context context;
-	private String pTangoHost;
+	private String RESTfulTangoHost;
+	private String tangoHost;
+	private String tangoPort;
+
+
 	private boolean attributePlottable[];
 	private boolean attributeWritable[];
 	private String attributeDesc[];
@@ -70,41 +73,6 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 		}
 		return "Unknown";
 	}
-
-
-	// -----------------------------------------------------
-	// Private stuff
-	// -----------------------------------------------------
-
-	/**
-	 * Get alphabetically sorted list of attributes.
-	 *
-	 * @return Array of attributes.
-	 * @throws DevFailed When device is uninitialized or there was problem with
-	 *                   connection.
-	 */
-	 /*private AttributeInfo[] getAttributeList() throws DevFailed {
-	     int i, j;
-        boolean end;
-        AttributeInfo tmp;
-        AttributeInfo[] lst = device.get_attribute_info();
-        // Sort the list
-        end = false;
-        j = lst.length - 1;
-        while (!end) {
-            end = true;
-            for (i = 0; i < j; i++) {
-                if (lst[i].name.compareToIgnoreCase(lst[i + 1].name) > 0) {
-                    end = false;
-                    tmp = lst[i];
-                    lst[i] = lst[i + 1];
-                    lst[i + 1] = tmp;
-                }
-            }
-            j--;
-        }
-        return lst;
-    }*/
 
 	/**
 	 * Check whether attribute could be presented as scalar, spectrum or image.
@@ -131,14 +99,17 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 		TextView tvDeviceName = (TextView) rootView.findViewById(R.id.devicePanel_attributes_deviceName);
 		tvDeviceName.setText(deviceName);
 		System.out.println("Device name: " + deviceName);
-		pTangoHost = ((DevicePanelActivity) getActivity()).getHost();
-		System.out.println("Host: " + pTangoHost);
+		RESTfulTangoHost = ((DevicePanelActivity) getActivity()).getRestHost();
+		tangoHost = ((DevicePanelActivity) getActivity()).getTangoHost();
+		tangoPort = ((DevicePanelActivity) getActivity()).getTangoPort();
 		context = ((DevicePanelActivity) getActivity()).getContext();
 
+		System.out.println("Host: " + RESTfulTangoHost);
 
 		RequestQueue queue = Volley.newRequestQueue(context);
 		queue.start();
-		String url = pTangoHost + "/RESTfulTangoApi/Device/" + deviceName + "/get_attribute_list.json";
+		String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+				"/get_attribute_list.json";
 		JsonObjectRequest jsObjRequest =
 				new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 					@Override
@@ -236,7 +207,8 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 				System.out.println("Processing read button");
 				RequestQueue queue = Volley.newRequestQueue(context);
 				queue.start();
-				String url = pTangoHost + "/RESTfulTangoApi/Device/" + deviceName + "/read_attribute.json/" +
+				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/read_attribute.json/" +
 						attributeNames[selectedAttributeId];
 				System.out.println("Sending JSON request");
 				JsonObjectRequest jsObjRequest =
@@ -287,7 +259,8 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 				String arginStr = arginEditTextValue.getText().toString();
 				RequestQueue queue = Volley.newRequestQueue(context);
 				queue.start();
-				String url = pTangoHost + "/RESTfulTangoApi/Device/" + deviceName + "/write_attribute.json/" +
+				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/write_attribute.json/" +
 						attributeNames[selectedAttributeId] + "/" + arginStr;
 				System.out.println("Sending JSON request");
 				JsonObjectRequest jsObjRequest =
@@ -332,7 +305,8 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 				System.out.println("Processing plot button");
 				RequestQueue queue = Volley.newRequestQueue(context);
 				queue.start();
-				String url = pTangoHost + "/RESTfulTangoApi/Device/" + deviceName + "/plot_attribute.json/" +
+				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/plot_attribute.json/" +
 						attributeNames[selectedAttributeId];
 				System.out.println("Sending JSON request");
 				JsonObjectRequest jsObjRequest =

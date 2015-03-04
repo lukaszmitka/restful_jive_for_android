@@ -9,13 +9,21 @@
     <string name="dev_selected">Selected device</string>
     <string name="action_set_host">Set Host</string>
     <string name="lorem_ipsum">Lorem Ipsum</string>
-    <string name="title_activity_set_host">SetHostActivity</string>
-    <string name="new_host_address">Enter new address here</string>
     <string name="ok_button">OK</string>
     <string name="cancel_button">Cancel</string>
+
+
+    <string name="title_activity_set_host">SetHostActivity</string>
+
+    <string name="new_rest_address">REST address</string>
+    <string name="new_tango_host">Tango host</string>
+    <string name="new_tango_port">Tango port</string>
     <string name="define_new_host">Define new host</string>
-    <string name="host_address">Address</string>
+    <string name="rest_address">REST server address</string>
+    <string name="tango_host">Tango host</string>
+    <string name="tango_port">Tango port</string>
     <string name="host_port">Port</string>
+
     <string name="new_host_port">Enter new port here</string>
 
     <color name="gray">#FFDDDDDD</color>
@@ -25,6 +33,9 @@
     <string name="menu_item_sort_by_classes">Sort by Classes</string>
     <string name="menu_item_sort_by_devices">Sort by Devices</string>
     <string name="menu_item_sort_by_servers">Sort by Servers</string>
+    <string name="title_sort_by_classes">List sorted by classes</string>
+    <string name="title_sort_by_devices">List sorted by devices</string>
+    <string name="title_sort_by_servers">List sorted by servers</string>
     <string name="list_of_devices">List of devices</string>
     <string name="title_activity_sorted_list">SortedList</string>
     <string name="details">Details</string>

@@ -40,9 +40,20 @@ public class AttributesActivity extends Activity {
 	 */
 	String deviceName;
 	/**
-	 * Database host address.
+	 * RESTful host address.
 	 */
-	String pTangoHost;
+	private String RESTfulHost;
+	/**
+	 * Address of database to be used by REST service.
+	 */
+	private String tangoHost;
+	/**
+	 * Port of database to be used by REST service.
+	 */
+	private String tangoPort;
+	/**
+	 * Application context.
+	 */
 	private Context context;
 
 	@Override
@@ -51,7 +62,9 @@ public class AttributesActivity extends Activity {
 		setContentView(R.layout.activity_attributes);
 		intent = getIntent();
 		deviceName = intent.getStringExtra("deviceName");
-		pTangoHost = intent.getStringExtra("restDatabaseHost");
+		RESTfulHost = intent.getStringExtra("restHost");
+		tangoHost = intent.getStringExtra("tangoHost");
+		tangoPort = intent.getStringExtra("tangoPort");
 		context = this;
 
 		refreshAttributesList();
@@ -71,10 +84,12 @@ public class AttributesActivity extends Activity {
 
 		System.out.println("AttributesActivity output:");
 		System.out.println("Device name: " + deviceName);
-		System.out.println("Device host: " + pTangoHost);
+		System.out.println("REST host: " + RESTfulHost);
+		System.out.println("Tango host: " + tangoHost + ":" + tangoPort);
 		RequestQueue queue = Volley.newRequestQueue(this);
 		queue.start();
-		String url = pTangoHost + "/RESTfulTangoApi/Device/" + deviceName + "/get_attribute_list.json";
+		String url = RESTfulHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+				"/get_attribute_list.json";
 		JsonObjectRequest jsObjRequest =
 				new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 					@Override
@@ -169,7 +184,8 @@ public class AttributesActivity extends Activity {
 				// deviceName = "controller/dummycountertimercontroller/ctctrl01";
 				// String tag = "LogLevel";
 				// String value = "4";
-				String url = pTangoHost + "/RESTfulTangoApi/Device/" + deviceName + "/write_attribute.json/" + tag + "/" +
+				String url = RESTfulHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/write_attribute.json/" + tag + "/" +
 						value;
 				JsonObjectRequest jsObjRequest =
 						new JsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {

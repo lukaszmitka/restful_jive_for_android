@@ -12,10 +12,38 @@
     <RelativeLayout
         android:id="@+id/layout1"
         android:layout_width="wrap_content"
-        android:layout_height="40dp"
+        android:layout_height="wrap_content"
         android:layout_below="@id/textView1"
         android:layout_marginTop="5dp"
         android:background="@color/white">
+
+        <TextView
+            android:id="@+id/textViewAddress"
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="5dp"
+            android:text="@string/rest_address"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/textViewTangoHost"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/editTextTangoHost"
+            android:layout_alignLeft="@+id/textViewAddress"
+            android:layout_alignParentLeft="true"
+            android:text="@string/tango_host"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/textViewTangoPort"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/editTextTangoPort"
+            android:layout_alignParentLeft="true"
+            android:text="@string/tango_port"
+            android:textSize="16sp"/>
 
         <EditText
             android:id="@+id/textNewHost"
@@ -25,18 +53,29 @@
             android:layout_alignParentRight="true"
             android:layout_toRightOf="@+id/textViewAddress"
             android:ems="10"
-            android:hint="@string/new_host_address"
+            android:hint="@string/new_rest_address"
             android:maxLines="1"
             android:textSize="16sp"/>
 
-        <TextView
-            android:id="@+id/textViewAddress"
-            android:layout_width="60dp"
+        <EditText
+            android:id="@+id/editTextTangoHost"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="5dp"
-            android:text="@string/host_address"
+            android:layout_alignLeft="@+id/textNewHost"
+            android:layout_alignParentRight="true"
+            android:layout_alignStart="@+id/textNewHost"
+            android:layout_below="@+id/textNewHost"
+            android:hint="@string/new_tango_host"
+            android:textSize="16sp"/>
+
+        <EditText
+            android:id="@+id/editTextTangoPort"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/textNewHost"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/editTextTangoHost"
+            android:hint="@string/new_tango_port"
             android:textSize="16sp"/>
 
     </RelativeLayout>

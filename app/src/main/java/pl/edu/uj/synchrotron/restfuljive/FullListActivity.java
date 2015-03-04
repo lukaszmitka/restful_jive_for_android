@@ -1,6 +1,7 @@
 package pl.edu.uj.synchrotron.restfuljive;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -27,7 +28,9 @@ import org.json.JSONObject;
 public class FullListActivity extends Activity {
 	public static final String PREFS_NAME = "SolarisDeviceListPrefsFile";
 	private Context context = this;
-	private String pTangoHost;
+	private String RESTfulTangoHost;
+	private String tangoHost;
+	private String tangoPort;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -36,14 +39,37 @@ public class FullListActivity extends Activity {
 		// this allows to connect with server in main thread
 		StrictMode.ThreadPolicy old = StrictMode.getThreadPolicy();
 		StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder(old).permitNetwork().build());
+
+
 		SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-		String tangoHost = settings.getString("RESTfulTangoHost", "");
-		if (tangoHost.equals("")) {
+		String settingsRestHost = settings.getString("RESTfulTangoHost", "");
+		String settingsTangoHost = settings.getString("TangoHost", "");
+		String settingsTangoPort = settings.getString("TangoPort", "");
+		System.out.println("Found RESTful host: " + settingsRestHost);
+		System.out.println("Found Tango host: " + settingsTangoHost);
+		System.out.println("Found Tango port: " + settingsTangoPort);
+		if (settingsRestHost.equals("") || settingsTangoHost.equals("") || settingsTangoPort.equals("")) {
+			System.out.println("Requesting new tango host,port and RESTful host");
 			setHost();
 		} else {
-			pTangoHost = settings.getString("RESTfulTangoHost", "");
-			refreshDeviceList(pTangoHost);
+			RESTfulTangoHost = settingsRestHost;
+			tangoHost = settingsTangoHost;
+			tangoPort = settingsTangoPort;
+			System.out.println("Getting device list from server:  " + RESTfulTangoHost + "at Tango Host: " +
+					settingsTangoHost + ":" +
+					settingsTangoPort);
+			try {
+				refreshDeviceList(RESTfulTangoHost);
+			} catch (Exception e) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(context);
+				builder.setMessage("Problem with connecting to REST server, check if internet connection is available and " +
+						"server address is set properly")
+						.setTitle("Error");
+				AlertDialog dialog = builder.create();
+				dialog.show();
+			}
 		}
+		setTitle("REST host: " + RESTfulTangoHost + ", TANGO_HOST: " + tangoHost + ":" + tangoPort);
 
 	}
 
@@ -76,8 +102,7 @@ public class FullListActivity extends Activity {
 	 */
 	public void button1_OnClick(View view) {
 		SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-		String tangoHost = settings.getString("RESTfulTangoHost", null);
-		refreshDeviceList(tangoHost);
+		refreshDeviceList(RESTfulTangoHost);
 	}
 
 	/**
@@ -102,13 +127,18 @@ public class FullListActivity extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == 1) {
 			if (resultCode == RESULT_OK) {
-				pTangoHost = data.getStringExtra("restHost");
+				RESTfulTangoHost = data.getStringExtra("restHost");
+				tangoHost = data.getStringExtra("TangoHost");
+				tangoPort = data.getStringExtra("TangoPort");
 				SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 				SharedPreferences.Editor editor = settings.edit();
-				editor.putString("RESTfulTangoHost", pTangoHost);
+				editor.putString("RESTfulTangoHost", RESTfulTangoHost);
+				editor.putString("TangoHost", tangoHost);
+				editor.putString("TangoPort", tangoPort);
 				editor.commit();
-				System.out.println("Result: " + pTangoHost);
-				refreshDeviceList(pTangoHost);
+				System.out.println("Result: " + RESTfulTangoHost);
+				refreshDeviceList(RESTfulTangoHost);
+				setTitle("REST host: " + RESTfulTangoHost + ", TANGO_HOST: " + tangoHost + ":" + tangoPort);
 			}
 			if (resultCode == RESULT_CANCELED) {
 				System.out.println("Host not changed");
@@ -124,7 +154,7 @@ public class FullListActivity extends Activity {
 	private void refreshDeviceList(String RESTfulTangoHost) {
 		RequestQueue queue = Volley.newRequestQueue(this);
 		queue.start();
-		String url = RESTfulTangoHost + "/RESTfulTangoApi/Device.json";
+		String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device.json";
 		JsonObjectRequest jsObjRequest =
 				new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 

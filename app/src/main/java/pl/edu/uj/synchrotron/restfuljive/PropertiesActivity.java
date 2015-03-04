@@ -29,15 +29,23 @@ public class PropertiesActivity extends Activity {
 	/**
 	 * The intent that activity was called with.
 	 */
-	Intent intent;
+	private Intent intent;
 	/**
 	 * Name of device, which attributes should be listed.
 	 */
-	String deviceName;
+	private String deviceName;
 	/**
-	 * Database host address.
+	 * RESTful host address.
 	 */
-	String pTangoHost;
+	private String RESTfulHost;
+	/**
+	 * Address of database to be used by REST service.
+	 */
+	private String tangoHost;
+	/**
+	 * Port of database to be used by REST service.
+	 */
+	private String tangoPort;
 	/**
 	 * Application context.
 	 */
@@ -49,7 +57,9 @@ public class PropertiesActivity extends Activity {
 		setContentView(R.layout.activity_properties);
 		intent = getIntent();
 		deviceName = intent.getStringExtra("deviceName");
-		pTangoHost = intent.getStringExtra("restDatabaseHost");
+		RESTfulHost = intent.getStringExtra("restHost");
+		tangoHost = intent.getStringExtra("tangoHost");
+		tangoPort = intent.getStringExtra("tangoPort");
 		context = this;
 		refreshPropertiesList();
 	}
@@ -68,11 +78,14 @@ public class PropertiesActivity extends Activity {
 
 		System.out.println("PropertiesActivity output:");
 		System.out.println("Device name: " + deviceName);
-		System.out.println("Device host: " + pTangoHost);
+		System.out.println("REST host: " + RESTfulHost);
+		System.out.println("Tango host: " + tangoHost + ":" + tangoPort);
 
 		RequestQueue queue = Volley.newRequestQueue(this);
 		queue.start();
-		String url = pTangoHost + "/RESTfulTangoApi/Device/" + deviceName + "/get_property_list.json";
+		String url = RESTfulHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+				"/get_property_list" +
+				".json";
 		JsonObjectRequest jsObjRequest =
 				new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 					@Override
@@ -155,7 +168,9 @@ public class PropertiesActivity extends Activity {
 			EditText et = (EditText) linearLayoutView.findViewById(R.id.editableListEditText);
 			String value = et.getText().toString();
 			String tag = (String) et.getTag();
-			String url = pTangoHost + "/RESTfulTangoApi/Device/" + deviceName + "/put_property.json/" + tag + "/" + value;
+			String url =
+					RESTfulHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName + "/put_property" +
+							".json/" + tag + "/" + value;
 			JsonObjectRequest jsObjRequest =
 					new JsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
 						@Override

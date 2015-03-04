@@ -39,9 +39,17 @@ public class DevicePanelActivity extends FragmentActivity implements ActionBar.T
 	 */
 	private String deviceName;
 	/**
-	 * Database host address.
+	 * RESTful host address.
 	 */
-	private String restHost = null;
+	private String restHost;
+	/**
+	 * Address of database to be used by REST service.
+	 */
+	private String tangoHost;
+	/**
+	 * Port of database to be used by REST service.
+	 */
+	private String tangoPort;
 	private Context context;
 
 	@Override
@@ -57,6 +65,8 @@ public class DevicePanelActivity extends FragmentActivity implements ActionBar.T
 		if (i.hasExtra("devName")) {
 			deviceName = i.getStringExtra("devName");
 			restHost = i.getStringExtra("restHost");
+			tangoHost = i.getStringExtra("tangoHost");
+			tangoPort = i.getStringExtra("tangoPort");
 		}
 
 		// Tab titles
@@ -123,8 +133,16 @@ public class DevicePanelActivity extends FragmentActivity implements ActionBar.T
 	 *
 	 * @return Database host.
 	 */
-	public String getHost() {
+	public String getRestHost() {
 		return restHost;
+	}
+
+	public String getTangoHost() {
+		return tangoHost;
+	}
+
+	public String getTangoPort() {
+		return tangoPort;
 	}
 
 	@Override
@@ -158,11 +176,6 @@ public class DevicePanelActivity extends FragmentActivity implements ActionBar.T
 	@Override
 	public void onTabUnselected(Tab tab, FragmentTransaction ft) {
 
-	}
-
-	public String getPort() {
-		// TODO Remove method
-		return null;
 	}
 }
 
