@@ -110,6 +110,15 @@ public class FullListActivity extends Activity {
 	 */
 	private void setHost() {
 		Intent i = new Intent(this, SetHostActivity.class);
+		if (!tangoHost.equals("") && tangoHost != null) {
+			i.putExtra("tangoHost", tangoHost);
+		}
+		if (!tangoPort.equals("") && tangoPort != null) {
+			i.putExtra("tangoPort", tangoPort);
+		}
+		if (!RESTfulTangoHost.equals("") && RESTfulTangoHost != null) {
+			i.putExtra("restHost", RESTfulTangoHost);
+		}
 		startActivityForResult(i, 1);
 	}
 
@@ -173,7 +182,8 @@ public class FullListActivity extends Activity {
 									devices[i] = response.getString("device" + i);
 									ListView deviceList = (ListView) findViewById(R.id.listView1);
 									ArrayAdapter<String> adapter =
-											new ArrayAdapter<String>(context, R.layout.list_item, R.id.firstLine, devices);
+											new ArrayAdapter<String>(context, R.layout.n_level_list_member_item, R.id.firstLine,
+													devices);
 									deviceList.setAdapter(adapter);
 									deviceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 

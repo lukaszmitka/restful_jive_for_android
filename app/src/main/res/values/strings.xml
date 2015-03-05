@@ -15,9 +15,9 @@
 
     <string name="title_activity_set_host">SetHostActivity</string>
 
-    <string name="new_rest_address">REST address</string>
-    <string name="new_tango_host">Tango host</string>
-    <string name="new_tango_port">Tango port</string>
+    <string name="new_rest_address">example: http://192.168.105.140</string>
+    <string name="new_tango_host">example: 192.168.130.100</string>
+    <string name="new_tango_port">example: 10000</string>
     <string name="define_new_host">Define new host</string>
     <string name="rest_address">REST server address</string>
     <string name="tango_host">Tango host</string>
@@ -36,6 +36,7 @@
     <string name="title_sort_by_classes">List sorted by classes</string>
     <string name="title_sort_by_devices">List sorted by devices</string>
     <string name="title_sort_by_servers">List sorted by servers</string>
+    <string name="title_sort_full_list">Full list of devices</string>
     <string name="list_of_devices">List of devices</string>
     <string name="title_activity_sorted_list">SortedList</string>
     <string name="details">Details</string>

@@ -16,6 +16,19 @@ public class SetHostActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_set_host);
+		Intent i = getIntent();
+		if (i.hasExtra("tangoHost")) {
+			EditText tangoHost = (EditText) findViewById(R.id.editTextTangoHost);
+			tangoHost.setText(i.getStringExtra("tangoHost"));
+		}
+		if (i.hasExtra("tangoPort")) {
+			EditText tangoPort = (EditText) findViewById(R.id.editTextTangoPort);
+			tangoPort.setText(i.getStringExtra("tangoPort"));
+		}
+		if (i.hasExtra("restHost")) {
+			EditText RESTfulHost = (EditText) findViewById(R.id.textNewHost);
+			RESTfulHost.setText(i.getStringExtra("restHost"));
+		}
 	}
 
 	@Override
