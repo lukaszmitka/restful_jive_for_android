@@ -26,6 +26,10 @@
         android:id="@+id/action_sort_by_servers"
         android:orderInCategory="5"
         android:title="@string/menu_item_sort_by_servers"/>
+    <item
+        android:id="@+id/action_about_filter"
+        android:orderInCategory="6"
+        android:title="@string/menu_item_about_filter"/>
 
 
 </menu>

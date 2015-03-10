@@ -68,7 +68,7 @@ public class DevicePanelActivity extends FragmentActivity implements ActionBar.T
 			tangoHost = i.getStringExtra("tangoHost");
 			tangoPort = i.getStringExtra("tangoPort");
 		}
-
+		setTitle("REST host: " + restHost + ", TANGO_HOST: " + tangoHost + ":" + tangoPort);
 		// Tab titles
 		String[] tabs = {this.getString(R.string.device_panel_commands), this.getString(R.string.device_panel_attributes),
 				this.getString(R.string.device_panel_admin)};

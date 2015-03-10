@@ -66,7 +66,9 @@ public class AttributesActivity extends Activity {
 		tangoHost = intent.getStringExtra("tangoHost");
 		tangoPort = intent.getStringExtra("tangoPort");
 		context = this;
-
+		TextView deviceAttTextView = (TextView) findViewById(R.id.attributesActivityTextView1);
+		deviceAttTextView.setText("Device " + deviceName + " attributes");
+		setTitle("REST host: " + RESTfulHost + ", TANGO_HOST: " + tangoHost + ":" + tangoPort);
 		refreshAttributesList();
 	}
 

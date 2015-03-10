@@ -2,63 +2,93 @@
 <resources>
 
     <string name="app_name">RESTful Jive</string>
-    <string name="action_settings">Settings</string>
-    <string name="action_sorted_list">Show sorted list</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="button_refresh">Refresh</string>
-    <string name="dev_selected">Selected device</string>
+    <string name="list_of_devices">List of devices</string>
+    <string name="server_list">Server list</string>
+    <string name="device_properties">Device properties</string>
+    <string name="device_attributes">Device attributes</string>
+    <string name="image_plot_viev_description">Plot of selected data</string>
+    <string name="image_plot_scale_description">Scale for plotted data</string>
     <string name="action_set_host">Set Host</string>
-    <string name="lorem_ipsum">Lorem Ipsum</string>
-    <string name="ok_button">OK</string>
-    <string name="cancel_button">Cancel</string>
-
-
-    <string name="title_activity_set_host">SetHostActivity</string>
-
-    <string name="new_rest_address">example: http://192.168.105.140</string>
-    <string name="new_tango_host">example: 192.168.130.100</string>
-    <string name="new_tango_port">example: 10000</string>
+    <string name="dev_selected">Selected device</string>
     <string name="define_new_host">Define new host</string>
     <string name="rest_address">REST server address</string>
     <string name="tango_host">Tango host</string>
     <string name="tango_port">Tango port</string>
     <string name="host_port">Port</string>
 
+    <!--    Buttons    -->
+    <string name="button_refresh">Refresh</string>
+    <string name="ok_button">OK</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="update_button">Update</string>
+    <string name="read_button">Read</string>
+    <string name="write_button">Write</string>
+    <string name="details">Details</string>
+    <string name="refresh_button">Refresh</string>
+    <string name="properties">Properties</string>
+    <string name="attributes">Attributes</string>
+    <string name="sortedList_filterButton">Filter</string>
+
+    <!--    Hints    -->
     <string name="new_host_port">Enter new port here</string>
+    <string name="sorted_list_filter">Your filter here</string>
+    <string name="hint_argin_value">Argin value</string>
+    <string name="new_rest_address">example: http://192.168.105.140</string>
+    <string name="new_tango_host">example: 192.168.130.100</string>
+    <string name="new_tango_port">example: 10000</string>
 
-    <color name="gray">#FFDDDDDD</color>
-    <color name="white">#FFFFFFFF</color>
-
-
+    <!--    Menu items    -->
     <string name="menu_item_sort_by_classes">Sort by Classes</string>
     <string name="menu_item_sort_by_devices">Sort by Devices</string>
     <string name="menu_item_sort_by_servers">Sort by Servers</string>
+    <string name="action_full_list">Show full list</string>
+    <string name="action_server_list">Show server list</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_sorted_list">Show sorted list</string>
+    <string name="menu_item_about_filter">About filter</string>
+
+    <!--    Activity titles    -->
+    <string name="title_activity_server_list">ServerList</string>
+    <string name="title_activity_device_panel">DevicePanelActivity</string>
+    <string name="title_activity_device_panel_commands_fragment">DevicePanelCommandsFragmentActivity</string>
+    <string name="title_activity_device_panel_attributes_fragment">DevicePanelAttributesFragmentActivity</string>
+    <string name="title_activity_device_panel_admin_fragment">DevicePanelAdminFragmentActivity</string>
+    <string name="title_activity_plot">PlotActivity</string>
+    <string name="title_activity_image_plot">ImagePlotActivity</string>
+    <string name="title_activity_properties">PropertiesActivity</string>
+    <string name="title_activity_attributes">AttributesActivity</string>
+    <string name="title_activity_set_host">SetHostActivity</string>
+    <string name="title_activity_sorted_list">SortedList</string>
+
+    <!--    Sorted list labels  -->
     <string name="title_sort_by_classes">List sorted by classes</string>
     <string name="title_sort_by_devices">List sorted by devices</string>
     <string name="title_sort_by_servers">List sorted by servers</string>
     <string name="title_sort_full_list">Full list of devices</string>
-    <string name="list_of_devices">List of devices</string>
-    <string name="title_activity_sorted_list">SortedList</string>
-    <string name="details">Details</string>
-    <string name="refresh_button">Refresh</string>
-    <string name="action_full_list">Show full list</string>
-    <string name="properties">Properties</string>
-    <string name="attributes">Attributes</string>
-    <string name="title_activity_server_list">ServerList</string>
-    <string name="action_server_list">Show server list</string>
-    <string name="server_list">Server list</string>
-    <string name="title_activity_properties">PropertiesActivity</string>
-    <string name="device_properties">Device properties</string>
-    <string name="update_button">Update</string>
-    <string name="title_activity_attributes">AttributesActivity</string>
-    <string name="device_attributes">Device attributes</string>
-    <string name="title_activity_device_panel">DevicePanelActivity</string>
-    <string name="device_panel_commands">Commands</string>
-    <string name="device_panel_attributes">Attributes</string>
-    <string name="device_panel_admin">Admin</string>
-    <string name="title_activity_device_panel_commands_fragment">DevicePanelCommandsFragmentActivity</string>
-    <string name="title_activity_device_panel_attributes_fragment">DevicePanelAttributesFragmentActivity</string>
-    <string name="title_activity_device_panel_admin_fragment">DevicePanelAdminFragmentActivity</string>
+
+    <!--    Sorted list searc description-->
+    <string name="sorted_list_filter_description">
+        Filtering feature use regular expressions.\n
+        Filter is case insensitive.\n
+        You can use expressions below in your filter:\n
+            . - Any character.\n
+            * - Preceding character occurs zero or more times.\n
+            ? - Preceding character occurs once or not at all.\n
+            + - Preceding character occurs one or more times.\n
+            [abc] - a,b or c.\n
+            [^abc] - Any character except a,b or c.\n
+            [a-z] - Any character from a to z.\n
+        For more expressions you can use in filter check section \"Summary of regular-expression constructs\" of
+        <a href="http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html">http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html</a>
+    </string>
+
+
+    <!--    Device panel labels    -->
+    <string name="devicepanel_adminfragment_source_label">Source</string>
+    <string name="devicepanel_adminfragment_timeout_label">Timeout (ms)</string>
+    <string name="devicepanel_adminfragment_blascbox_label">BlackBox (nb cmb)</string>
+    <string name="devicepanel_adminfragment_answer_min_label">Answer limit (min)</string>
+    <string name="devicepanel_adminfragment_answer_max_label">Answer limit (max)</string>
     <string name="device_panel_device">Device: </string>
     <string name="device_panel_argin_type">Argin type: </string>
     <string name="device_panel_argout_type">Argout type: </string>
@@ -66,18 +96,8 @@
     <string name="devicePanel_showDescription">Description</string>
     <string name="devicePanel_execute">Execute</string>
     <string name="devicePanel_plot">Plot</string>
-    <string name="hint_argin_value">Argin value</string>
-    <string name="read_button">Read</string>
-    <string name="write_button">Write</string>
-    <string name="title_activity_plot">PlotActivity</string>
-    <string name="title_activity_image_plot">ImagePlotActivity</string>
-    <string name="image_plot_viev_description">Plot of selected data</string>
-    <string name="image_plot_scale_description">Scale for plotted data</string>
-    <string name="devicepanel_adminfragment_source_label">Source</string>
-    <string name="devicepanel_adminfragment_timeout_label">Timeout (ms)</string>
-    <string name="devicepanel_adminfragment_blascbox_label">BlackBox (nb cmb)</string>
-    <string name="devicepanel_adminfragment_answer_min_label">Answer limit (min)</string>
-    <string name="devicepanel_adminfragment_answer_max_label">Answer limit (max)</string>
+
+    <!--    Device panel buttons    -->
     <string name="devicePanel_apply">Apply</string>
     <string name="devicepanel_adminfragment_deviceInfo_button">Device info</string>
     <string name="devicepanel_adminfragment_pingDevice_button">Ping device</string>
@@ -88,9 +108,23 @@
     <string name="apply">Apply</string>
     <string name="execute">Execute</string>
 
+    <!--    Device panel tabs`-->
+    <string name="device_panel_commands">Commands</string>
+    <string name="device_panel_attributes">Attributes</string>
+    <string name="device_panel_admin">Admin</string>
+
+
+    <!--    String arrays     -->
     <string-array name="devicepanel_adminfragment_source_array">
         <item>CACHE</item>
         <item>CACHE_DEVICE</item>
         <item>DEVICE</item>
     </string-array>
+
+
+    <!--    Colours    -->
+    <color name="gray">#FFDDDDDD</color>
+    <color name="white">#FFFFFFFF</color>
+
+
 </resources>

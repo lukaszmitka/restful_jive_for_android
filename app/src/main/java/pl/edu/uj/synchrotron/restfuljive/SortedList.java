@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,8 +17,10 @@ import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +39,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -57,6 +62,8 @@ public class SortedList extends Activity {
 	private String RESTfulTangoHost;
 	private String tangoHost;
 	private String tangoPort;
+	private JSONObject lastResponse;
+	private int lastSortType;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +91,7 @@ public class SortedList extends Activity {
 					settingsTangoHost + ":" +
 					settingsTangoPort);
 			try {
-				refreshDeviceList(RESTfulTangoHost);
+				getSortedList(RESTfulTangoHost);
 			} catch (Exception e) {
 				AlertDialog.Builder builder = new AlertDialog.Builder(context);
 				builder.setMessage("Problem with connecting to REST server, check if internet connection is available and " +
@@ -113,20 +120,29 @@ public class SortedList extends Activity {
 				return true;
 			case R.id.action_full_list:
 				sortType = SORT_FULL_LIST;
-				refreshDeviceList(RESTfulTangoHost);
+				getSortedList(RESTfulTangoHost);
 				return true;
 			case R.id.action_sort_by_classes:
 				sortType = SORT_BY_CLASS;
-				refreshDeviceList(RESTfulTangoHost);
+				getSortedList(RESTfulTangoHost);
 				return true;
 			case R.id.action_sort_by_devices:
 				sortType = SORT_BY_DEVICE;
-				refreshDeviceList(RESTfulTangoHost);
+				getSortedList(RESTfulTangoHost);
 				return true;
 			case R.id.action_sort_by_servers:
 				sortType = SORT_BY_SERVER;
-				refreshDeviceList(RESTfulTangoHost);
+				getSortedList(RESTfulTangoHost);
 				return true;
+			case R.id.action_about_filter:
+				AlertDialog.Builder builder = new AlertDialog.Builder(context);
+				// Linkify the message
+				//final SpannableString s = new SpannableString(context.getText(R.string.sorted_list_filter_description));
+				//Linkify.addLinks(s, Linkify.ALL);
+				builder.setMessage(R.string.sorted_list_filter_description).setTitle(R.string.menu_item_about_filter);
+				AlertDialog dialog = builder.create();
+				dialog.show();
+				((TextView) dialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
 			default:
 				return super.onOptionsItemSelected(item);
 		}
@@ -137,14 +153,20 @@ public class SortedList extends Activity {
 	 */
 	private void setHost() {
 		Intent i = new Intent(this, SetHostActivity.class);
-		if (!tangoHost.equals("") && tangoHost != null) {
-			i.putExtra("tangoHost", tangoHost);
+		if (tangoHost != null) {
+			if (!tangoHost.equals("")) {
+				i.putExtra("tangoHost", tangoHost);
+			}
 		}
-		if (!tangoPort.equals("") && tangoPort != null) {
-			i.putExtra("tangoPort", tangoPort);
+		if (tangoPort != null) {
+			if (!tangoPort.equals("")) {
+				i.putExtra("tangoPort", tangoPort);
+			}
 		}
-		if (!RESTfulTangoHost.equals("") && RESTfulTangoHost != null) {
-			i.putExtra("restHost", RESTfulTangoHost);
+		if (RESTfulTangoHost != null) {
+			if (!RESTfulTangoHost.equals("")) {
+				i.putExtra("restHost", RESTfulTangoHost);
+			}
 		}
 		startActivityForResult(i, 1);
 	}
@@ -172,7 +194,7 @@ public class SortedList extends Activity {
 				editor.putString("TangoPort", tangoPort);
 				editor.commit();
 				System.out.println("Result: " + RESTfulTangoHost);
-				refreshDeviceList(RESTfulTangoHost);
+				getSortedList(RESTfulTangoHost);
 				setTitle("REST host: " + RESTfulTangoHost + ", TANGO_HOST: " + tangoHost + ":" + tangoPort);
 			}
 			if (resultCode == RESULT_CANCELED) {
@@ -182,13 +204,20 @@ public class SortedList extends Activity {
 	}
 
 	/**
-	 * Get list of devices from databse, and sort them accordingly to their domain and class.
+	 * Generate request for RESTful host and set listener for incoming reply.
 	 *
-	 * @param RESTHost Database host address.
-	 * @return TreeMap with sorted list.
+	 * @param RESTHost RESTful host address.
 	 */
 	private void getSortedList(String RESTHost) {
 		RequestQueue queue = Volley.newRequestQueue(this);
+		ProgressBar progressBar = (ProgressBar) findViewById(R.id.sortedList_progressBar);
+		progressBar.setVisibility(View.VISIBLE);
+		ListView listView = (ListView) findViewById(R.id.sortedList_listView);
+		listView.setFocusable(false);
+		listView.setEnabled(false);
+		Button button = (Button) findViewById(R.id.sortedList_refreshButton);
+		button.setFocusable(false);
+		button.setEnabled(false);
 		switch (sortType) {
 			case SORT_BY_CLASS:
 				queue.start();
@@ -200,6 +229,8 @@ public class SortedList extends Activity {
 								try {
 									if (response.getString("connectionStatus").equals("OK")) {
 										System.out.println("Device connection OK");
+										lastSortType = SORT_BY_CLASS;
+										lastResponse = response;
 										updateDeviceList(response, SORT_BY_CLASS);
 									} else {
 										System.out.println("Tango database API returned message:");
@@ -233,6 +264,8 @@ public class SortedList extends Activity {
 								try {
 									if (response.getString("connectionStatus").equals("OK")) {
 										System.out.println("Device connection OK");
+										lastSortType = SORT_BY_SERVER;
+										lastResponse = response;
 										updateDeviceList(response, SORT_BY_SERVER);
 									} else {
 										System.out.println("Tango database API returned message:");
@@ -266,6 +299,8 @@ public class SortedList extends Activity {
 								try {
 									if (response.getString("connectionStatus").equals("OK")) {
 										System.out.println("Device connection OK");
+										lastSortType = SORT_FULL_LIST;
+										lastResponse = response;
 										updateDeviceList(response, SORT_FULL_LIST);
 									} else {
 										System.out.println("Tango database API returned message:");
@@ -300,6 +335,8 @@ public class SortedList extends Activity {
 								try {
 									if (response.getString("connectionStatus").equals("OK")) {
 										System.out.println("Device connection OK");
+										lastSortType = SORT_BY_DEVICE;
+										lastResponse = response;
 										updateDeviceList(response, SORT_BY_DEVICE);
 									} else {
 										System.out.println("Tango database API returned message:");
@@ -410,25 +447,31 @@ public class SortedList extends Activity {
 	 *
 	 * @param v Reference to the widget that was clicked.
 	 */
-	public void sortedListRefresh(View v) {
-		refreshDeviceList(RESTfulTangoHost);
+	public void buttonSortedListRefresh(View v) {
+		getSortedList(RESTfulTangoHost);
+	}
+
+
+	/**
+	 * Button listener, read pattern from text view and filter device list with it.
+	 *
+	 * @param view
+	 */
+	public void buttonFilter(View view) {
+		EditText filterPattern = (EditText) findViewById(R.id.sortedList_filterPattern);
+		filterDeviceList(lastResponse, lastSortType, filterPattern.getText().toString());
 	}
 
 	/**
-	 * Refresh currently shown list of devices.
+	 * Update currently shown list of devices with list received from server in JSON format.
 	 *
-	 * @param RESTfulHost Database host address.
+	 * @param response JSON response from RESTful srever.
+	 * @param sortCase Method of sorting devices.
 	 */
-	private void refreshDeviceList(String RESTfulHost) {
-
-		listView = (ListView) findViewById(R.id.listView2);
-		list = new ArrayList<NLevelItem>();
-		System.out.println("Connecting to: " + RESTfulHost);
-		getSortedList(RESTfulHost);
-	}
-
 
 	private void updateDeviceList(JSONObject response, int sortCase) {
+		listView = (ListView) findViewById(R.id.sortedList_listView);
+		list = new ArrayList<NLevelItem>();
 		boolean isDeviceAlive;
 		switch (sortCase) {
 			case SORT_BY_CLASS:
@@ -443,14 +486,14 @@ public class SortedList extends Activity {
 
 						final NLevelItem grandParent =
 								new NLevelItem(new SomeObject(className, "", false), null, new NLevelView() {
-							public View getView(NLevelItem item) {
-								View view = inflater.inflate(R.layout.n_level_list_item_lev_1, null);
-								TextView tv = (TextView) view.findViewById(R.id.nLevelList_item_L1_textView);
-								String name = (String) ((SomeObject) item.getWrappedObject()).getName();
-								tv.setText(name);
-								return view;
-							}
-						});
+									public View getView(NLevelItem item) {
+										View view = inflater.inflate(R.layout.n_level_list_item_lev_1, null);
+										TextView tv = (TextView) view.findViewById(R.id.nLevelList_item_L1_textView);
+										String name = (String) ((SomeObject) item.getWrappedObject()).getName();
+										tv.setText(name);
+										return view;
+									}
+								});
 						list.add(grandParent);
 						devicesCount = response.getInt(className + "DevCount");
 						for (int j = 0; j < devicesCount; j++) {
@@ -550,14 +593,14 @@ public class SortedList extends Activity {
 						// prepare first level list item
 						final NLevelItem serverLevel =
 								new NLevelItem(new SomeObject(serverName, "", false), null, new NLevelView() {
-							public View getView(NLevelItem item) {
-								View view = serverSortingInflater.inflate(R.layout.n_level_list_item_lev_1, null);
-								TextView tv = (TextView) view.findViewById(R.id.nLevelList_item_L1_textView);
-								String name = (String) ((SomeObject) item.getWrappedObject()).getName();
-								tv.setText(name);
-								return view;
-							}
-						});
+									public View getView(NLevelItem item) {
+										View view = serverSortingInflater.inflate(R.layout.n_level_list_item_lev_1, null);
+										TextView tv = (TextView) view.findViewById(R.id.nLevelList_item_L1_textView);
+										String name = (String) ((SomeObject) item.getWrappedObject()).getName();
+										tv.setText(name);
+										return view;
+									}
+								});
 						// add frist level list item
 						list.add(serverLevel);
 
@@ -925,6 +968,583 @@ public class SortedList extends Activity {
 			default:
 				break;
 		}
+
+		ProgressBar progressBar = (ProgressBar) findViewById(R.id.sortedList_progressBar);
+		progressBar.setVisibility(View.INVISIBLE);
+		ListView listView = (ListView) findViewById(R.id.sortedList_listView);
+		listView.setFocusable(true);
+		listView.setEnabled(true);
+		Button button = (Button) findViewById(R.id.sortedList_refreshButton);
+		button.setFocusable(true);
+		button.setEnabled(true);
+
+	}
+
+	/**
+	 * Filter currently shown list of devices with selected patern.
+	 *
+	 * @param response JSON response from RESTful srever.
+	 * @param sortCase Method of sorting devices.
+	 * @param pattern  String containing regular expression filter.
+	 */
+
+	private void filterDeviceList(JSONObject response, int sortCase, String pattern) {
+		Pattern p = Pattern.compile(pattern.toLowerCase());
+		Matcher m;
+		listView = (ListView) findViewById(R.id.sortedList_listView);
+		list = new ArrayList<NLevelItem>();
+		boolean isDeviceAlive;
+		boolean grandParentPresent;
+		boolean secondLevelPresent;
+		boolean thirdLevelPresent;
+		switch (sortCase) {
+			case SORT_BY_CLASS:
+				final LayoutInflater inflater = LayoutInflater.from(this);
+				try {
+					int classCount = response.getInt("numberOfClasses");
+					String className;
+					int devicesCount;
+					String deviceName;
+					for (int i = 0; i < classCount; i++) {
+						className = response.getString("className" + i);
+
+						final NLevelItem grandParent =
+								new NLevelItem(new SomeObject(className, "", false), null, new NLevelView() {
+									public View getView(NLevelItem item) {
+										View view = inflater.inflate(R.layout.n_level_list_item_lev_1, null);
+										TextView tv = (TextView) view.findViewById(R.id.nLevelList_item_L1_textView);
+										String name = (String) ((SomeObject) item.getWrappedObject()).getName();
+										tv.setText(name);
+										return view;
+									}
+								});
+						grandParentPresent = false;
+						devicesCount = response.getInt(className + "DevCount");
+						for (int j = 0; j < devicesCount; j++) {
+							deviceName = response.getString(className + "Device" + j);
+							m = p.matcher(deviceName.toLowerCase());
+							if (m.matches()) {
+								if (grandParentPresent == false) {
+									list.add(grandParent);
+									grandParentPresent = true;
+								}
+								isDeviceAlive = response.getBoolean(className + "isDeviceAlive" + j);
+								NLevelItem child =
+										new NLevelItem(new SomeObject(deviceName, deviceName, isDeviceAlive), grandParent,
+												new NLevelView() {
+													public View getView(NLevelItem item) {
+														View view = inflater.inflate(R.layout.n_level_list_member_item, null);
+														ImageView imageView = (ImageView) view.findViewById(R.id.nLevelListMemberDiode);
+														if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
+															imageView.setImageResource(R.drawable.dioda_zielona);
+														} else {
+															imageView.setImageResource(R.drawable.dioda_czerwona);
+														}
+														Button b = (Button) view.findViewById(R.id.nLevelList_member_button);
+														b.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
+														TextView tv = (TextView) view.findViewById(R.id.nLevelList_member_textView);
+														tv.setClickable(true);
+														String name = (String) ((SomeObject) item.getWrappedObject()).getName();
+														tv.setText(name);
+														tv.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
+														tv.setOnLongClickListener(new OnLongClickListener() {
+															@Override
+															public boolean onLongClick(View v) {
+																TextView tv = (TextView) v;
+																AlertDialog.Builder builder = new AlertDialog.Builder(tv.getContext());
+																builder.setTitle("Choose action");
+																builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+																	public void onClick(DialogInterface dialog, int id) {
+																	}
+																});
+																String[] s = {"Monitor", "Test"};
+																final String name = tv.getTag().toString();
+																builder.setItems(s, new DialogInterface.OnClickListener() {
+																	public void onClick(DialogInterface dialog, int choice) {
+																		if (choice == 0) {
+																			Toast toast = Toast.makeText(context, "This should run ATKPanel",
+																					Toast.LENGTH_LONG);
+																			toast.show();
+																		}
+																		if (choice == 1) {
+																			Intent i = new Intent(context, DevicePanelActivity.class);
+																			i.putExtra("devName", name);
+																			i.putExtra("restHost", RESTfulTangoHost);
+																			i.putExtra("tangoHost", tangoHost);
+																			i.putExtra("tangoPort", tangoPort);
+																			startActivity(i);
+																		}
+																	}
+																});
+																AlertDialog dialog = builder.create();
+																dialog.show();
+																return true;
+															}
+														});
+														Button properties = (Button) view.findViewById(R.id.nLevelList_member_properties);
+														properties.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
+														Button attributes = (Button) view.findViewById(R.id.nLevelList_member_attributes);
+														attributes.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
+														return view;
+													}
+												});
+								list.add(child);
+							}
+						}
+					}
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+
+				NLevelAdapter adapter = new NLevelAdapter(list);
+				listView.setAdapter(adapter);
+				listView.setOnItemClickListener(new OnItemClickListener() {
+					public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+						((NLevelAdapter) listView.getAdapter()).toggle(arg2);
+						((NLevelAdapter) listView.getAdapter()).getFilter().filter();
+					}
+				});
+
+				break;
+			case SORT_BY_SERVER:
+				final LayoutInflater serverSortingInflater = LayoutInflater.from(this);
+				try {
+					// get number of servers
+					int serverCount = response.getInt("ServerCount");
+					String serverName;
+					int instancesCount;
+					String instanceName;
+					int classCount;
+					String className;
+					int devicesCount;
+					String deviceName;
+					for (int i = 0; i < serverCount; i++) {
+						serverName = response.getString("Server" + i);
+						// prepare first level list item
+						final NLevelItem serverLevel =
+								new NLevelItem(new SomeObject(serverName, "", false), null, new NLevelView() {
+									public View getView(NLevelItem item) {
+										View view = serverSortingInflater.inflate(R.layout.n_level_list_item_lev_1, null);
+										TextView tv = (TextView) view.findViewById(R.id.nLevelList_item_L1_textView);
+										String name = (String) ((SomeObject) item.getWrappedObject()).getName();
+										tv.setText(name);
+										return view;
+									}
+								});
+						grandParentPresent = false;
+
+						// get number of instances for the server
+						instancesCount = response.getInt(serverName + "InstCnt");
+						for (int j = 0; j < instancesCount; j++) {
+							instanceName = response.getString(serverName + "Instance" + j);
+							// prepare second level list item
+							final NLevelItem instanceLevel = new NLevelItem(new SomeObject(instanceName, "", false), serverLevel,
+									new NLevelView() {
+										public View getView(NLevelItem item) {
+											View view = serverSortingInflater.inflate(R.layout.n_level_list_item_lev_2, null);
+											TextView tv = (TextView) view.findViewById(R.id.nLevelList_item_L2_textView);
+											String name = (String) ((SomeObject) item.getWrappedObject()).getName();
+											tv.setText(name);
+											return view;
+										}
+									});
+							secondLevelPresent = false;
+
+							// get number of classes in the instance
+							classCount = response.getInt("Se" + i + "In" + j + "ClassCnt");
+							for (int k = 0; k < classCount; k++) {
+								className = response.getString("Se" + i + "In" + j + "Cl" + k);
+								// prepare third level list item
+								final NLevelItem classLevel =
+										new NLevelItem(new SomeObject(className, "", false), instanceLevel, new NLevelView() {
+											public View getView(NLevelItem item) {
+												View view = serverSortingInflater.inflate(R.layout.n_level_list_item_lev_3, null);
+												TextView tv = (TextView) view.findViewById(R.id.nLevelList_item_L3_textView);
+												String name = (String) ((SomeObject) item.getWrappedObject()).getName();
+												tv.setText(name);
+												return view;
+											}
+										});
+								thirdLevelPresent = false;
+
+
+								// get count of devices for class
+								devicesCount = response.getInt("Se" + i + "In" + j + "Cl" + k + "DCnt");
+								if (devicesCount > 0) {
+									for (int l = 0; l < devicesCount; l++) {
+										deviceName = response.getString("Se" + i + "In" + j + "Cl" + k + "Dev" + l);
+										m = p.matcher(deviceName.toLowerCase());
+										if (m.matches()) {
+											if (grandParentPresent == false) {
+												// add frist level list item
+												list.add(serverLevel);
+												grandParentPresent = true;
+											}
+											if (secondLevelPresent == false) {
+												// add second level list item
+												list.add(instanceLevel);
+												secondLevelPresent = true;
+											}
+											if (thirdLevelPresent == false) {
+												// add third level list item
+												list.add(classLevel);
+												thirdLevelPresent = true;
+											}
+											System.out.println("Add device " + deviceName + " to list");
+											// prepare fourth level list item
+											isDeviceAlive = response.getBoolean(deviceName + "isDeviceAlive" + l);
+											NLevelItem deviceLevel =
+													new NLevelItem(new SomeObject(deviceName, deviceName, isDeviceAlive), classLevel,
+															new NLevelView() {
+																public View getView(NLevelItem item) {
+																	View view =
+																			serverSortingInflater.inflate(R.layout.n_level_list_member_item,
+																					null);
+																	ImageView imageView =
+																			(ImageView) view.findViewById(R.id.nLevelListMemberDiode);
+																	if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
+																		imageView.setImageResource(R.drawable.dioda_zielona);
+																	} else {
+																		imageView.setImageResource(R.drawable.dioda_czerwona);
+																	}
+																	Button b = (Button) view.findViewById(R.id.nLevelList_member_button);
+																	b.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
+																	TextView tv =
+																			(TextView) view.findViewById(R.id.nLevelList_member_textView);
+																	tv.setClickable(true);
+																	String name = (String) ((SomeObject) item.getWrappedObject()).getName();
+																	tv.setText(name);
+																	tv.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
+																	tv.setOnLongClickListener(new OnLongClickListener() {
+																		@Override
+																		public boolean onLongClick(View v) {
+																			TextView tv = (TextView) v;
+																			AlertDialog.Builder builder = new AlertDialog.Builder(tv.getContext
+																					());
+																			builder.setTitle("Choose action");
+																			builder.setNegativeButton("Cancel",
+																					new DialogInterface.OnClickListener() {
+																						public void onClick(DialogInterface dialog, int id) {
+																						}
+																					});
+																			String[] s = {"Monitor", "Test"};
+																			final String name = tv.getTag().toString();
+																			builder.setItems(s, new DialogInterface.OnClickListener() {
+																				public void onClick(DialogInterface dialog, int choice) {
+																					if (choice == 0) {
+																						Toast toast =
+																								Toast.makeText(context, "This should run ATKPanel",
+																										Toast.LENGTH_LONG);
+																						toast.show();
+																					}
+																					if (choice == 1) {
+																						Intent i = new Intent(context, DevicePanelActivity.class);
+																						i.putExtra("devName", name);
+																						i.putExtra("restHost", RESTfulTangoHost);
+																						i.putExtra("tangoHost", tangoHost);
+																						i.putExtra("tangoPort", tangoPort);
+																						startActivity(i);
+																					}
+																				}
+																			});
+																			AlertDialog dialog = builder.create();
+																			dialog.show();
+																			return true;
+																		}
+																	});
+																	Button properties =
+																			(Button) view.findViewById(R.id.nLevelList_member_properties);
+																	properties
+																			.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
+																	Button attributes =
+																			(Button) view.findViewById(R.id.nLevelList_member_attributes);
+																	attributes
+																			.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
+																	return view;
+																}
+															});
+											// add fourth level list item
+											list.add(deviceLevel);
+										}
+									}
+								}
+
+
+							}
+						}
+					}
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+
+				NLevelAdapter servSortAdapter = new NLevelAdapter(list);
+				listView.setAdapter(servSortAdapter);
+				listView.setOnItemClickListener(new OnItemClickListener() {
+					public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+						((NLevelAdapter) listView.getAdapter()).toggle(arg2);
+						((NLevelAdapter) listView.getAdapter()).getFilter().filter();
+					}
+				});
+
+				break;
+			case SORT_BY_DEVICE:
+				final LayoutInflater deviceSortingInflater = LayoutInflater.from(this);
+				try {
+					// get number of servers
+					int domainCount = response.getInt("domainCount");
+					String domainName;
+					int classCount;
+					String className;
+					int devicesCount;
+					String deviceName;
+					for (int i = 0; i < domainCount; i++) {
+
+						domainName = response.getString("domain" + i);
+						// prepare first level list item
+						final NLevelItem serverLevel =
+								new NLevelItem(new SomeObject(domainName, "", false), null, new NLevelView() {
+									public View getView(NLevelItem item) {
+										View view = deviceSortingInflater.inflate(R.layout.n_level_list_item_lev_1, null);
+										TextView tv = (TextView) view.findViewById(R.id.nLevelList_item_L1_textView);
+										String name = (String) ((SomeObject) item.getWrappedObject()).getName();
+										tv.setText(name);
+										return view;
+									}
+								});
+						grandParentPresent = false;
+						// add frist level list item
+						//list.add(serverLevel);
+
+
+						// get number of classes in the instance
+						classCount = response.getInt("domain" + i + "classCount");
+						for (int k = 0; k < classCount; k++) {
+							className = response.getString("domain" + i + "class" + k);
+							// prepare third level list item
+							final NLevelItem classLevel =
+									new NLevelItem(new SomeObject(className, "", false), serverLevel, new NLevelView() {
+										public View getView(NLevelItem item) {
+											View view = deviceSortingInflater.inflate(R.layout.n_level_list_item_lev_2, null);
+											TextView tv = (TextView) view.findViewById(R.id.nLevelList_item_L2_textView);
+											String name = (String) ((SomeObject) item.getWrappedObject()).getName();
+											tv.setText(name);
+											return view;
+										}
+									});
+							secondLevelPresent = false;
+							// add second level list item
+							//list.add(classLevel);
+
+
+							// get count of devices for class
+							devicesCount = response.getInt("domain" + i + "class" + k + "devCount");
+							if (devicesCount > 0) {
+								for (int l = 0; l < devicesCount; l++) {
+									deviceName = response.getString("domain" + i + "class" + k + "device" + l);
+									m = p.matcher(deviceName.toLowerCase());
+									if (m.matches()) {
+										if (grandParentPresent == false) {
+											// add frist level list item
+											list.add(serverLevel);
+											grandParentPresent = true;
+										}
+										if (secondLevelPresent == false) {
+											// add second level list item
+											list.add(classLevel);
+											secondLevelPresent = true;
+										}
+										System.out.println("Add device " + deviceName + " to list");
+										// prepare third level list item
+										isDeviceAlive = response.getBoolean(deviceName + "isDeviceAlive");
+										NLevelItem deviceLevel =
+												new NLevelItem(new SomeObject(deviceName, deviceName, isDeviceAlive), classLevel,
+														new NLevelView() {
+															public View getView(NLevelItem item) {
+																View view =
+																		deviceSortingInflater.inflate(R.layout.n_level_list_member_item,
+																				null);
+																ImageView imageView = (ImageView) view.findViewById(R.id
+																		.nLevelListMemberDiode);
+																if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
+																	imageView.setImageResource(R.drawable.dioda_zielona);
+																} else {
+																	imageView.setImageResource(R.drawable.dioda_czerwona);
+																}
+																Button b = (Button) view.findViewById(R.id.nLevelList_member_button);
+																b.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
+																TextView tv = (TextView) view.findViewById(R.id.nLevelList_member_textView);
+																tv.setClickable(true);
+																String name = (String) ((SomeObject) item.getWrappedObject()).getName();
+																tv.setText(name);
+																tv.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
+																tv.setOnLongClickListener(new OnLongClickListener() {
+																	@Override
+																	public boolean onLongClick(View v) {
+																		TextView tv = (TextView) v;
+																		AlertDialog.Builder builder = new AlertDialog.Builder(tv.getContext
+																				());
+																		builder.setTitle("Choose action");
+																		builder.setNegativeButton("Cancel",
+																				new DialogInterface.OnClickListener() {
+																					public void onClick(DialogInterface dialog, int id) {
+																					}
+																				});
+																		String[] s = {"Monitor", "Test"};
+																		final String name = tv.getTag().toString();
+																		builder.setItems(s, new DialogInterface.OnClickListener() {
+																			public void onClick(DialogInterface dialog, int choice) {
+																				if (choice == 0) {
+																					Toast toast =
+																							Toast.makeText(context, "This should run ATKPanel",
+																									Toast.LENGTH_LONG);
+																					toast.show();
+																				}
+																				if (choice == 1) {
+																					Intent i = new Intent(context, DevicePanelActivity.class);
+																					i.putExtra("devName", name);
+																					i.putExtra("restHost", RESTfulTangoHost);
+																					i.putExtra("tangoHost", tangoHost);
+																					i.putExtra("tangoPort", tangoPort);
+																					startActivity(i);
+																				}
+																			}
+																		});
+																		AlertDialog dialog = builder.create();
+																		dialog.show();
+																		return true;
+																	}
+																});
+																Button properties =
+																		(Button) view.findViewById(R.id.nLevelList_member_properties);
+																properties.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
+																Button attributes =
+																		(Button) view.findViewById(R.id.nLevelList_member_attributes);
+																attributes.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
+																return view;
+															}
+														});
+										// add third level list item
+										list.add(deviceLevel);
+									}
+								}
+							}
+
+
+						}
+
+					}
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+
+				NLevelAdapter devSortAdapter = new NLevelAdapter(list);
+				listView.setAdapter(devSortAdapter);
+				listView.setOnItemClickListener(new OnItemClickListener() {
+					public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+						((NLevelAdapter) listView.getAdapter()).toggle(arg2);
+						((NLevelAdapter) listView.getAdapter()).getFilter().filter();
+					}
+				});
+				break;
+			case SORT_FULL_LIST:
+				final LayoutInflater fullListInflater = LayoutInflater.from(this);
+				try {
+					int deviceCount = response.getInt("numberOfDevices");
+					String deviceName;
+					for (int j = 0; j < deviceCount; j++) {
+						deviceName = response.getString("device" + j);
+						m = p.matcher(deviceName.toLowerCase());
+						if (m.matches()) {
+							System.out.println("Matched device: " + deviceName);
+							isDeviceAlive = response.getBoolean(deviceName + "isDeviceAlive");
+							NLevelItem child =
+									new NLevelItem(new SomeObject(deviceName, deviceName, isDeviceAlive), null,
+											new NLevelView() {
+												public View getView(NLevelItem item) {
+													View view = fullListInflater.inflate(R.layout.n_level_list_member_item, null);
+													ImageView imageView = (ImageView) view.findViewById(R.id.nLevelListMemberDiode);
+													if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
+														imageView.setImageResource(R.drawable.dioda_zielona);
+													} else {
+														imageView.setImageResource(R.drawable.dioda_czerwona);
+													}
+													Button b = (Button) view.findViewById(R.id.nLevelList_member_button);
+													b.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
+													TextView tv = (TextView) view.findViewById(R.id.nLevelList_member_textView);
+													tv.setClickable(true);
+													String name = (String) ((SomeObject) item.getWrappedObject()).getName();
+													tv.setText(name);
+													tv.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
+													tv.setOnLongClickListener(new OnLongClickListener() {
+														@Override
+														public boolean onLongClick(View v) {
+															TextView tv = (TextView) v;
+															AlertDialog.Builder builder = new AlertDialog.Builder(tv.getContext());
+															builder.setTitle("Choose action");
+															builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+																public void onClick(DialogInterface dialog, int id) {
+																}
+															});
+															String[] s = {"Monitor", "Test"};
+															final String name = tv.getTag().toString();
+															builder.setItems(s, new DialogInterface.OnClickListener() {
+																public void onClick(DialogInterface dialog, int choice) {
+																	if (choice == 0) {
+																		Toast toast = Toast.makeText(context, "This should run ATKPanel",
+																				Toast.LENGTH_LONG);
+																		toast.show();
+																	}
+																	if (choice == 1) {
+																		Intent i = new Intent(context, DevicePanelActivity.class);
+																		i.putExtra("devName", name);
+																		i.putExtra("restHost", RESTfulTangoHost);
+																		i.putExtra("tangoHost", tangoHost);
+																		i.putExtra("tangoPort", tangoPort);
+																		startActivity(i);
+																	}
+																}
+															});
+															AlertDialog dialog = builder.create();
+															dialog.show();
+															return true;
+														}
+													});
+													Button properties = (Button) view.findViewById(R.id.nLevelList_member_properties);
+													properties.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
+													Button attributes = (Button) view.findViewById(R.id.nLevelList_member_attributes);
+													attributes.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
+													return view;
+												}
+											});
+							list.add(child);
+						}
+					}
+
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+
+				NLevelAdapter fullListAdapter = new NLevelAdapter(list);
+				listView.setAdapter(fullListAdapter);
+				listView.setOnItemClickListener(new OnItemClickListener() {
+					public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+						((NLevelAdapter) listView.getAdapter()).toggle(arg2);
+						((NLevelAdapter) listView.getAdapter()).getFilter().filter();
+					}
+				});
+				break;
+			default:
+				break;
+		}
+
+		ProgressBar progressBar = (ProgressBar) findViewById(R.id.sortedList_progressBar);
+		progressBar.setVisibility(View.INVISIBLE);
+		ListView listView = (ListView) findViewById(R.id.sortedList_listView);
+		listView.setFocusable(true);
+		listView.setEnabled(true);
+		Button button = (Button) findViewById(R.id.sortedList_refreshButton);
+		button.setFocusable(true);
+		button.setEnabled(true);
 
 	}
 
