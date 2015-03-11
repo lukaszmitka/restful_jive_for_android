@@ -4,6 +4,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:name="android.support.multidex.MultiDexApplication"
         android:allowBackup="true"
@@ -12,7 +13,8 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".SortedList"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:windowSoftInputMode="stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -33,15 +35,18 @@
         </activity>
         <activity
             android:name=".PropertiesActivity"
-            android:label="@string/title_activity_properties">
+            android:label="@string/title_activity_properties"
+            android:windowSoftInputMode="stateHidden">
         </activity>
         <activity
             android:name=".AttributesActivity"
-            android:label="@string/title_activity_attributes">
+            android:label="@string/title_activity_attributes"
+            android:windowSoftInputMode="stateHidden">
         </activity>
         <activity
             android:name=".DevicePanelActivity"
-            android:label="@string/title_activity_device_panel">
+            android:label="@string/title_activity_device_panel"
+            android:windowSoftInputMode="stateHidden">
         </activity>
         <activity
             android:name=".PlotActivity"
@@ -50,6 +55,22 @@
         <activity
             android:name=".ImagePlotActivity"
             android:label="@string/title_activity_image_plot">
+        </activity>
+        <activity
+            android:name=".ATKPanelActivity"
+            android:label="@string/title_activity_atkpanel"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="stateHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".SetDeviceActivity"
+            android:label="@string/title_activity_set_device"
+            android:theme="@style/Base.Theme.AppCompat.Light.Dialog">
         </activity>
     </application>
 

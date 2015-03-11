@@ -36,6 +36,7 @@
     <string name="new_rest_address">example: http://192.168.105.140</string>
     <string name="new_tango_host">example: 192.168.130.100</string>
     <string name="new_tango_port">example: 10000</string>
+    <string name="hint_device_name">example: sys/tg_test/1</string>
 
     <!--    Menu items    -->
     <string name="menu_item_sort_by_classes">Sort by Classes</string>
@@ -59,6 +60,15 @@
     <string name="title_activity_attributes">AttributesActivity</string>
     <string name="title_activity_set_host">SetHostActivity</string>
     <string name="title_activity_sorted_list">SortedList</string>
+    <string name="title_activity_atkpanel">ATK Panel</string>
+    <string name="title_activity_set_device">SetDeviceDialogActivity</string>
+
+    <!--    Set device name strings -->
+    <string name="set_device_dialog">Type device name</string>
+
+    <!--    ATK Panel strings   -->
+    <string name="atk_panel_dev_not_set">Device not set</string>
+
 
     <!--    Sorted list labels  -->
     <string name="title_sort_by_classes">List sorted by classes</string>
@@ -66,7 +76,7 @@
     <string name="title_sort_by_servers">List sorted by servers</string>
     <string name="title_sort_full_list">Full list of devices</string>
 
-    <!--    Sorted list searc description-->
+    <!--    Sorted list search description-->
     <string name="sorted_list_filter_description">
         Filtering feature use regular expressions.\n
         Filter is case insensitive.\n

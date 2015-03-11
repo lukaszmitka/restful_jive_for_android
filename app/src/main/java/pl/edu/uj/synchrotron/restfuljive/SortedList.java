@@ -22,7 +22,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -532,9 +531,15 @@ public class SortedList extends Activity {
 															builder.setItems(s, new DialogInterface.OnClickListener() {
 																public void onClick(DialogInterface dialog, int choice) {
 																	if (choice == 0) {
-																		Toast toast = Toast.makeText(context, "This should run ATKPanel",
+																		Intent i = new Intent(context, ATKPanelActivity.class);
+																		i.putExtra("DEVICE_NAME", name);
+																		i.putExtra("restHost", RESTfulTangoHost);
+																		i.putExtra("tangoHost", tangoHost);
+																		i.putExtra("tangoPort", tangoPort);
+																		startActivity(i);
+																		/*Toast toast = Toast.makeText(context, "This should run ATKPanel",
 																				Toast.LENGTH_LONG);
-																		toast.show();
+																		toast.show();*/
 																	}
 																	if (choice == 1) {
 																		Intent i = new Intent(context, DevicePanelActivity.class);
@@ -687,10 +692,15 @@ public class SortedList extends Activity {
 																		builder.setItems(s, new DialogInterface.OnClickListener() {
 																			public void onClick(DialogInterface dialog, int choice) {
 																				if (choice == 0) {
-																					Toast toast =
-																							Toast.makeText(context, "This should run ATKPanel",
-																									Toast.LENGTH_LONG);
-																					toast.show();
+																					Intent i = new Intent(context, ATKPanelActivity.class);
+																					i.putExtra("DEVICE_NAME", name);
+																					i.putExtra("restHost", RESTfulTangoHost);
+																					i.putExtra("tangoHost", tangoHost);
+																					i.putExtra("tangoPort", tangoPort);
+																					startActivity(i);
+																		/*Toast toast = Toast.makeText(context, "This should run ATKPanel",
+																				Toast.LENGTH_LONG);
+																		toast.show();*/
 																				}
 																				if (choice == 1) {
 																					Intent i = new Intent(context, DevicePanelActivity.class);
@@ -831,10 +841,15 @@ public class SortedList extends Activity {
 																	builder.setItems(s, new DialogInterface.OnClickListener() {
 																		public void onClick(DialogInterface dialog, int choice) {
 																			if (choice == 0) {
-																				Toast toast =
-																						Toast.makeText(context, "This should run ATKPanel",
-																								Toast.LENGTH_LONG);
-																				toast.show();
+																				Intent i = new Intent(context, ATKPanelActivity.class);
+																				i.putExtra("DEVICE_NAME", name);
+																				i.putExtra("restHost", RESTfulTangoHost);
+																				i.putExtra("tangoHost", tangoHost);
+																				i.putExtra("tangoPort", tangoPort);
+																				startActivity(i);
+																		/*Toast toast = Toast.makeText(context, "This should run ATKPanel",
+																				Toast.LENGTH_LONG);
+																		toast.show();*/
 																			}
 																			if (choice == 1) {
 																				Intent i = new Intent(context, DevicePanelActivity.class);
@@ -923,9 +938,15 @@ public class SortedList extends Activity {
 														builder.setItems(s, new DialogInterface.OnClickListener() {
 															public void onClick(DialogInterface dialog, int choice) {
 																if (choice == 0) {
-																	Toast toast = Toast.makeText(context, "This should run ATKPanel",
-																			Toast.LENGTH_LONG);
-																	toast.show();
+																	Intent i = new Intent(context, ATKPanelActivity.class);
+																	i.putExtra("DEVICE_NAME", name);
+																	i.putExtra("restHost", RESTfulTangoHost);
+																	i.putExtra("tangoHost", tangoHost);
+																	i.putExtra("tangoPort", tangoPort);
+																	startActivity(i);
+																		/*Toast toast = Toast.makeText(context, "This should run ATKPanel",
+																				Toast.LENGTH_LONG);
+																		toast.show();*/
 																}
 																if (choice == 1) {
 																	Intent i = new Intent(context, DevicePanelActivity.class);
@@ -989,7 +1010,7 @@ public class SortedList extends Activity {
 	 */
 
 	private void filterDeviceList(JSONObject response, int sortCase, String pattern) {
-		Pattern p = Pattern.compile(pattern.toLowerCase());
+		Pattern p = Pattern.compile(".*" + pattern.toLowerCase() + ".*");
 		Matcher m;
 		listView = (ListView) findViewById(R.id.sortedList_listView);
 		list = new ArrayList<NLevelItem>();
@@ -1062,9 +1083,15 @@ public class SortedList extends Activity {
 																builder.setItems(s, new DialogInterface.OnClickListener() {
 																	public void onClick(DialogInterface dialog, int choice) {
 																		if (choice == 0) {
-																			Toast toast = Toast.makeText(context, "This should run ATKPanel",
-																					Toast.LENGTH_LONG);
-																			toast.show();
+																			Intent i = new Intent(context, ATKPanelActivity.class);
+																			i.putExtra("DEVICE_NAME", name);
+																			i.putExtra("restHost", RESTfulTangoHost);
+																			i.putExtra("tangoHost", tangoHost);
+																			i.putExtra("tangoPort", tangoPort);
+																			startActivity(i);
+																		/*Toast toast = Toast.makeText(context, "This should run ATKPanel",
+																				Toast.LENGTH_LONG);
+																		toast.show();*/
 																		}
 																		if (choice == 1) {
 																			Intent i = new Intent(context, DevicePanelActivity.class);
@@ -1232,10 +1259,15 @@ public class SortedList extends Activity {
 																			builder.setItems(s, new DialogInterface.OnClickListener() {
 																				public void onClick(DialogInterface dialog, int choice) {
 																					if (choice == 0) {
-																						Toast toast =
-																								Toast.makeText(context, "This should run ATKPanel",
-																										Toast.LENGTH_LONG);
-																						toast.show();
+																						Intent i = new Intent(context, ATKPanelActivity.class);
+																						i.putExtra("DEVICE_NAME", name);
+																						i.putExtra("restHost", RESTfulTangoHost);
+																						i.putExtra("tangoHost", tangoHost);
+																						i.putExtra("tangoPort", tangoPort);
+																						startActivity(i);
+																		/*Toast toast = Toast.makeText(context, "This should run ATKPanel",
+																				Toast.LENGTH_LONG);
+																		toast.show();*/
 																					}
 																					if (choice == 1) {
 																						Intent i = new Intent(context, DevicePanelActivity.class);
@@ -1394,10 +1426,15 @@ public class SortedList extends Activity {
 																		builder.setItems(s, new DialogInterface.OnClickListener() {
 																			public void onClick(DialogInterface dialog, int choice) {
 																				if (choice == 0) {
-																					Toast toast =
-																							Toast.makeText(context, "This should run ATKPanel",
-																									Toast.LENGTH_LONG);
-																					toast.show();
+																					Intent i = new Intent(context, ATKPanelActivity.class);
+																					i.putExtra("DEVICE_NAME", name);
+																					i.putExtra("restHost", RESTfulTangoHost);
+																					i.putExtra("tangoHost", tangoHost);
+																					i.putExtra("tangoPort", tangoPort);
+																					startActivity(i);
+																		/*Toast toast = Toast.makeText(context, "This should run ATKPanel",
+																				Toast.LENGTH_LONG);
+																		toast.show();*/
 																				}
 																				if (choice == 1) {
 																					Intent i = new Intent(context, DevicePanelActivity.class);
@@ -1490,9 +1527,15 @@ public class SortedList extends Activity {
 															builder.setItems(s, new DialogInterface.OnClickListener() {
 																public void onClick(DialogInterface dialog, int choice) {
 																	if (choice == 0) {
-																		Toast toast = Toast.makeText(context, "This should run ATKPanel",
+																		Intent i = new Intent(context, ATKPanelActivity.class);
+																		i.putExtra("DEVICE_NAME", name);
+																		i.putExtra("restHost", RESTfulTangoHost);
+																		i.putExtra("tangoHost", tangoHost);
+																		i.putExtra("tangoPort", tangoPort);
+																		startActivity(i);
+																		/*Toast toast = Toast.makeText(context, "This should run ATKPanel",
 																				Toast.LENGTH_LONG);
-																		toast.show();
+																		toast.show();*/
 																	}
 																	if (choice == 1) {
 																		Intent i = new Intent(context, DevicePanelActivity.class);

@@ -1,0 +1,58 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                tools:context="pl.edu.uj.synchrotron.restfuljive.SetDeviceActivity">
+
+    <TextView
+        android:id="@+id/setDeviceLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="@string/set_device_dialog"
+        android:textColor="#ff000000"
+        android:textSize="30dp"/>
+
+    <EditText
+        android:id="@+id/setDevieEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/setDeviceLabel"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="5dp"
+        android:background="#ffffffff"
+        android:hint="@string/hint_device_name"
+        android:singleLine="true"
+        android:textSize="30dp"/>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/setDevieEditText"
+        android:layout_centerHorizontal="true"
+        >
+
+        <Button
+            android:id="@+id/setDeviceCancelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="buttonClickCancel"
+            android:text="@string/cancel_button"
+            android:textSize="30dp"/>
+
+        <Button
+            android:id="@+id/setDeviceOKButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/setDeviceCancelButton"
+            android:layout_toRightOf="@+id/setDeviceCancelButton"
+            android:onClick="buttonClickOk"
+            android:text="@string/ok_button"
+            android:textSize="30dp"/>
+    </RelativeLayout>
+
+</RelativeLayout>
