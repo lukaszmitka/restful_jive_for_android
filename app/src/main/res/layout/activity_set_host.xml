@@ -24,6 +24,7 @@
             android:layout_alignParentLeft="true"
             android:layout_marginLeft="5dp"
             android:text="@string/rest_address"
+            android:textColor="#ff000000"
             android:textSize="16sp"/>
 
         <TextView
@@ -34,6 +35,7 @@
             android:layout_alignLeft="@+id/textViewAddress"
             android:layout_alignParentLeft="true"
             android:text="@string/tango_host"
+            android:textColor="#ff000000"
             android:textSize="16sp"/>
 
         <TextView
@@ -43,6 +45,7 @@
             android:layout_alignBaseline="@+id/editTextTangoPort"
             android:layout_alignParentLeft="true"
             android:text="@string/tango_port"
+            android:textColor="#ff000000"
             android:textSize="16sp"/>
 
         <EditText
@@ -80,16 +83,28 @@
 
     </RelativeLayout>
 
-    <Button
-        android:id="@+id/cancelButton"
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/okButton"
-        android:layout_alignBottom="@+id/okButton"
-        android:layout_marginLeft="20dp"
-        android:layout_toRightOf="@+id/okButton"
-        android:onClick="buttonClickCancel"
-        android:text="@string/cancel_button"/>
+        android:layout_below="@+id/layout1"
+        android:layout_centerHorizontal="true">
+
+        <Button
+            android:id="@+id/okButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/cancelButton"
+            android:onClick="buttonClickOk"
+            android:text="@string/ok_button"/>
+
+        <Button
+            android:id="@+id/cancelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="buttonClickCancel"
+            android:text="@string/cancel_button"/>
+
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/textView1"
@@ -99,16 +114,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
         android:text="@string/define_new_host"
-        android:textAppearance="?android:attr/textAppearanceLarge"/>
-
-    <Button
-        android:id="@+id/okButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/layout1"
-        android:layout_marginLeft="31dp"
-        android:layout_marginTop="14dp"
-        android:onClick="buttonClickOk"
-        android:text="@string/ok_button"/>
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#ff000000"/>
 
 </RelativeLayout>

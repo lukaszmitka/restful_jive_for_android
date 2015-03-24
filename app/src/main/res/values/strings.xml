@@ -15,6 +15,9 @@
     <string name="tango_host">Tango host</string>
     <string name="tango_port">Tango port</string>
     <string name="host_port">Port</string>
+    <string name="warning">Warning!</string>
+    <string name="track_status_warning">Tracking device status may take a long time, depanding on number of devices. Do you
+        want to continue?</string>
 
     <!--    Buttons    -->
     <string name="button_refresh">Refresh</string>
@@ -47,6 +50,8 @@
     <string name="action_settings">Settings</string>
     <string name="action_sorted_list">Show sorted list</string>
     <string name="menu_item_about_filter">About filter</string>
+    <string name="menu_item_track_status">Track status</string>
+    <string name="menu_item_untrack_status">Untrack status</string>
 
     <!--    Activity titles    -->
     <string name="title_activity_server_list">ServerList</string>

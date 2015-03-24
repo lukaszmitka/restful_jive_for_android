@@ -30,6 +30,16 @@
         android:id="@+id/action_about_filter"
         android:orderInCategory="6"
         android:title="@string/menu_item_about_filter"/>
+    <item
+        android:id="@+id/action_track_status"
+        android:orderInCategory="7"
+        android:title="@string/menu_item_track_status"
+        android:visible="true"/>
+    <item
+        android:id="@+id/action_untrack_status"
+        android:orderInCategory="7"
+        android:title="@string/menu_item_untrack_status"
+        android:visible="false"/>
 
 
 </menu>

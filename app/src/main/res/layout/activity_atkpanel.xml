@@ -24,4 +24,22 @@
         android:layout_alignParentTop="true"
         android:layout_toLeftOf="@+id/atk_panel_command_spinner"/>
 
+    <Spinner
+        android:id="@+id/atk_panel_attribute_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"/>
+
+    <RelativeLayout
+        android:id="@+id/atkPanel_innerLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_above="@+id/atk_panel_attribute_spinner"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/atk_panel_command_spinner">
+    </RelativeLayout>
+
 </RelativeLayout>

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.text.method.LinkMovementMethod;
@@ -28,18 +29,29 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 
 
 /**
@@ -50,14 +62,19 @@ public class SortedList extends Activity {
 	public static final String PREFS_NAME = "SolarisDeviceListPrefsFile";
 	// define types of sorting
 	private static final int SORT_BY_DEVICE = 0;
-	private static final int DEFAULT_SORTING_TYPE = SORT_BY_DEVICE;
-	private int sortType = DEFAULT_SORTING_TYPE;
 	private static final int SORT_BY_CLASS = 1;
 	private static final int SORT_BY_SERVER = 2;
 	private static final int SORT_FULL_LIST = 3;
+	private static final int DEFAULT_SORTING_TYPE = SORT_FULL_LIST;
+	private int sortType = DEFAULT_SORTING_TYPE;
+	private static final int REQUEST_LONG_TIMEOUT = 60000; // in miliseconds
 	final Context context = this;
 	List<NLevelItem> list;
 	ListView listView;
+	TrustManagerFactory tmf = null;
+	SSLContext sslContext = null;
+	CertificateFactory cf = null;
+	private boolean trackDeviceStatus = false;
 	private String RESTfulTangoHost;
 	private String tangoHost;
 	private String tangoPort;
@@ -71,6 +88,43 @@ public class SortedList extends Activity {
 		// this allows to connect with server in main thread
 		StrictMode.ThreadPolicy old = StrictMode.getThreadPolicy();
 		StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder(old).permitNetwork().build());
+
+		// BEGIN - Adding security exception for serf-signed ssl certificate
+		InputStream caInput = getResources().openRawResource(
+				getResources().getIdentifier("raw/server",
+						"raw", getPackageName()));
+
+		// Load CAs from an InputStream
+		try {
+			cf = CertificateFactory.getInstance("X.509");
+			Certificate ca;
+			ca = cf.generateCertificate(caInput);
+			System.out.println("ca=" + ((X509Certificate) ca).getSubjectDN());
+
+			// Create a KeyStore containing our trusted CAs
+			String keyStoreType = KeyStore.getDefaultType();
+			KeyStore keyStore = null;
+			keyStore = KeyStore.getInstance(keyStoreType);
+			keyStore.load(null, null);
+			keyStore.setCertificateEntry("ca", ca);
+			String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+			// Create a TrustManager that trusts the CAs in our KeyStore
+			tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+			tmf.init(keyStore);
+			// Create an SSLContext that uses our TrustManager
+			sslContext = SSLContext.getInstance("TLS");
+			sslContext.init(null, tmf.getTrustManagers(), null);
+		} catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException
+				e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				caInput.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		// END - Adding security exception for serf-signed ssl certificate
 
 		SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		String settingsRestHost = settings.getString("RESTfulTangoHost", "");
@@ -90,9 +144,13 @@ public class SortedList extends Activity {
 					settingsTangoHost + ":" +
 					settingsTangoPort);
 			try {
-				getSortedList(RESTfulTangoHost);
+				if (lastResponse == null) {
+					getSortedList(RESTfulTangoHost);
+				} else {
+					updateDeviceList(lastResponse, sortType);
+				}
 			} catch (Exception e) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(context);
+				AlertDialog.Builder builder = new AlertDialog.Builder(this.context);
 				builder.setMessage("Problem with connecting to REST server, check if internet connection is available and " +
 						"server address is set properly")
 						.setTitle("Error");
@@ -104,9 +162,38 @@ public class SortedList extends Activity {
 	}
 
 	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		setContentView(R.layout.activity_sorted_list);
+		try {
+			if (lastResponse == null) {
+				getSortedList(RESTfulTangoHost);
+			} else {
+				updateDeviceList(lastResponse, sortType);
+			}
+		} catch (Exception e) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(context);
+			builder.setMessage("Problem with connecting to REST server, check if internet connection is available and " +
+					"server address is set properly")
+					.setTitle("Error");
+			AlertDialog dialog = builder.create();
+			dialog.show();
+		}
+	}
+
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.menu_sorted_list, menu);
 
+		return true;
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		MenuItem menuItemTrackStatus = menu.findItem(R.id.action_track_status);
+		MenuItem menuItemUntrackStatus = menu.findItem(R.id.action_untrack_status);
+		menuItemTrackStatus.setVisible(!trackDeviceStatus);
+		menuItemUntrackStatus.setVisible(trackDeviceStatus);
 		return true;
 	}
 
@@ -142,6 +229,31 @@ public class SortedList extends Activity {
 				AlertDialog dialog = builder.create();
 				dialog.show();
 				((TextView) dialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
+				return true;
+			case R.id.action_track_status:
+				AlertDialog.Builder trackStatusBuilder = new AlertDialog.Builder(context);
+				trackStatusBuilder.setMessage(R.string.track_status_warning).setTitle(R.string.warning);
+				trackStatusBuilder.setNegativeButton(R.string.cancel_button, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						trackDeviceStatus = false;
+					}
+				});
+				trackStatusBuilder.setPositiveButton(R.string.ok_button, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						trackDeviceStatus = true;
+						getSortedList(RESTfulTangoHost);
+
+					}
+				});
+				AlertDialog trackStatusDialog = trackStatusBuilder.create();
+				trackStatusDialog.show();
+				return true;
+			case R.id.action_untrack_status:
+				trackDeviceStatus = false;
+				updateDeviceList(lastResponse, sortType);
+				return true;
 			default:
 				return super.onOptionsItemSelected(item);
 		}
@@ -168,15 +280,6 @@ public class SortedList extends Activity {
 			}
 		}
 		startActivityForResult(i, 1);
-	}
-
-	/**
-	 * Start new activity with full, unsorted list of devices.
-	 */
-	private void showFullList() {
-		Intent i = new Intent(this, FullListActivity.class);
-		i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-		startActivity(i);
 	}
 
 	@Override
@@ -208,21 +311,17 @@ public class SortedList extends Activity {
 	 * @param RESTHost RESTful host address.
 	 */
 	private void getSortedList(String RESTHost) {
-		RequestQueue queue = Volley.newRequestQueue(this);
-		ProgressBar progressBar = (ProgressBar) findViewById(R.id.sortedList_progressBar);
-		progressBar.setVisibility(View.VISIBLE);
-		ListView listView = (ListView) findViewById(R.id.sortedList_listView);
-		listView.setFocusable(false);
-		listView.setEnabled(false);
-		Button button = (Button) findViewById(R.id.sortedList_refreshButton);
-		button.setFocusable(false);
-		button.setEnabled(false);
+		RequestQueue queue =
+				Volley.newRequestQueue(getApplicationContext(), new HurlStack(null, sslContext.getSocketFactory()));
+
+		enableUserInterface(false);
 		switch (sortType) {
 			case SORT_BY_CLASS:
 				queue.start();
-				String urlSortCase1 = RESTHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/SortedDeviceList.json/1";
-				JsonObjectRequest jsObjRequestCase1 =
-						new JsonObjectRequest(Request.Method.GET, urlSortCase1, null, new Response.Listener<JSONObject>() {
+				String urlSortCase1 = RESTHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/SortedDeviceList" +
+						".json/1/" + trackDeviceStatus;
+				HeaderJsonObjectRequest jsObjRequestCase1 =
+						new HeaderJsonObjectRequest(Request.Method.GET, urlSortCase1, null, new Response.Listener<JSONObject>() {
 							@Override
 							public void onResponse(JSONObject response) {
 								try {
@@ -243,21 +342,23 @@ public class SortedList extends Activity {
 						}, new Response.ErrorListener() {
 							@Override
 							public void onErrorResponse(VolleyError error) {
-								System.out.println("Connection error!");
-								error.printStackTrace();
+								jsonRequestErrorHandler(error);
 							}
 						});
-				jsObjRequestCase1.setRetryPolicy(new DefaultRetryPolicy(60000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-						DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+				jsObjRequestCase1
+						.setRetryPolicy(new DefaultRetryPolicy(REQUEST_LONG_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+								DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
 				queue.add(jsObjRequestCase1);
 				TextView hostTextView = (TextView) findViewById(R.id.sortedList_hostTextView);
 				hostTextView.setText(R.string.title_sort_by_classes);
 				break;
 			case SORT_BY_SERVER:
 				queue.start();
-				String urlSortCase2 = RESTHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/SortedDeviceList.json/2";
-				JsonObjectRequest jsObjRequestCase2 =
-						new JsonObjectRequest(Request.Method.GET, urlSortCase2, null, new Response.Listener<JSONObject>() {
+				String urlSortCase2 = RESTHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/SortedDeviceList" +
+						".json/2/" + trackDeviceStatus;
+				HeaderJsonObjectRequest jsObjRequestCase2 =
+						new HeaderJsonObjectRequest(Request.Method.GET, urlSortCase2, null, new Response.Listener<JSONObject>() {
 							@Override
 							public void onResponse(JSONObject response) {
 								try {
@@ -278,21 +379,23 @@ public class SortedList extends Activity {
 						}, new Response.ErrorListener() {
 							@Override
 							public void onErrorResponse(VolleyError error) {
-								System.out.println("Connection error!");
-								error.printStackTrace();
+								jsonRequestErrorHandler(error);
 							}
 						});
-				jsObjRequestCase2.setRetryPolicy(new DefaultRetryPolicy(60000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-						DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+				jsObjRequestCase2
+						.setRetryPolicy(new DefaultRetryPolicy(REQUEST_LONG_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+								DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 				queue.add(jsObjRequestCase2);
 				TextView hostTextView2 = (TextView) findViewById(R.id.sortedList_hostTextView);
 				hostTextView2.setText(R.string.title_sort_by_servers);
 				break;
 			case SORT_FULL_LIST:
 				queue.start();
-				String urlSortCase3 = RESTHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device.json";
-				JsonObjectRequest jsObjRequestCase3 =
-						new JsonObjectRequest(Request.Method.GET, urlSortCase3, null, new Response.Listener<JSONObject>() {
+
+				String urlSortCase3 =
+						RESTHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device.json/" + trackDeviceStatus;
+				HeaderJsonObjectRequest jsObjRequestCase3 =
+						new HeaderJsonObjectRequest(Request.Method.GET, urlSortCase3, null, new Response.Listener<JSONObject>() {
 							@Override
 							public void onResponse(JSONObject response) {
 								try {
@@ -313,21 +416,22 @@ public class SortedList extends Activity {
 						}, new Response.ErrorListener() {
 							@Override
 							public void onErrorResponse(VolleyError error) {
-								System.out.println("Connection error!");
-								error.printStackTrace();
+								jsonRequestErrorHandler(error);
 							}
 						});
-				jsObjRequestCase3.setRetryPolicy(new DefaultRetryPolicy(60000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-						DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+				jsObjRequestCase3
+						.setRetryPolicy(new DefaultRetryPolicy(REQUEST_LONG_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+								DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 				queue.add(jsObjRequestCase3);
 				TextView hostTextView3 = (TextView) findViewById(R.id.sortedList_hostTextView);
 				hostTextView3.setText(R.string.title_sort_full_list);
 				break;
 			default: //sort by devices
 				queue.start();
-				String url = RESTHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/SortedDeviceList.json/3";
-				JsonObjectRequest jsObjRequest =
-						new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+				String url = RESTHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/SortedDeviceList.json/3/" +
+						trackDeviceStatus;
+				HeaderJsonObjectRequest jsObjRequest =
+						new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 
 							@Override
 							public void onResponse(JSONObject response) {
@@ -349,16 +453,39 @@ public class SortedList extends Activity {
 						}, new Response.ErrorListener() {
 							@Override
 							public void onErrorResponse(VolleyError error) {
-								System.out.println("Connection error!");
-								error.printStackTrace();
+								jsonRequestErrorHandler(error);
 							}
 						});
-				jsObjRequest.setRetryPolicy(new DefaultRetryPolicy(60000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+				jsObjRequest.setRetryPolicy(new DefaultRetryPolicy(REQUEST_LONG_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
 						DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 				queue.add(jsObjRequest);
 				TextView hostTextViewDef = (TextView) findViewById(R.id.sortedList_hostTextView);
 				hostTextViewDef.setText(R.string.title_sort_by_devices);
 		}
+	}
+
+	/**
+	 * Method displaying info about connection error
+	 *
+	 * @param error Error tah caused exception
+	 */
+	private void jsonRequestErrorHandler(VolleyError error) {
+		// Print error message to LogcCat
+		System.out.println("Connection error!");
+		error.printStackTrace();
+		//System.out.println("getMessage: "+error.getMessage());
+		//System.out.println("toString: "+error.toString());
+		//System.out.println("getCause: "+error.getCause());
+		//System.out.println("getStackTrace: "+error.getStackTrace().toString());
+
+		// show dialog box with error message
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setMessage(error.toString()).setTitle("Connection error!").setPositiveButton(getString(R.string.ok_button),
+				null);
+		AlertDialog dialog = builder.create();
+		dialog.show();
+
+		enableUserInterface(true);
 	}
 
 	/**
@@ -369,12 +496,13 @@ public class SortedList extends Activity {
 	public void buttonClick(View v) {
 		String devName = (String) v.getTag();
 		System.out.println("Clicked object: " + devName);
-		RequestQueue queue = Volley.newRequestQueue(this);
+		RequestQueue queue =
+				Volley.newRequestQueue(getApplicationContext(), new HurlStack(null, sslContext.getSocketFactory()));
 		queue.start();
 		String url =
 				RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + devName + "/get_info.json";
-		JsonObjectRequest jsObjRequest =
-				new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+		HeaderJsonObjectRequest jsObjRequest =
+				new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 					@Override
 					public void onResponse(JSONObject response) {
 						try {
@@ -471,7 +599,7 @@ public class SortedList extends Activity {
 	private void updateDeviceList(JSONObject response, int sortCase) {
 		listView = (ListView) findViewById(R.id.sortedList_listView);
 		list = new ArrayList<NLevelItem>();
-		boolean isDeviceAlive;
+		boolean isDeviceAlive = false;
 		switch (sortCase) {
 			case SORT_BY_CLASS:
 				final LayoutInflater inflater = LayoutInflater.from(this);
@@ -497,17 +625,23 @@ public class SortedList extends Activity {
 						devicesCount = response.getInt(className + "DevCount");
 						for (int j = 0; j < devicesCount; j++) {
 							deviceName = response.getString(className + "Device" + j);
-							isDeviceAlive = response.getBoolean(className + "isDeviceAlive" + j);
+							if (trackDeviceStatus) {
+								isDeviceAlive = response.getBoolean(className + "isDeviceAlive" + j);
+							}
 							NLevelItem child =
 									new NLevelItem(new SomeObject(deviceName, deviceName, isDeviceAlive), grandParent,
 											new NLevelView() {
 												public View getView(NLevelItem item) {
 													View view = inflater.inflate(R.layout.n_level_list_member_item, null);
 													ImageView imageView = (ImageView) view.findViewById(R.id.nLevelListMemberDiode);
-													if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
-														imageView.setImageResource(R.drawable.dioda_zielona);
+													if (trackDeviceStatus) {
+														if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
+															imageView.setImageResource(R.drawable.dioda_zielona);
+														} else {
+															imageView.setImageResource(R.drawable.dioda_czerwona);
+														}
 													} else {
-														imageView.setImageResource(R.drawable.dioda_czerwona);
+														imageView.setVisibility(View.INVISIBLE);
 													}
 													Button b = (Button) view.findViewById(R.id.nLevelList_member_button);
 													b.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
@@ -653,7 +787,9 @@ public class SortedList extends Activity {
 										deviceName = response.getString("Se" + i + "In" + j + "Cl" + k + "Dev" + l);
 										System.out.println("Add device " + deviceName + " to list");
 										// prepare fourth level list item
-										isDeviceAlive = response.getBoolean(deviceName + "isDeviceAlive" + l);
+										if (trackDeviceStatus) {
+											isDeviceAlive = response.getBoolean(deviceName + "isDeviceAlive" + l);
+										}
 										NLevelItem deviceLevel =
 												new NLevelItem(new SomeObject(deviceName, deviceName, isDeviceAlive), classLevel,
 														new NLevelView() {
@@ -663,10 +799,14 @@ public class SortedList extends Activity {
 																				null);
 																ImageView imageView =
 																		(ImageView) view.findViewById(R.id.nLevelListMemberDiode);
-																if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
-																	imageView.setImageResource(R.drawable.dioda_zielona);
+																if (trackDeviceStatus) {
+																	if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
+																		imageView.setImageResource(R.drawable.dioda_zielona);
+																	} else {
+																		imageView.setImageResource(R.drawable.dioda_czerwona);
+																	}
 																} else {
-																	imageView.setImageResource(R.drawable.dioda_czerwona);
+																	imageView.setVisibility(View.INVISIBLE);
 																}
 																Button b = (Button) view.findViewById(R.id.nLevelList_member_button);
 																b.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
@@ -802,7 +942,9 @@ public class SortedList extends Activity {
 									deviceName = response.getString("domain" + i + "class" + k + "device" + l);
 									System.out.println("Add device " + deviceName + " to list");
 									// prepare fourth level list item
-									isDeviceAlive = response.getBoolean(deviceName + "isDeviceAlive");
+									if (trackDeviceStatus) {
+										isDeviceAlive = response.getBoolean(deviceName + "isDeviceAlive");
+									}
 									NLevelItem deviceLevel =
 											new NLevelItem(new SomeObject(deviceName, deviceName, isDeviceAlive), classLevel,
 													new NLevelView() {
@@ -812,10 +954,14 @@ public class SortedList extends Activity {
 																			null);
 															ImageView imageView = (ImageView) view.findViewById(R.id
 																	.nLevelListMemberDiode);
-															if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
-																imageView.setImageResource(R.drawable.dioda_zielona);
+															if (trackDeviceStatus) {
+																if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
+																	imageView.setImageResource(R.drawable.dioda_zielona);
+																} else {
+																	imageView.setImageResource(R.drawable.dioda_czerwona);
+																}
 															} else {
-																imageView.setImageResource(R.drawable.dioda_czerwona);
+																imageView.setVisibility(View.INVISIBLE);
 															}
 															Button b = (Button) view.findViewById(R.id.nLevelList_member_button);
 															b.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
@@ -904,17 +1050,23 @@ public class SortedList extends Activity {
 					String deviceName;
 					for (int j = 0; j < deviceCount; j++) {
 						deviceName = response.getString("device" + j);
-						isDeviceAlive = response.getBoolean(deviceName + "isDeviceAlive");
+						if (trackDeviceStatus) {
+							isDeviceAlive = response.getBoolean(deviceName + "isDeviceAlive");
+						}
 						NLevelItem child =
 								new NLevelItem(new SomeObject(deviceName, deviceName, isDeviceAlive), null,
 										new NLevelView() {
 											public View getView(NLevelItem item) {
 												View view = fullListInflater.inflate(R.layout.n_level_list_member_item, null);
 												ImageView imageView = (ImageView) view.findViewById(R.id.nLevelListMemberDiode);
-												if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
-													imageView.setImageResource(R.drawable.dioda_zielona);
+												if (trackDeviceStatus) {
+													if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
+														imageView.setImageResource(R.drawable.dioda_zielona);
+													} else {
+														imageView.setImageResource(R.drawable.dioda_czerwona);
+													}
 												} else {
-													imageView.setImageResource(R.drawable.dioda_czerwona);
+													imageView.setVisibility(View.INVISIBLE);
 												}
 												Button b = (Button) view.findViewById(R.id.nLevelList_member_button);
 												b.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
@@ -989,16 +1141,7 @@ public class SortedList extends Activity {
 			default:
 				break;
 		}
-
-		ProgressBar progressBar = (ProgressBar) findViewById(R.id.sortedList_progressBar);
-		progressBar.setVisibility(View.INVISIBLE);
-		ListView listView = (ListView) findViewById(R.id.sortedList_listView);
-		listView.setFocusable(true);
-		listView.setEnabled(true);
-		Button button = (Button) findViewById(R.id.sortedList_refreshButton);
-		button.setFocusable(true);
-		button.setEnabled(true);
-
+		enableUserInterface(true);
 	}
 
 	/**
@@ -1579,130 +1722,42 @@ public class SortedList extends Activity {
 			default:
 				break;
 		}
-
-		ProgressBar progressBar = (ProgressBar) findViewById(R.id.sortedList_progressBar);
-		progressBar.setVisibility(View.INVISIBLE);
-		ListView listView = (ListView) findViewById(R.id.sortedList_listView);
-		listView.setFocusable(true);
-		listView.setEnabled(true);
-		Button button = (Button) findViewById(R.id.sortedList_refreshButton);
-		button.setFocusable(true);
-		button.setEnabled(true);
-
 	}
 
-
-	/*private void updateDeviceList(TreeMap<String, DevClassList> devCL) {
-		if (devCL != null) {
-			final LayoutInflater inflater = LayoutInflater.from(this);
-			String[] s = new String[1];
-			String[] domainList = devCL.keySet().toArray(s);
-
-			for (String searchDomain : domainList) {
-				// devDomain = searchDomain;
-				if (devCL.containsKey(searchDomain)) {
-					DevClassList dclRet = devCL.get(searchDomain);
-					String[] classList = dclRet.getClassSet();
-
-					final NLevelItem grandParent = new NLevelItem(new SomeObject(searchDomain, "", false), null,
-					new NLevelView() {
-						public View getView(NLevelItem item) {
-							View view = inflater.inflate(R.layout.n_level_list_item_lev_1, null);
-							TextView tv = (TextView) view.findViewById(R.id.nLevelList_item_L1_textView);
-							String name = (String) ((SomeObject) item.getWrappedObject()).getName();
-							tv.setText(name);
-							return view;
-						}
-					});
-
-					list.add(grandParent);
-
-					for (String sClass : classList) {
-						// devClass = sClass;
-						ArrayList<String> classMembers = dclRet.getClass(sClass);
-
-						NLevelItem parent = new NLevelItem(new SomeObject(sClass, "", false), grandParent, new NLevelView() {
-							public View getView(NLevelItem item) {
-								View view = inflater.inflate(R.layout.n_level_list_item_lev_2, null);
-								TextView tv = (TextView) view.findViewById(R.id.nLevelList_item_L2_textView);
-								String name = (String) ((SomeObject) item.getWrappedObject()).getName();
-								tv.setText(name);
-								return view;
-							}
-						});
-						list.add(parent);
-						for (String cMember : classMembers) {
-							// devMember = cMember;
-							//isDeviceAlive = response.getBoolean(className + "isDeviceAlive" + j)
-							NLevelItem child =
-									new NLevelItem(new SomeObject(cMember, searchDomain + "/" + sClass + "/" + cMember, true),
-									parent,
-											new NLevelView() {
-												public View getView(NLevelItem item) {
-													View view = inflater.inflate(R.layout.n_level_list_member_item, null);
-													Button b = (Button) view.findViewById(R.id.nLevelList_member_button);
-													b.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
-													TextView tv = (TextView) view.findViewById(R.id.nLevelList_member_textView);
-													tv.setClickable(true);
-													String name = (String) ((SomeObject) item.getWrappedObject()).getName();
-													tv.setText(name);
-													tv.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
-													tv.setOnLongClickListener(new OnLongClickListener() {
-														@Override
-														public boolean onLongClick(View v) {
-															TextView tv = (TextView) v;
-															AlertDialog.Builder builder = new AlertDialog.Builder(tv.getContext());
-															builder.setTitle("Choose action");
-															builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-																public void onClick(DialogInterface dialog, int id) {
-																}
-															});
-															String[] s = {"Monitor", "Test"};
-															final String name = tv.getTag().toString();
-															builder.setItems(s, new DialogInterface.OnClickListener() {
-																public void onClick(DialogInterface dialog, int choice) {
-																	if (choice == 0) {
-																		Toast toast = Toast.makeText(context, "This should run ATKPanel",
-																				Toast.LENGTH_LONG);
-																		toast.show();
-																	}
-																	if (choice == 1) {
-																		Intent i = new Intent(context, DevicePanelActivity.class);
-																		i.putExtra("devName", name);
-																		i.putExtra("restHost", RESTfulTangoHost);
-																		i.putExtra("tangoHost", tangoHost);
-																		i.putExtra("tangoPort", tangoPort);
-																		startActivity(i);
-																	}
-																}
-															});
-															AlertDialog dialog = builder.create();
-															dialog.show();
-															return true;
-														}
-													});
-													Button properties = (Button) view.findViewById(R.id.nLevelList_member_properties);
-													properties.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
-													Button attributes = (Button) view.findViewById(R.id.nLevelList_member_attributes);
-													attributes.setTag((String) ((SomeObject) item.getWrappedObject()).getTag());
-													return view;
-												}
-											});
-							list.add(child);
-						}
-					}
-				}
-			}
-			NLevelAdapter adapter = new NLevelAdapter(list);
-			listView.setAdapter(adapter);
-			listView.setOnItemClickListener(new OnItemClickListener() {
-				public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-					((NLevelAdapter) listView.getAdapter()).toggle(arg2);
-					((NLevelAdapter) listView.getAdapter()).getFilter().filter();
-				}
-			});
+	private void enableUserInterface(boolean enabled) {
+		if (enabled) {
+			ProgressBar progressBar = (ProgressBar) findViewById(R.id.sortedList_progressBar);
+			progressBar.setVisibility(View.INVISIBLE);
+			ListView listView = (ListView) findViewById(R.id.sortedList_listView);
+			listView.setFocusable(true);
+			listView.setEnabled(true);
+			Button refreshButton = (Button) findViewById(R.id.sortedList_refreshButton);
+			refreshButton.setFocusable(true);
+			refreshButton.setEnabled(true);
+			Button filterButton = (Button) findViewById(R.id.sortedList_filterButton);
+			filterButton.setEnabled(true);
+			filterButton.setFocusable(true);
+			TextView filterTextView = (TextView) findViewById(R.id.sortedList_filterPattern);
+			filterTextView.setEnabled(true);
+			filterTextView.setFocusable(true);
+		} else {
+			ProgressBar progressBar = (ProgressBar) findViewById(R.id.sortedList_progressBar);
+			progressBar.setVisibility(View.VISIBLE);
+			ListView listView = (ListView) findViewById(R.id.sortedList_listView);
+			listView.setFocusable(false);
+			listView.setEnabled(false);
+			Button refreshButton = (Button) findViewById(R.id.sortedList_refreshButton);
+			refreshButton.setFocusable(false);
+			refreshButton.setEnabled(false);
+			Button filterButton = (Button) findViewById(R.id.sortedList_filterButton);
+			filterButton.setEnabled(false);
+			filterButton.setFocusable(false);
+			TextView filterTextView = (TextView) findViewById(R.id.sortedList_filterPattern);
+			filterTextView.setEnabled(false);
+			filterTextView.setFocusable(false);
 		}
-	}*/
+	}
+
 
 	/**
 	 * Class for storing name and tag of list element.
@@ -1748,64 +1803,5 @@ public class SortedList extends Activity {
 		public boolean getIsAlive() {
 			return isAlive;
 		}
-
-	}
-}
-
-/**
- * Class for storing class list.
- */
-class DevClassList {
-	/**
-	 * In this TreeMap are stored device classes with devices of their type. Class names are stores as key, and devices
-	 * are stored as value.
-	 */
-	private TreeMap<String, ArrayList<String>> deviceClassList;
-
-	public DevClassList(String domainName) {
-		deviceClassList = new TreeMap<String, ArrayList<String>>(new AlphabeticComparator());
-	}
-
-	/**
-	 * Add class with its devices to map.
-	 *
-	 * @param key Name of the class.
-	 * @param dc  Device list.
-	 */
-	public void addToMap(String key, ArrayList<String> dc) {
-		deviceClassList.put(key, dc);
-	}
-
-	/**
-	 * Get list of stored classes.
-	 *
-	 * @return Array of strings containing names of classes.
-	 */
-	public String[] getClassSet() {
-		String[] s = new String[1];
-		return deviceClassList.keySet().toArray(s);
-	}
-
-	/**
-	 * Get list of devices of selected class.
-	 *
-	 * @param key Name of selected class.
-	 * @return List of devices.
-	 */
-	public ArrayList<String> getClass(String key) {
-		if (deviceClassList.containsKey(key)) {
-			return deviceClassList.get(key);
-		}
-		return null;
-	}
-}
-
-/**
- * Class comparing elements, used to sort alphapetically.
- */
-class AlphabeticComparator implements Comparator<String> {
-	@Override
-	public int compare(String e1, String e2) {
-		return e1.toLowerCase().compareTo(e2.toLowerCase());
 	}
 }

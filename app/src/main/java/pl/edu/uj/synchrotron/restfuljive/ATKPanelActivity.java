@@ -1,6 +1,7 @@
 package pl.edu.uj.synchrotron.restfuljive;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,7 +9,11 @@ import android.os.Bundle;
 import android.os.StrictMode;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -16,7 +21,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
@@ -29,6 +33,10 @@ import java.util.List;
 public class ATKPanelActivity extends Activity {
 	public static final String PREFS_NAME = "SolarisDeviceListPrefsFile";
 	final Context context = this;
+	List<String> commandArray;
+	List<String> scalarAttrbuteArray;
+	List<String> nonScalarAttributeArray;
+	String attributeName;
 	private String deviceName;
 	private String restHost;
 	private String tangoHost;
@@ -190,8 +198,8 @@ public class ATKPanelActivity extends Activity {
 		queue.start();
 		String urlCommandListQuery = restHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort +
 				"/Device/" + deviceName + "/command_list_query.json";
-		JsonObjectRequest jsObjRequestCommands =
-				new JsonObjectRequest(Request.Method.GET, urlCommandListQuery, null, new Response.Listener<JSONObject>() {
+		HeaderJsonObjectRequest jsObjRequestCommands =
+				new HeaderJsonObjectRequest(Request.Method.GET, urlCommandListQuery, null, new Response.Listener<JSONObject>() {
 					@Override
 					public void onResponse(JSONObject response) {
 						try {
@@ -210,8 +218,7 @@ public class ATKPanelActivity extends Activity {
 				}, new Response.ErrorListener() {
 					@Override
 					public void onErrorResponse(VolleyError error) {
-						System.out.println("Connection error!");
-						error.printStackTrace();
+						jsonRequestErrorHandler(error);
 					}
 				});
 		queue.add(jsObjRequestCommands);
@@ -219,8 +226,8 @@ public class ATKPanelActivity extends Activity {
 
 		String urlGetStatus = restHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort +
 				"/Device/" + deviceName + "/command_inout.json/Status/DevVoidArgument";
-		JsonObjectRequest jsObjRequestStatus =
-				new JsonObjectRequest(Request.Method.PUT, urlGetStatus, null, new Response.Listener<JSONObject>() {
+		HeaderJsonObjectRequest jsObjRequestStatus =
+				new HeaderJsonObjectRequest(Request.Method.PUT, urlGetStatus, null, new Response.Listener<JSONObject>() {
 					@Override
 					public void onResponse(JSONObject response) {
 						try {
@@ -239,27 +246,73 @@ public class ATKPanelActivity extends Activity {
 				}, new Response.ErrorListener() {
 					@Override
 					public void onErrorResponse(VolleyError error) {
-						System.out.println("Connection error!");
-						error.printStackTrace();
+						jsonRequestErrorHandler(error);
 					}
 				});
 		queue.add(jsObjRequestStatus);
 
+		String urlGetAttribuesList = restHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort +
+				"/Device/" + deviceName + "/get_attribute_list.json";
+		HeaderJsonObjectRequest jsObjRequestAttributeList =
+				new HeaderJsonObjectRequest(Request.Method.GET, urlGetAttribuesList, null, new Response.Listener<JSONObject>() {
+					@Override
+					public void onResponse(JSONObject response) {
+						try {
+							if (response.getString("connectionStatus").equals("OK")) {
+								System.out.println("Device connection OK");
+								populateAttributeSpinner(response);
+							} else {
+								System.out.println("Tango database API returned message:");
+								System.out.println(response.getString("connectionStatus"));
+							}
+						} catch (JSONException e) {
+							System.out.println("Problem with JSON object");
+							e.printStackTrace();
+						}
+					}
+				}, new Response.ErrorListener() {
+					@Override
+					public void onErrorResponse(VolleyError error) {
+						jsonRequestErrorHandler(error);
+					}
+				});
+		queue.add(jsObjRequestAttributeList);
+	}
 
+	/**
+	 * Method displaying info about connection error
+	 *
+	 * @param error Error tah caused exception
+	 */
+	private void jsonRequestErrorHandler(VolleyError error) {
+		// Print error message to LogcCat
+		System.out.println("Connection error!");
+		error.printStackTrace();
+		//System.out.println("getMessage: "+error.getMessage());
+		//System.out.println("toString: "+error.toString());
+		//System.out.println("getCause: "+error.getCause());
+		//System.out.println("getStackTrace: "+error.getStackTrace().toString());
+
+		// show dialog box with error message
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setMessage(error.toString()).setTitle("Connection error!").setPositiveButton(getString(R.string.ok_button),
+				null);
+		AlertDialog dialog = builder.create();
+		dialog.show();
 	}
 
 	private void populateCommandSpinner(JSONObject response) {
 		System.out.println("Populating command spinner");
-		List<String> spinnerArray = new ArrayList<String>();
+		commandArray = new ArrayList<String>();
 		try {
 			int commandCount = response.getInt("commandCount");
 			String commandName;
 			for (int i = 0; i < commandCount; i++) {
 				commandName = response.getString("command" + i);
-				spinnerArray.add(commandName);
+				commandArray.add(commandName);
 			}
 			ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-					this, android.R.layout.simple_spinner_item, spinnerArray);
+					this, android.R.layout.simple_spinner_item, commandArray);
 			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			Spinner sItems = (Spinner) findViewById(R.id.atk_panel_command_spinner);
 			sItems.setAdapter(adapter);
@@ -276,7 +329,70 @@ public class ATKPanelActivity extends Activity {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-
-
 	}
+
+	private void populateAttributeSpinner(JSONObject response) {
+		System.out.println("Populating attribute spinner");
+		scalarAttrbuteArray = new ArrayList<String>();
+		nonScalarAttributeArray = new ArrayList<String>();
+		try {
+			int attributeCount = response.getInt("attCount");
+			for (int i = 0; i < attributeCount; i++) {
+				attributeName = response.getString("attribute" + i);
+				if (response.getBoolean("attScalar" + i)) {
+					scalarAttrbuteArray.add(attributeName);
+				} else {
+					nonScalarAttributeArray.add(attributeName);
+				}
+			}
+			if (!nonScalarAttributeArray.isEmpty()) {
+				nonScalarAttributeArray.add(0, "Scalar");
+				ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+						this, android.R.layout.simple_spinner_item, commandArray);
+				adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+				Spinner attributeSpinner = (Spinner) findViewById(R.id.atk_panel_attribute_spinner);
+				attributeSpinner.setAdapter(adapter);
+				attributeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+					@Override
+					public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+						String attName = nonScalarAttributeArray.get(position);
+						if (attName.equals("Scalar")) {
+							populateScalarListView();
+						} else {
+							//TODO add attribute plot
+							//RelativeLayout container = (RelativeLayout) findViewById(R.id.atkPanel_innerLayout);
+							//container.addView(plot);
+						}
+					}
+
+					@Override
+					public void onNothingSelected(AdapterView<?> parentView) {
+					}
+
+				});
+			} else {
+				Spinner attributeSpinner = (Spinner) findViewById(R.id.atk_panel_attribute_spinner);
+				attributeSpinner.setVisibility(View.INVISIBLE);
+				populateScalarListView();
+
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void populateScalarListView() {
+		if (!scalarAttrbuteArray.isEmpty()) {
+
+			ListView scalarAttributeListView = new ListView(this);
+			RelativeLayout container = (RelativeLayout) findViewById(R.id.atkPanel_innerLayout);
+			container.addView(scalarAttributeListView);
+			ArrayAdapter adapter = new ArrayAdapter<String>(this,
+					android.R.layout.simple_list_item_1,
+					scalarAttrbuteArray);
+			scalarAttributeListView.setAdapter(adapter);
+		}
+	}
+
+
 }

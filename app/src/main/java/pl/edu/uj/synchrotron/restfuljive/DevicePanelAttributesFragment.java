@@ -23,7 +23,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
@@ -110,8 +109,8 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 		queue.start();
 		String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 				"/get_attribute_list.json";
-		JsonObjectRequest jsObjRequest =
-				new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+		HeaderJsonObjectRequest jsObjRequest =
+				new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 					@Override
 					public void onResponse(JSONObject response) {
 						try {
@@ -177,8 +176,7 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 				}, new Response.ErrorListener() {
 					@Override
 					public void onErrorResponse(VolleyError error) {
-						System.out.println("Connection error!");
-						error.printStackTrace();
+						jsonRequestErrorHandler(error);
 					}
 				});
 		queue.add(jsObjRequest);
@@ -211,8 +209,8 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 						"/read_attribute.json/" +
 						attributeNames[selectedAttributeId];
 				System.out.println("Sending JSON request");
-				JsonObjectRequest jsObjRequest =
-						new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+				HeaderJsonObjectRequest jsObjRequest =
+						new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 							@Override
 							public void onResponse(JSONObject response) {
 								try {
@@ -242,8 +240,7 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 						}, new Response.ErrorListener() {
 							@Override
 							public void onErrorResponse(VolleyError error) {
-								System.out.println("Connection error!");
-								error.printStackTrace();
+								jsonRequestErrorHandler(error);
 							}
 						});
 				queue.add(jsObjRequest);
@@ -263,8 +260,8 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 						"/write_attribute.json/" +
 						attributeNames[selectedAttributeId] + "/" + arginStr;
 				System.out.println("Sending JSON request");
-				JsonObjectRequest jsObjRequest =
-						new JsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
+				HeaderJsonObjectRequest jsObjRequest =
+						new HeaderJsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
 							@Override
 							public void onResponse(JSONObject response) {
 								try {
@@ -291,8 +288,7 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 						}, new Response.ErrorListener() {
 							@Override
 							public void onErrorResponse(VolleyError error) {
-								System.out.println("Connection error!");
-								error.printStackTrace();
+								jsonRequestErrorHandler(error);
 							}
 						});
 				queue.add(jsObjRequest);
@@ -309,8 +305,8 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 						"/plot_attribute.json/" +
 						attributeNames[selectedAttributeId];
 				System.out.println("Sending JSON request");
-				JsonObjectRequest jsObjRequest =
-						new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+				HeaderJsonObjectRequest jsObjRequest =
+						new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 							@Override
 							public void onResponse(JSONObject response) {
 								try {
@@ -404,8 +400,7 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 						}, new Response.ErrorListener() {
 							@Override
 							public void onErrorResponse(VolleyError error) {
-								System.out.println("Connection error!");
-								error.printStackTrace();
+								jsonRequestErrorHandler(error);
 							}
 						});
 				queue.add(jsObjRequest);
@@ -414,5 +409,27 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 			;
 		});
 		return rootView;
+	}
+
+	/**
+	 * Method displaying info about connection error
+	 *
+	 * @param error Error tah caused exception
+	 */
+	private void jsonRequestErrorHandler(VolleyError error) {
+		// Print error message to LogcCat
+		System.out.println("Connection error!");
+		error.printStackTrace();
+		//System.out.println("getMessage: "+error.getMessage());
+		//System.out.println("toString: "+error.toString());
+		//System.out.println("getCause: "+error.getCause());
+		//System.out.println("getStackTrace: "+error.getStackTrace().toString());
+
+		// show dialog box with error message
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setMessage(error.toString()).setTitle("Connection error!").setPositiveButton(getString(R.string.ok_button),
+				null);
+		AlertDialog dialog = builder.create();
+		dialog.show();
 	}
 }

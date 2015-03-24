@@ -17,7 +17,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
@@ -76,8 +75,8 @@ public class DevicePanelAdminFragment extends Fragment {
 						"/black_box.json/" +
 						nbCmd;
 				System.out.println("Sending JSON request");
-				JsonObjectRequest jsObjRequest =
-						new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+				HeaderJsonObjectRequest jsObjRequest =
+						new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 							@Override
 							public void onResponse(JSONObject response) {
 								try {
@@ -115,8 +114,7 @@ public class DevicePanelAdminFragment extends Fragment {
 						}, new Response.ErrorListener() {
 							@Override
 							public void onErrorResponse(VolleyError error) {
-								System.out.println("Connection error!");
-								error.printStackTrace();
+								jsonRequestErrorHandler(error);
 							}
 						});
 				queue.add(jsObjRequest);
@@ -151,8 +149,8 @@ public class DevicePanelAdminFragment extends Fragment {
 						"/set_timeout_milis.json/" +
 						timeoutEditText.getText().toString();
 				System.out.println("Sending JSON request");
-				JsonObjectRequest jsObjRequest =
-						new JsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
+				HeaderJsonObjectRequest jsObjRequest =
+						new HeaderJsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
 							@Override
 							public void onResponse(JSONObject response) {
 								try {
@@ -189,8 +187,7 @@ public class DevicePanelAdminFragment extends Fragment {
 						}, new Response.ErrorListener() {
 							@Override
 							public void onErrorResponse(VolleyError error) {
-								System.out.println("Connection error!");
-								error.printStackTrace();
+								jsonRequestErrorHandler(error);
 							}
 						});
 				queue.add(jsObjRequest);
@@ -207,8 +204,8 @@ public class DevicePanelAdminFragment extends Fragment {
 				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 						"/get_device_info.json";
 				System.out.println("Sending JSON request");
-				JsonObjectRequest jsObjRequest =
-						new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+				HeaderJsonObjectRequest jsObjRequest =
+						new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 							@Override
 							public void onResponse(JSONObject response) {
 								try {
@@ -247,8 +244,7 @@ public class DevicePanelAdminFragment extends Fragment {
 						}, new Response.ErrorListener() {
 							@Override
 							public void onErrorResponse(VolleyError error) {
-								System.out.println("Connection error!");
-								error.printStackTrace();
+								jsonRequestErrorHandler(error);
 							}
 						});
 				queue.add(jsObjRequest);
@@ -265,8 +261,8 @@ public class DevicePanelAdminFragment extends Fragment {
 				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 						"/ping_device.json";
 				System.out.println("Sending JSON request");
-				JsonObjectRequest jsObjRequest =
-						new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+				HeaderJsonObjectRequest jsObjRequest =
+						new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 							@Override
 							public void onResponse(JSONObject response) {
 								try {
@@ -305,8 +301,7 @@ public class DevicePanelAdminFragment extends Fragment {
 						}, new Response.ErrorListener() {
 							@Override
 							public void onErrorResponse(VolleyError error) {
-								System.out.println("Connection error!");
-								error.printStackTrace();
+								jsonRequestErrorHandler(error);
 							}
 						});
 				queue.add(jsObjRequest);
@@ -324,8 +319,8 @@ public class DevicePanelAdminFragment extends Fragment {
 				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 						"/poll_status.json";
 				System.out.println("Sending JSON request");
-				JsonObjectRequest jsObjRequest =
-						new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+				HeaderJsonObjectRequest jsObjRequest =
+						new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 							@Override
 							public void onResponse(JSONObject response) {
 								try {
@@ -363,8 +358,7 @@ public class DevicePanelAdminFragment extends Fragment {
 						}, new Response.ErrorListener() {
 							@Override
 							public void onErrorResponse(VolleyError error) {
-								System.out.println("Connection error!");
-								error.printStackTrace();
+								jsonRequestErrorHandler(error);
 							}
 						});
 				queue.add(jsObjRequest);
@@ -382,8 +376,8 @@ public class DevicePanelAdminFragment extends Fragment {
 				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 						"/restart.json";
 				System.out.println("Sending JSON request");
-				JsonObjectRequest jsObjRequest =
-						new JsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
+				HeaderJsonObjectRequest jsObjRequest =
+						new HeaderJsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
 							@Override
 							public void onResponse(JSONObject response) {
 								try {
@@ -420,8 +414,7 @@ public class DevicePanelAdminFragment extends Fragment {
 						}, new Response.ErrorListener() {
 							@Override
 							public void onErrorResponse(VolleyError error) {
-								System.out.println("Connection error!");
-								error.printStackTrace();
+								jsonRequestErrorHandler(error);
 							}
 						});
 				queue.add(jsObjRequest);
@@ -433,8 +426,8 @@ public class DevicePanelAdminFragment extends Fragment {
 		String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 				"/get_source.json";
 		System.out.println("Sending JSON request");
-		JsonObjectRequest jsObjRequest =
-				new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+		HeaderJsonObjectRequest jsObjRequest =
+				new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 					@Override
 					public void onResponse(JSONObject response) {
 						try {
@@ -464,8 +457,7 @@ public class DevicePanelAdminFragment extends Fragment {
 				}, new Response.ErrorListener() {
 					@Override
 					public void onErrorResponse(VolleyError error) {
-						System.out.println("Connection error!");
-						error.printStackTrace();
+						jsonRequestErrorHandler(error);
 					}
 				});
 		queue.add(jsObjRequest);
@@ -509,8 +501,8 @@ public class DevicePanelAdminFragment extends Fragment {
 
 				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + devName +
 						"/set_source.json/" + sourceId;
-				JsonObjectRequest jsObjRequest =
-						new JsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
+				HeaderJsonObjectRequest jsObjRequest =
+						new HeaderJsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
 							@Override
 							public void onResponse(JSONObject response) {
 								try {
@@ -538,8 +530,7 @@ public class DevicePanelAdminFragment extends Fragment {
 						}, new Response.ErrorListener() {
 							@Override
 							public void onErrorResponse(VolleyError error) {
-								System.out.println("Connection error!");
-								error.printStackTrace();
+								jsonRequestErrorHandler(error);
 							}
 						});
 				queue.add(jsObjRequest);
@@ -550,5 +541,27 @@ public class DevicePanelAdminFragment extends Fragment {
 			}
 
 		});
+	}
+
+	/**
+	 * Method displaying info about connection error
+	 *
+	 * @param error Error tah caused exception
+	 */
+	private void jsonRequestErrorHandler(VolleyError error) {
+		// Print error message to LogcCat
+		System.out.println("Connection error!");
+		error.printStackTrace();
+		//System.out.println("getMessage: "+error.getMessage());
+		//System.out.println("toString: "+error.toString());
+		//System.out.println("getCause: "+error.getCause());
+		//System.out.println("getStackTrace: "+error.getStackTrace().toString());
+
+		// show dialog box with error message
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setMessage(error.toString()).setTitle("Connection error!").setPositiveButton(getString(R.string.ok_button),
+				null);
+		AlertDialog dialog = builder.create();
+		dialog.show();
 	}
 }
