@@ -80,6 +80,7 @@ public class SortedList extends Activity {
 	private String tangoPort;
 	private JSONObject lastResponse;
 	private int lastSortType;
+	private RequestQueue queue;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -125,6 +126,9 @@ public class SortedList extends Activity {
 			}
 		}
 		// END - Adding security exception for serf-signed ssl certificate
+
+		queue = Volley.newRequestQueue(getApplicationContext(), new HurlStack(null, sslContext.getSocketFactory()));
+		queue.start();
 
 		SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		String settingsRestHost = settings.getString("RESTfulTangoHost", "");
@@ -311,13 +315,11 @@ public class SortedList extends Activity {
 	 * @param RESTHost RESTful host address.
 	 */
 	private void getSortedList(String RESTHost) {
-		RequestQueue queue =
-				Volley.newRequestQueue(getApplicationContext(), new HurlStack(null, sslContext.getSocketFactory()));
+
 
 		enableUserInterface(false);
 		switch (sortType) {
 			case SORT_BY_CLASS:
-				queue.start();
 				String urlSortCase1 = RESTHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/SortedDeviceList" +
 						".json/1/" + trackDeviceStatus;
 				HeaderJsonObjectRequest jsObjRequestCase1 =
@@ -348,13 +350,13 @@ public class SortedList extends Activity {
 				jsObjRequestCase1
 						.setRetryPolicy(new DefaultRetryPolicy(REQUEST_LONG_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
 								DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-
+				jsObjRequestCase1.setShouldCache(false);
 				queue.add(jsObjRequestCase1);
 				TextView hostTextView = (TextView) findViewById(R.id.sortedList_hostTextView);
 				hostTextView.setText(R.string.title_sort_by_classes);
 				break;
 			case SORT_BY_SERVER:
-				queue.start();
+				//queue.start();
 				String urlSortCase2 = RESTHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/SortedDeviceList" +
 						".json/2/" + trackDeviceStatus;
 				HeaderJsonObjectRequest jsObjRequestCase2 =
@@ -385,12 +387,13 @@ public class SortedList extends Activity {
 				jsObjRequestCase2
 						.setRetryPolicy(new DefaultRetryPolicy(REQUEST_LONG_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
 								DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+				jsObjRequestCase2.setShouldCache(false);
 				queue.add(jsObjRequestCase2);
 				TextView hostTextView2 = (TextView) findViewById(R.id.sortedList_hostTextView);
 				hostTextView2.setText(R.string.title_sort_by_servers);
 				break;
 			case SORT_FULL_LIST:
-				queue.start();
+				//queue.start();
 
 				String urlSortCase3 =
 						RESTHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device.json/" + trackDeviceStatus;
@@ -422,12 +425,13 @@ public class SortedList extends Activity {
 				jsObjRequestCase3
 						.setRetryPolicy(new DefaultRetryPolicy(REQUEST_LONG_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
 								DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+				jsObjRequestCase3.setShouldCache(false);
 				queue.add(jsObjRequestCase3);
 				TextView hostTextView3 = (TextView) findViewById(R.id.sortedList_hostTextView);
 				hostTextView3.setText(R.string.title_sort_full_list);
 				break;
 			default: //sort by devices
-				queue.start();
+				//queue.start();
 				String url = RESTHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/SortedDeviceList.json/3/" +
 						trackDeviceStatus;
 				HeaderJsonObjectRequest jsObjRequest =
@@ -458,6 +462,7 @@ public class SortedList extends Activity {
 						});
 				jsObjRequest.setRetryPolicy(new DefaultRetryPolicy(REQUEST_LONG_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
 						DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 				TextView hostTextViewDef = (TextView) findViewById(R.id.sortedList_hostTextView);
 				hostTextViewDef.setText(R.string.title_sort_by_devices);
@@ -496,9 +501,9 @@ public class SortedList extends Activity {
 	public void buttonClick(View v) {
 		String devName = (String) v.getTag();
 		System.out.println("Clicked object: " + devName);
-		RequestQueue queue =
-				Volley.newRequestQueue(getApplicationContext(), new HurlStack(null, sslContext.getSocketFactory()));
-		queue.start();
+		//RequestQueue queue =
+		//	Volley.newRequestQueue(getApplicationContext(), new HurlStack(null, sslContext.getSocketFactory()));
+		//queue.start();
 		String url =
 				RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + devName + "/get_info.json";
 		HeaderJsonObjectRequest jsObjRequest =
@@ -530,6 +535,7 @@ public class SortedList extends Activity {
 						error.printStackTrace();
 					}
 				});
+		jsObjRequest.setShouldCache(false);
 		queue.add(jsObjRequest);
 	}
 
@@ -1123,6 +1129,7 @@ public class SortedList extends Activity {
 											}
 										});
 						list.add(child);
+
 					}
 
 				} catch (JSONException e) {
@@ -1737,9 +1744,11 @@ public class SortedList extends Activity {
 			Button filterButton = (Button) findViewById(R.id.sortedList_filterButton);
 			filterButton.setEnabled(true);
 			filterButton.setFocusable(true);
-			TextView filterTextView = (TextView) findViewById(R.id.sortedList_filterPattern);
+			EditText filterTextView = (EditText) findViewById(R.id.sortedList_filterPattern);
 			filterTextView.setEnabled(true);
 			filterTextView.setFocusable(true);
+			filterTextView.setFocusableInTouchMode(true);
+
 		} else {
 			ProgressBar progressBar = (ProgressBar) findViewById(R.id.sortedList_progressBar);
 			progressBar.setVisibility(View.VISIBLE);
@@ -1752,9 +1761,10 @@ public class SortedList extends Activity {
 			Button filterButton = (Button) findViewById(R.id.sortedList_filterButton);
 			filterButton.setEnabled(false);
 			filterButton.setFocusable(false);
-			TextView filterTextView = (TextView) findViewById(R.id.sortedList_filterPattern);
+			EditText filterTextView = (EditText) findViewById(R.id.sortedList_filterPattern);
 			filterTextView.setEnabled(false);
 			filterTextView.setFocusable(false);
+			filterTextView.setFocusableInTouchMode(false);
 		}
 	}
 

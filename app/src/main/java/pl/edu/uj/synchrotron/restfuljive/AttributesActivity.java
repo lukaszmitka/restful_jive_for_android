@@ -56,6 +56,7 @@ public class AttributesActivity extends Activity {
 	 */
 	private Context context;
 
+	private RequestQueue queue;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -69,6 +70,8 @@ public class AttributesActivity extends Activity {
 		TextView deviceAttTextView = (TextView) findViewById(R.id.attributesActivityTextView1);
 		deviceAttTextView.setText("Device " + deviceName + " attributes");
 		setTitle("REST host: " + RESTfulHost + ", TANGO_HOST: " + tangoHost + ":" + tangoPort);
+		queue = Volley.newRequestQueue(this);
+		queue.start();
 		refreshAttributesList();
 	}
 
@@ -88,8 +91,7 @@ public class AttributesActivity extends Activity {
 		System.out.println("Device name: " + deviceName);
 		System.out.println("REST host: " + RESTfulHost);
 		System.out.println("Tango host: " + tangoHost + ":" + tangoPort);
-		RequestQueue queue = Volley.newRequestQueue(this);
-		queue.start();
+
 		String url = RESTfulHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 				"/get_attribute_list.json";
 		JsonObjectRequest jsObjRequest =
@@ -143,6 +145,7 @@ public class AttributesActivity extends Activity {
 						error.printStackTrace();
 					}
 				});
+		jsObjRequest.setShouldCache(false);
 		queue.add(jsObjRequest);
 
 	}
@@ -173,9 +176,6 @@ public class AttributesActivity extends Activity {
 	public void attributesActivityUpdateButton(View view) {
 		LinearLayout linearLayout = (LinearLayout) findViewById(R.id.attributesActivityLinearLayout);
 		int childCount = linearLayout.getChildCount();
-
-		RequestQueue queue = Volley.newRequestQueue(this);
-		queue.start();
 		for (int i = 0; i < childCount; i++) {
 			// for (int i = 0; i < 2; i++) {
 			View linearLayoutView = linearLayout.getChildAt(i);
@@ -214,6 +214,7 @@ public class AttributesActivity extends Activity {
 								error.printStackTrace();
 							}
 						});
+				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
 		}

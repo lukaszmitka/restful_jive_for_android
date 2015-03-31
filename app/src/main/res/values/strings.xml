@@ -40,6 +40,7 @@
     <string name="new_tango_host">example: 192.168.130.100</string>
     <string name="new_tango_port">example: 10000</string>
     <string name="hint_device_name">example: sys/tg_test/1</string>
+    <string name="hint_period_in_ms">period [ms]</string>
 
     <!--    Menu items    -->
     <string name="menu_item_sort_by_classes">Sort by Classes</string>
@@ -52,6 +53,7 @@
     <string name="menu_item_about_filter">About filter</string>
     <string name="menu_item_track_status">Track status</string>
     <string name="menu_item_untrack_status">Untrack status</string>
+    <string name="menu_item_set_refreshing_period">Set refreshing period</string>
 
     <!--    Activity titles    -->
     <string name="title_activity_server_list">ServerList</string>
@@ -68,11 +70,21 @@
     <string name="title_activity_atkpanel">ATK Panel</string>
     <string name="title_activity_set_device">SetDeviceDialogActivity</string>
 
+
     <!--    Set device name strings -->
     <string name="set_device_dialog">Type device name</string>
 
     <!--    ATK Panel strings   -->
     <string name="atk_panel_dev_not_set">Device not set</string>
+
+
+    <!-- dialog box messages -->
+    <string name="set_new_refreshing_period">Set new refreshing period</string>
+    <string name="command_input">Command input</string>
+    <string name="command_input_type">Command input type: </string>
+    <string name="command_execution_confirmation">Command executed without problems</string>
+    <string name="attribute_new_value">Attribute new value</string>
+    <string name="new_value_for_att">New value for </string>
 
 
     <!--    Sorted list labels  -->

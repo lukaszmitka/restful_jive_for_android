@@ -40,6 +40,7 @@ public class DevicePanelAdminFragment extends Fragment {
 	private String RESTfulTangoHost;
 	private String tangoHost;
 	private String tangoPort;
+	private RequestQueue queue;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -52,6 +53,8 @@ public class DevicePanelAdminFragment extends Fragment {
 		tangoPort = ((DevicePanelActivity) getActivity()).getTangoPort();
 		System.out.println("Host: " + RESTfulTangoHost);
 		context = ((DevicePanelActivity) getActivity()).getContext();
+		queue = Volley.newRequestQueue(context);
+		queue.start();
 
 		answerLimitMinEditText = (EditText) rootView.findViewById(R.id.devicePanel_adminFragment_limitMinEditText);
 		answerLimitMinEditText.setText("" + answerLimitMin);
@@ -69,8 +72,7 @@ public class DevicePanelAdminFragment extends Fragment {
 			public void onClick(View v) {
 				String nbCmd = blackBoxEditText.getText().toString();
 				System.out.println("Processing BlackBox button");
-				RequestQueue queue = Volley.newRequestQueue(context);
-				queue.start();
+
 				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 						"/black_box.json/" +
 						nbCmd;
@@ -117,6 +119,7 @@ public class DevicePanelAdminFragment extends Fragment {
 								jsonRequestErrorHandler(error);
 							}
 						});
+				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
 		});
@@ -143,8 +146,6 @@ public class DevicePanelAdminFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				System.out.println("Processing timeout button");
-				RequestQueue queue = Volley.newRequestQueue(context);
-				queue.start();
 				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 						"/set_timeout_milis.json/" +
 						timeoutEditText.getText().toString();
@@ -190,6 +191,7 @@ public class DevicePanelAdminFragment extends Fragment {
 								jsonRequestErrorHandler(error);
 							}
 						});
+				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
 		});
@@ -199,8 +201,6 @@ public class DevicePanelAdminFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				System.out.println("Processing deviceInfo button");
-				RequestQueue queue = Volley.newRequestQueue(context);
-				queue.start();
 				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 						"/get_device_info.json";
 				System.out.println("Sending JSON request");
@@ -247,6 +247,7 @@ public class DevicePanelAdminFragment extends Fragment {
 								jsonRequestErrorHandler(error);
 							}
 						});
+				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
 		});
@@ -256,8 +257,6 @@ public class DevicePanelAdminFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				System.out.println("Processing deviceInfo button");
-				RequestQueue queue = Volley.newRequestQueue(context);
-				queue.start();
 				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 						"/ping_device.json";
 				System.out.println("Sending JSON request");
@@ -304,6 +303,7 @@ public class DevicePanelAdminFragment extends Fragment {
 								jsonRequestErrorHandler(error);
 							}
 						});
+				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
 		});
@@ -314,8 +314,6 @@ public class DevicePanelAdminFragment extends Fragment {
 			public void onClick(View v) {
 
 				System.out.println("Processing deviceInfo button");
-				RequestQueue queue = Volley.newRequestQueue(context);
-				queue.start();
 				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 						"/poll_status.json";
 				System.out.println("Sending JSON request");
@@ -361,6 +359,7 @@ public class DevicePanelAdminFragment extends Fragment {
 								jsonRequestErrorHandler(error);
 							}
 						});
+				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
 		});
@@ -371,8 +370,6 @@ public class DevicePanelAdminFragment extends Fragment {
 			public void onClick(View v) {
 
 				System.out.println("Processing deviceInfo button");
-				RequestQueue queue = Volley.newRequestQueue(context);
-				queue.start();
 				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 						"/restart.json";
 				System.out.println("Sending JSON request");
@@ -417,12 +414,11 @@ public class DevicePanelAdminFragment extends Fragment {
 								jsonRequestErrorHandler(error);
 							}
 						});
+				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
 		});
 
-		RequestQueue queue = Volley.newRequestQueue(context);
-		queue.start();
 		String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 				"/get_source.json";
 		System.out.println("Sending JSON request");
@@ -460,6 +456,7 @@ public class DevicePanelAdminFragment extends Fragment {
 						jsonRequestErrorHandler(error);
 					}
 				});
+		jsObjRequest.setShouldCache(false);
 		queue.add(jsObjRequest);
 		return rootView;
 	}
@@ -496,8 +493,6 @@ public class DevicePanelAdminFragment extends Fragment {
 				} else {
 					sourceId = -1;
 				}
-				RequestQueue queue = Volley.newRequestQueue(context);
-				queue.start();
 
 				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + devName +
 						"/set_source.json/" + sourceId;
@@ -533,6 +528,7 @@ public class DevicePanelAdminFragment extends Fragment {
 								jsonRequestErrorHandler(error);
 							}
 						});
+				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
 

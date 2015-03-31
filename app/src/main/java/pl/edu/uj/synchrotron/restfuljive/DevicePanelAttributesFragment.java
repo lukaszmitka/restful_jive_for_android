@@ -53,6 +53,8 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 	private boolean attributeWritable[];
 	private String attributeDesc[];
 
+	private RequestQueue queue;
+
 	/**
 	 * Check whether attribute could be read, written or both.
 	 *
@@ -105,7 +107,7 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 
 		System.out.println("Host: " + RESTfulTangoHost);
 
-		RequestQueue queue = Volley.newRequestQueue(context);
+		queue = Volley.newRequestQueue(context);
 		queue.start();
 		String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 				"/get_attribute_list.json";
@@ -179,6 +181,7 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 						jsonRequestErrorHandler(error);
 					}
 				});
+		jsObjRequest.setShouldCache(false);
 		queue.add(jsObjRequest);
 
 		Button descriptionButton = (Button) rootView.findViewById(R.id.devicePanel_attributes_descriptionButton);
@@ -203,8 +206,6 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 		readButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				System.out.println("Processing read button");
-				RequestQueue queue = Volley.newRequestQueue(context);
-				queue.start();
 				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 						"/read_attribute.json/" +
 						attributeNames[selectedAttributeId];
@@ -243,6 +244,7 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 								jsonRequestErrorHandler(error);
 							}
 						});
+				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
 		});
@@ -254,8 +256,6 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 				EditText arginEditTextValue = (EditText) rootView
 						.findViewById(R.id.devicePanel_attributes_arginValueEditText);
 				String arginStr = arginEditTextValue.getText().toString();
-				RequestQueue queue = Volley.newRequestQueue(context);
-				queue.start();
 				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 						"/write_attribute.json/" +
 						attributeNames[selectedAttributeId] + "/" + arginStr;
@@ -291,6 +291,7 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 								jsonRequestErrorHandler(error);
 							}
 						});
+				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
 		});
@@ -299,8 +300,6 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 		plotButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				System.out.println("Processing plot button");
-				RequestQueue queue = Volley.newRequestQueue(context);
-				queue.start();
 				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 						"/plot_attribute.json/" +
 						attributeNames[selectedAttributeId];
@@ -403,6 +402,7 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 								jsonRequestErrorHandler(error);
 							}
 						});
+				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
 

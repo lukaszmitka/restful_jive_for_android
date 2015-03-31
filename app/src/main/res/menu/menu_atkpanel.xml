@@ -1,4 +1,9 @@
 <menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="pl.edu.uj.synchrotron.restfuljive.ATKPanelActivity">
+    <item
+        android:id="@+id/action_set_refreshing_period"
+        android:orderInCategory="1"
+        android:title="@string/menu_item_set_refreshing_period"/>
 </menu>

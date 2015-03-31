@@ -52,6 +52,7 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 	private String tangoHost;
 	private String tangoPort;
 	private String deviceName;
+	private RequestQueue queue;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -66,7 +67,7 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 		System.out.println("Host: " + RESTfulTangoHost);
 		context = ((DevicePanelActivity) getActivity()).getContext();
 
-		RequestQueue queue = Volley.newRequestQueue(context);
+		queue = Volley.newRequestQueue(context);
 		queue.start();
 		String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 				"/command_list_query.json";
@@ -144,6 +145,7 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 						jsonRequestErrorHandler(error);
 					}
 				});
+		jsObjRequest.setShouldCache(false);
 		queue.add(jsObjRequest);
 
 		Button descriptionButton = (Button) rootView.findViewById(R.id.devicePanel_descriptionButton);
@@ -173,8 +175,6 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 				if (arginStr.equals("")) {
 					arginStr = "DevVoidArgument";
 				}
-				RequestQueue queue = Volley.newRequestQueue(context);
-				queue.start();
 				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 						"/command_inout.json/" +
 						commandNames[selectedCommandId] + "/" + arginStr;
@@ -209,6 +209,7 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 								jsonRequestErrorHandler(error);
 							}
 						});
+				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
 		});
@@ -222,8 +223,6 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 				if (arginStr.equals("")) {
 					arginStr = "DevVoidArgument";
 				}
-				RequestQueue queue = Volley.newRequestQueue(context);
-				queue.start();
 				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 						"/extract_plot_data.json/" +
 						commandNames[selectedCommandId] + "/" + arginStr;
@@ -262,6 +261,7 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 								jsonRequestErrorHandler(error);
 							}
 						});
+				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 
 			}

@@ -51,6 +51,9 @@ public class PropertiesActivity extends Activity {
 	 */
 	private Context context;
 
+
+	private RequestQueue queue;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -64,6 +67,8 @@ public class PropertiesActivity extends Activity {
 		TextView devicePropTextView = (TextView) findViewById(R.id.devicePropertiesTextView1);
 		devicePropTextView.setText("Device " + deviceName + " properties");
 		setTitle("REST host: " + RESTfulHost + ", TANGO_HOST: " + tangoHost + ":" + tangoPort);
+		queue = Volley.newRequestQueue(this);
+		queue.start();
 		refreshPropertiesList();
 	}
 
@@ -72,6 +77,13 @@ public class PropertiesActivity extends Activity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.menu_properties, menu);
 		return true;
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		queue.stop();
+		queue.getCache().clear();
 	}
 
 	/**
@@ -84,8 +96,6 @@ public class PropertiesActivity extends Activity {
 		System.out.println("REST host: " + RESTfulHost);
 		System.out.println("Tango host: " + tangoHost + ":" + tangoPort);
 
-		RequestQueue queue = Volley.newRequestQueue(this);
-		queue.start();
 		String url = RESTfulHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 				"/get_property_list" +
 				".json";
@@ -134,6 +144,7 @@ public class PropertiesActivity extends Activity {
 						error.printStackTrace();
 					}
 				});
+		jsObjRequest.setShouldCache(false);
 		queue.add(jsObjRequest);
 	}
 
@@ -164,8 +175,6 @@ public class PropertiesActivity extends Activity {
 		LinearLayout linearLayout = (LinearLayout) findViewById(R.id.properties_activity_linear_layout);
 		int childCount = linearLayout.getChildCount();
 
-		RequestQueue queue = Volley.newRequestQueue(this);
-		queue.start();
 		for (int i = 0; i < childCount; i++) {
 			View linearLayoutView = linearLayout.getChildAt(i);
 			EditText et = (EditText) linearLayoutView.findViewById(R.id.editableListEditText);
@@ -199,6 +208,7 @@ public class PropertiesActivity extends Activity {
 							error.printStackTrace();
 						}
 					});
+			jsObjRequest.setShouldCache(false);
 			queue.add(jsObjRequest);
 		}
 	}
