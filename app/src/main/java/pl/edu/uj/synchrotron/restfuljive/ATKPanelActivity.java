@@ -268,11 +268,9 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 														.setSize(new SizeMetrics(55, SizeLayoutType.ABSOLUTE, 100, SizeLayoutType.FILL));
 												break;
 											case "IMAGE":
-												//TODO implement plot
-
 												TextView textViewMaxValue = prepareTextViewMaxValue(maxId);
 												TextView textViewMinValue = prepareTextViewMinValue(minId);
-												ImageView imageViewScale = prepareScaleImageView(minId, maxId, scaleId);
+												ImageView imageViewScale = prepareScaleImageView(maxId, scaleId);
 												ImageView imageViewPlot = preparePlotImageView(scaleId, plotId);
 												plotHeight = scrollView.getHeight();
 												plotWidth = scrollView.getWidth() - 50;
@@ -324,7 +322,7 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 												double range = maxValue - minValue;
 												float step = (float) (330 / range);
 
-												int color = 0;
+												int color;
 												float hsv[] = {0, 1, 1};
 
 												for (int i = 1; i < ivalues.length; i++) {
@@ -440,7 +438,7 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 		return plotImageView;
 	}
 
-	private ImageView prepareScaleImageView(int minId, int maxId, int scaleId) {
+	private ImageView prepareScaleImageView(int maxId, int scaleId) {
 		ImageView scaleImageView = new ImageView(context);
 		scaleImageView.setId(scaleId);
 		// create layout
@@ -688,21 +686,21 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 	private void jsonRequestErrorHandler(VolleyError error) {
 		// Print error message to LogcCat
 		Log.d("jsonRequestErrorHandler", "Connection error!");
-		//error.printStackTrace();
+		error.printStackTrace();
 
 		// show dialog box with error message
-		/*AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setMessage(error.toString()).setTitle("Connection error!").setPositiveButton(getString(R.string.ok_button),
 				null);
 		AlertDialog dialog = builder.create();
-		dialog.show();*/
+		dialog.show();
 	}
 
 	private void populateCommandSpinner(JSONObject response) {
 		Log.d("populateCommandSpinner", "Populating command spinner");
-		commandArray = new ArrayList<String>();
-		commandInTypeArray = new ArrayList<String>();
-		commandOutTypeArray = new ArrayList<String>();
+		commandArray = new ArrayList<>();
+		commandInTypeArray = new ArrayList<>();
+		commandOutTypeArray = new ArrayList<>();
 		try {
 			int commandCount = response.getInt("commandCount");
 			//String commandName;
@@ -714,7 +712,7 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 						"Command " + commandArray.get(i) + ", inType: " + commandInTypeArray.get(i) + ", " +
 								"outType: " + commandOutTypeArray.get(i));
 			}
-			ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+			ArrayAdapter<String> adapter = new ArrayAdapter<>(
 					this, android.R.layout.simple_spinner_item, commandArray);
 			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			NoSelectionSpinner sItems = (NoSelectionSpinner) findViewById(R.id.atk_panel_command_spinner);
@@ -830,8 +828,8 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 
 	private void populateAttributeSpinner(JSONObject response) {
 		Log.d("popAttributeSpinner", "Populating attribute spinner");
-		scalarAttrbuteArray = new ArrayList<String>();
-		nonScalarAttributeArray = new ArrayList<String>();
+		scalarAttrbuteArray = new ArrayList<>();
+		nonScalarAttributeArray = new ArrayList<>();
 
 		try {
 			int attributeCount = response.getInt("attCount");
@@ -849,7 +847,7 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 			}
 			if (!nonScalarAttributeArray.isEmpty()) {
 				nonScalarAttributeArray.add(0, "Scalar");
-				ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+				ArrayAdapter<String> adapter = new ArrayAdapter<>(
 						this, android.R.layout.simple_spinner_item, nonScalarAttributeArray);
 				adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 				Spinner attributeSpinner = (Spinner) findViewById(R.id.atk_panel_attribute_spinner);

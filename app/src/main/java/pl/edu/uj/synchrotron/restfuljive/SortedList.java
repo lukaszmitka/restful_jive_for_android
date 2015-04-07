@@ -85,10 +85,12 @@ public class SortedList extends CertificateExceptionActivity {
 			Log.d("onCreate()",
 					"Getting device list from server:  " + RESTfulTangoHost + "at Tango Host: " + tangoHost + ":" + tangoPort);
 			try {
-				if (lastResponse == null) {
-					getSortedList(RESTfulTangoHost);
-				} else {
-					updateDeviceList(lastResponse, sortType);
+				if (isConnected) {
+					if (lastResponse == null) {
+						getSortedList(RESTfulTangoHost);
+					} else {
+						updateDeviceList(lastResponse, sortType);
+					}
 				}
 			} catch (Exception e) {
 				AlertDialog.Builder builder = new AlertDialog.Builder(this.context);

@@ -1,0 +1,97 @@
+/**
+ * Created by lukasz on 07.04.15.
+ * This file is element of RESTful Jive application project.
+ * You are free to use, copy and edit whole application or any of its components.
+ * Application comes with no warranty. Although author is trying to make it best, it may work or it may not work.
+ */
+package pl.edu.uj.synchrotron.restfuljive;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
+
+public class WifiMonitorActivity extends Activity {
+	protected Context context;
+	protected boolean isConnected;
+	private IntentFilter filter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
+	private BroadcastReceiver broadcast = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context arg0, Intent arg1) {
+			checkInternetConnectionStatus();
+		}
+	};
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		context = this;
+		checkInternetConnectionStatus();
+	}
+
+	private void checkInternetConnectionStatus() {
+		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+		if (activeNetwork != null) {
+			Log.d("checkInternetConnection", "Found internet connection.");
+			if (activeNetwork.isConnectedOrConnecting()) {
+				Log.d("checkInternetConnection", "Connection is active.");
+				isConnected = true;
+				int networkType = activeNetwork.getType();
+				Toast toast;
+				switch (networkType) {
+					case ConnectivityManager.TYPE_WIFI:
+						WifiManager mainWifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+						WifiInfo currentWifi = mainWifi.getConnectionInfo();
+						toast = Toast.makeText(this, "Connecting using wifi: " + currentWifi.getSSID(), Toast.LENGTH_SHORT);
+						break;
+					case ConnectivityManager.TYPE_MOBILE:
+						toast = Toast.makeText(this, "Connecting using mobile data.", Toast.LENGTH_SHORT);
+						break;
+					case ConnectivityManager.TYPE_ETHERNET:
+						toast = Toast.makeText(this, "Connecting using ethernet.", Toast.LENGTH_SHORT);
+						break;
+					default:
+						toast = Toast.makeText(this, "Connecting using other connection type.", Toast.LENGTH_SHORT);
+						break;
+				}
+				toast.show();
+			} else {
+				noNetworkConnection();
+			}
+		} else {
+			noNetworkConnection();
+		}
+	}
+
+	private void noNetworkConnection() {
+		isConnected = false;
+		Log.d("noNetworkConnection()", "No internet connection.");
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setMessage("You have no internet connection! Application will not work").setTitle("No connection!");
+		AlertDialog dialog = builder.create();
+		dialog.show();
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		registerReceiver(broadcast, filter);
+	}
+
+	@Override
+	public void onPause() {
+		unregisterReceiver(broadcast);
+		super.onPause();  // Always call the superclass method first
+
+	}
+}

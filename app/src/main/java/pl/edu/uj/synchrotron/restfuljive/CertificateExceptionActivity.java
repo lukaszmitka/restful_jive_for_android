@@ -34,7 +34,7 @@ import javax.net.ssl.TrustManagerFactory;
 /**
  * Class that enable to add security exception for self signed SSL certificate in application fragment.
  */
-public abstract class CertificateExceptionActivity extends Activity {
+public abstract class CertificateExceptionActivity extends WifiMonitorActivity {
 	public static final String PREFS_NAME = "SolarisDeviceListPrefsFile";
 	private static final int REQUEST_CERT_PATH = 100;
 	protected RequestQueue queue;
@@ -45,18 +45,18 @@ public abstract class CertificateExceptionActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		String lastCertPath = settings.getString("LastCertificatePath", "");
-		if (lastCertPath != "") {
+		if (lastCertPath.equals("")) {
 			setSSLCertificate(lastCertPath);
 		}
 	}
 
 	@Override
 	protected void onDestroy() {
-		super.onDestroy();
 		if (queue != null) {
 			queue.stop();
 			queue.getCache().clear();
 		}
+		super.onDestroy();
 	}
 
 	protected void restartQueue() {
@@ -86,6 +86,7 @@ public abstract class CertificateExceptionActivity extends Activity {
 	@Override
 	protected synchronized void onActivityResult(final int requestCode,
 	                                             int resultCode, final Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
 		Log.d("onActivityResult", "Processing certificate path from activity");
 		if (resultCode == Activity.RESULT_OK) {
 			Log.d("onActivityResult", "Result code: OK");
