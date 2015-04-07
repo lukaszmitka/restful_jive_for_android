@@ -1,9 +1,9 @@
 package pl.edu.uj.synchrotron.restfuljive;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -13,11 +13,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,7 +23,7 @@ import org.json.JSONObject;
 /**
  * A class for creating properties activity screen.
  */
-public class PropertiesActivity extends Activity {
+public class PropertiesActivity extends CertificateExceptionActivity {
 	/**
 	 * The intent that activity was called with.
 	 */
@@ -51,9 +49,6 @@ public class PropertiesActivity extends Activity {
 	 */
 	private Context context;
 
-
-	private RequestQueue queue;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -67,8 +62,8 @@ public class PropertiesActivity extends Activity {
 		TextView devicePropTextView = (TextView) findViewById(R.id.devicePropertiesTextView1);
 		devicePropTextView.setText("Device " + deviceName + " properties");
 		setTitle("REST host: " + RESTfulHost + ", TANGO_HOST: " + tangoHost + ":" + tangoPort);
-		queue = Volley.newRequestQueue(this);
-		queue.start();
+
+		restartQueue();
 		refreshPropertiesList();
 	}
 
@@ -79,22 +74,14 @@ public class PropertiesActivity extends Activity {
 		return true;
 	}
 
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		queue.stop();
-		queue.getCache().clear();
-	}
-
 	/**
 	 * Refresh already shown list of properties.
 	 */
 	private void refreshPropertiesList() {
 
-		System.out.println("PropertiesActivity output:");
-		System.out.println("Device name: " + deviceName);
-		System.out.println("REST host: " + RESTfulHost);
-		System.out.println("Tango host: " + tangoHost + ":" + tangoPort);
+		Log.d("refreshPropertiesList()", "Device name: " + deviceName);
+		Log.d("refreshPropertiesList()", "REST host: " + RESTfulHost);
+		Log.d("refreshPropertiesList()", "Tango host: " + tangoHost + ":" + tangoPort);
 
 		String url = RESTfulHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 				"/get_property_list" +
@@ -105,11 +92,11 @@ public class PropertiesActivity extends Activity {
 					public void onResponse(JSONObject response) {
 						try {
 							if (response.getString("connectionStatus").equals("OK")) {
-								System.out.println("Device connection OK");
+								Log.d("refreshPropertiesList()", "Device connection OK / method GET / get_property_list");
 								LinearLayout layout = (LinearLayout) findViewById(R.id.properties_activity_linear_layout);
 								layout.removeAllViews();
 								int propertyCount = response.getInt("propertyCount");
-								System.out.println("Received " + propertyCount + " properties");
+								Log.d("refreshPropertiesList()", "Received " + propertyCount + " properties");
 								String[] prop_list = new String[propertyCount];
 								String[] prop_values = new String[propertyCount];
 								for (int i = 0; i < prop_list.length; i++) {
@@ -118,8 +105,8 @@ public class PropertiesActivity extends Activity {
 								}
 								final LayoutInflater inflater = LayoutInflater.from(context);
 								for (int i = 0; i < prop_list.length; i++) {
-									System.out.println("Processing property no. " + i);
-									System.out.println("Name: " + prop_list[i] + " Value: " + prop_values[i]);
+									Log.d("refreshPropertiesList()", "Processing property no. " + i);
+									Log.d("refreshPropertiesList()", "Name: " + prop_list[i] + " Value: " + prop_values[i]);
 									View view = inflater.inflate(R.layout.editable_list_element, null);
 									EditText et = (EditText) view.findViewById(R.id.editableListEditText);
 									TextView tv = (TextView) view.findViewById(R.id.editableListTextView);
@@ -129,18 +116,19 @@ public class PropertiesActivity extends Activity {
 									layout.addView(view);
 								}
 							} else {
-								System.out.println("Tango database API returned message:");
-								System.out.println(response.getString("connectionStatus"));
+								Log.d("refreshPropertiesList()", "Tango database API returned message from query " +
+										"get_property_list:");
+								Log.d("refreshPropertiesList()", response.getString("connectionStatus"));
 							}
 						} catch (JSONException e) {
-							System.out.println("Problem with JSON object");
+							Log.d("refreshPropertiesList()", "Problem with JSON object while getting property list");
 							e.printStackTrace();
 						}
 					}
 				}, new Response.ErrorListener() {
 					@Override
 					public void onErrorResponse(VolleyError error) {
-						System.out.println("Connection error!");
+						Log.d("refreshPropertiesList()", "Connection error!");
 						error.printStackTrace();
 					}
 				});
@@ -189,22 +177,22 @@ public class PropertiesActivity extends Activity {
 						public void onResponse(JSONObject response) {
 							try {
 								if (response.getString("connectionStatus").equals("OK")) {
-									System.out.println("Device connection OK");
+									Log.d("updateButton.onClick()", "Device connection OK / method PUT / put_property");
 								} else {
 									Toast.makeText(getApplicationContext(), response.getString("connectionStatus"),
 											Toast.LENGTH_SHORT).show();
-									System.out.println("Tango database API returned message:");
-									System.out.println(response.getString("connectionStatus"));
+									Log.d("updateButton.onClick()", "Tango database API returned message from query put_property:");
+									Log.d("updateButton.onClick()", response.getString("connectionStatus"));
 								}
 							} catch (JSONException e) {
-								System.out.println("Problem with JSON object");
+								Log.d("updateButton.onClick()", "Problem with JSON object while updating property");
 								e.printStackTrace();
 							}
 						}
 					}, new Response.ErrorListener() {
 						@Override
 						public void onErrorResponse(VolleyError error) {
-							System.out.println("Connection error!");
+							Log.d("updateButton.onClick()", "Connection error!");
 							error.printStackTrace();
 						}
 					});

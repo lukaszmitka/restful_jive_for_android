@@ -1,10 +1,10 @@
 package pl.edu.uj.synchrotron.restfuljive;
 
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -14,11 +14,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,7 +28,7 @@ import org.json.JSONObject;
 /**
  * A class for creating attributes activity screen.
  */
-public class AttributesActivity extends Activity {
+public class AttributesActivity extends CertificateExceptionActivity {
 	/**
 	 * The intent that activity was called with.
 	 */
@@ -56,7 +54,6 @@ public class AttributesActivity extends Activity {
 	 */
 	private Context context;
 
-	private RequestQueue queue;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -70,8 +67,8 @@ public class AttributesActivity extends Activity {
 		TextView deviceAttTextView = (TextView) findViewById(R.id.attributesActivityTextView1);
 		deviceAttTextView.setText("Device " + deviceName + " attributes");
 		setTitle("REST host: " + RESTfulHost + ", TANGO_HOST: " + tangoHost + ":" + tangoPort);
-		queue = Volley.newRequestQueue(this);
-		queue.start();
+
+		restartQueue();
 		refreshAttributesList();
 	}
 
@@ -87,10 +84,9 @@ public class AttributesActivity extends Activity {
 	 */
 	private void refreshAttributesList() {
 
-		System.out.println("AttributesActivity output:");
-		System.out.println("Device name: " + deviceName);
-		System.out.println("REST host: " + RESTfulHost);
-		System.out.println("Tango host: " + tangoHost + ":" + tangoPort);
+		Log.d("refreshAttributeList()", "Device name: " + deviceName);
+		Log.d("refreshAttributeList()", "REST host: " + RESTfulHost);
+		Log.d("refreshAttributeList()", "Tango host: " + tangoHost + ":" + tangoPort);
 
 		String url = RESTfulHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 				"/get_attribute_list.json";
@@ -100,12 +96,12 @@ public class AttributesActivity extends Activity {
 					public void onResponse(JSONObject response) {
 						try {
 							if (response.getString("connectionStatus").equals("OK")) {
-								System.out.println("Device connection OK");
+								Log.d("refreshAttributeList()", "Device connection OK / method GET / get_sttribute_list");
 								LinearLayout layout = (LinearLayout) findViewById(R.id.attributesActivityLinearLayout);
 								layout.removeAllViews();
 								final LayoutInflater inflater = LayoutInflater.from(context);
 								int attributeCount = response.getInt("attCount");
-								System.out.println("Received " + attributeCount + " properties");
+								Log.d("refreshAttributeList()", "Received " + attributeCount + " attributes");
 								String[] attr_list = new String[attributeCount];
 								String[] attr_values = new String[attributeCount];
 								boolean[] writable = new boolean[attributeCount];
@@ -130,18 +126,19 @@ public class AttributesActivity extends Activity {
 									layout.addView(view);
 								}
 							} else {
-								System.out.println("Tango database API returned message:");
-								System.out.println(response.getString("connectionStatus"));
+								Log.d("refreshAttributeList()", "Tango database API returned message from query " +
+										"get_attribute_list:");
+								Log.d("refreshAttributeList()", response.getString("connectionStatus"));
 							}
 						} catch (JSONException e) {
-							System.out.println("Problem with JSON object");
+							Log.d("refreshAttributeList()", "Problem with JSON object while getting attribute list");
 							e.printStackTrace();
 						}
 					}
 				}, new Response.ErrorListener() {
 					@Override
 					public void onErrorResponse(VolleyError error) {
-						System.out.println("Connection error!");
+						Log.d("refreshAttributeList()", "Connection error!");
 						error.printStackTrace();
 					}
 				});
@@ -195,22 +192,23 @@ public class AttributesActivity extends Activity {
 							public void onResponse(JSONObject response) {
 								try {
 									if (response.getString("connectionStatus").equals("OK")) {
-										System.out.println("Device connection OK");
+										Log.d("updateButton.onClick()", "Device connection OK / method PUT / write_attribute");
 									} else {
 										Toast.makeText(getApplicationContext(), response.getString("connectionStatus"),
 												Toast.LENGTH_LONG).show();
-										System.out.println("Tango database API returned message:");
-										System.out.println(response.getString("connectionStatus"));
+										Log.d("updateButton.onClick()", "Tango database API returned message from query " +
+												"write_attribute:");
+										Log.d("updateButton.onClick()", response.getString("connectionStatus"));
 									}
 								} catch (JSONException e) {
-									System.out.println("Problem with JSON object");
+									Log.d("updateButton.onClick()", "Problem with JSON object while writing attribute");
 									e.printStackTrace();
 								}
 							}
 						}, new Response.ErrorListener() {
 							@Override
 							public void onErrorResponse(VolleyError error) {
-								System.out.println("Connection error!");
+								Log.d("updateButton.onClick()", "Connection error!");
 								error.printStackTrace();
 							}
 						});

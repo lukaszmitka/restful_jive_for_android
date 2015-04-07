@@ -7,7 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -20,26 +20,18 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import fr.esrf.Tango.DevState;
-import fr.esrf.Tango.DevVarDoubleStringArray;
-import fr.esrf.Tango.DevVarLongStringArray;
-import fr.esrf.TangoApi.DeviceData;
-import fr.esrf.TangoApi.DeviceProxy;
 import fr.esrf.TangoDs.TangoConst;
 
-public class DevicePanelCommandsFragment extends Fragment implements TangoConst {
+public class DevicePanelCommandsFragment extends CertificateExceptionFragment implements TangoConst {
 	private int selectedCommandId;
 	private View rootView;
-	private DeviceProxy dp;
 	private int commandCount;
 	private String[] commandNames;
 	private String[] commandInDesc;
@@ -52,23 +44,21 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 	private String tangoHost;
 	private String tangoPort;
 	private String deviceName;
-	private RequestQueue queue;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		super.onCreateView(inflater, container, savedInstanceState);
 		rootView = inflater.inflate(R.layout.fragment_device_panel_commands, container, false);
 		deviceName = ((DevicePanelActivity) getActivity()).getDeviceName();
 		TextView tvDeviceName = (TextView) rootView.findViewById(R.id.devicePanel_deviceName);
 		tvDeviceName.setText(deviceName);
-		System.out.println("Device name: " + deviceName);
+		Log.d("onCreateView", "Device name: " + deviceName);
 		RESTfulTangoHost = ((DevicePanelActivity) getActivity()).getRestHost();
 		tangoHost = ((DevicePanelActivity) getActivity()).getTangoHost();
 		tangoPort = ((DevicePanelActivity) getActivity()).getTangoPort();
-		System.out.println("Host: " + RESTfulTangoHost);
+		Log.d("onCreateView", "Host: " + RESTfulTangoHost);
 		context = ((DevicePanelActivity) getActivity()).getContext();
-
-		queue = Volley.newRequestQueue(context);
-		queue.start();
+		restartQueue();
 		String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 				"/command_list_query.json";
 		HeaderJsonObjectRequest jsObjRequest =
@@ -77,7 +67,7 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 					public void onResponse(JSONObject response) {
 						try {
 							if (response.getString("connectionStatus").equals("OK")) {
-								System.out.println("Device connection OK");
+								Log.d("onCreate()", "Device connection OK / method GET / got command list");
 								// showDeviceInfo(response.getString("deviceInfo"));
 								// dp = new DeviceProxy(deviceName, dbHost, dbPort);
 								commandCount = response.getInt("commandCount");
@@ -131,11 +121,11 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 								//AlertDialog dialog = builder.create();
 								//dialog.show();
 							} else {
-								System.out.println("Tango database API returned message:");
-								System.out.println(response.getString("connectionStatus"));
+								Log.d("onCreate()", "Tango database API returned message from query command_list_query:");
+								Log.d("onCreate()", response.getString("connectionStatus"));
 							}
 						} catch (JSONException e) {
-							System.out.println("Problem with JSON object");
+							Log.d("onCreate()", "Problem with JSON object while getting command list");
 							e.printStackTrace();
 						}
 					}
@@ -171,7 +161,7 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 			public void onClick(View v) {
 				EditText arginEditTextValue = (EditText) rootView.findViewById(R.id.devicePanel_arginValueEditText);
 				String arginStr = arginEditTextValue.getText().toString();
-				System.out.println("Have text from input: " + arginStr);
+				Log.d("executeButton.onClick()", "Have text from input: " + arginStr);
 				if (arginStr.equals("")) {
 					arginStr = "DevVoidArgument";
 				}
@@ -184,7 +174,7 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 							public void onResponse(JSONObject response) {
 								try {
 									if (response.getString("connectionStatus").equals("OK")) {
-										System.out.println("Device connection OK");
+										Log.d("executeButton.onClick()", "Device connection OK / method PUT / executed command");
 										String commandOut = response.getString("commandReply");
 										AlertDialog.Builder builder = new AlertDialog.Builder(rootView.getContext());
 										builder.setMessage(commandOut).setTitle("Command output");
@@ -195,11 +185,12 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 										AlertDialog dialog = builder.create();
 										dialog.show();
 									} else {
-										System.out.println("Tango database API returned message:");
-										System.out.println(response.getString("connectionStatus"));
+										Log.d("executeButton.onClick()", "Tango database API returned message from query " +
+												"command_imout:");
+										Log.d("executeButton.onClick()", response.getString("connectionStatus"));
 									}
 								} catch (JSONException e) {
-									System.out.println("Problem with JSON object");
+									Log.d("executeButton.onClick()", "Problem with JSON object while executing command");
 									e.printStackTrace();
 								}
 							}
@@ -219,7 +210,7 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 			public void onClick(View v) {
 				EditText arginEditTextValue = (EditText) rootView.findViewById(R.id.devicePanel_arginValueEditText);
 				String arginStr = arginEditTextValue.getText().toString();
-				System.out.println("Have text from input: " + arginStr);
+				Log.d("plotButton.onClick()", "Have text from input: " + arginStr);
 				if (arginStr.equals("")) {
 					arginStr = "DevVoidArgument";
 				}
@@ -232,9 +223,9 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 							public void onResponse(JSONObject response) {
 								try {
 									if (response.getString("connectionStatus").equals("OK")) {
-										System.out.println("Device connection OK");
+										Log.d("plotButton.onClick()", "Device connection OK / method PUT / got plot data");
 										String commandOut = response.getString("replyHeader");
-										System.out.println("Reply header: " + commandOut);
+										Log.d("plotButton.onClick()", "Reply header: " + commandOut);
 										JSONArray array = response.getJSONArray("plotData");
 										double[] values = new double[array.length()];
 										for (int i = 0; i < array.length(); i++) {
@@ -247,11 +238,12 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 										// intent.putExtra("plotTitle", dp.name()+"/"+commInfo.cmd_name);
 										startActivity(intent);
 									} else {
-										System.out.println("Tango database API returned message:");
-										System.out.println(response.getString("connectionStatus"));
+										Log.d("plotButton.onClick()", "Tango database API returned message from query " +
+												"extract+plot_data: ");
+										Log.d("plotButton.onClick()", response.getString("connectionStatus"));
 									}
 								} catch (JSONException e) {
-									System.out.println("Problem with JSON object");
+									Log.d("plotButton.onClick()", "Problem with JSON object while getting plot data");
 									e.printStackTrace();
 								}
 							}
@@ -271,7 +263,7 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 		return rootView;
 	}
 
-	/**
+	/*
 	 * Adds value to DeviceData.
 	 *
 	 * @param argin   Value to be added.
@@ -280,7 +272,7 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 	 * @return DeviceData with new value.
 	 * @throws NumberFormatException
 	 */
-	private DeviceData insertData(String argin, DeviceData send, int outType) throws NumberFormatException {
+	/*private DeviceData insertData(String argin, DeviceData send, int outType) throws NumberFormatException {
 
 		if (outType == Tango_DEV_VOID)
 			return send;
@@ -352,16 +344,16 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 		}
 		return send;
 
-	}
+	}*/
 
-	/**
+	/*
 	 * Extract data from DeviceData to one dimensional array.
 	 *
 	 * @param data    DeviceData to extract data from.
 	 * @param outType Identifier of data type.
 	 * @return Array of data that can be plotted.
 	 */
-	private double[] extractPlotData(DeviceData data, int outType) {
+	/*private double[] extractPlotData(DeviceData data, int outType) {
 
 		double[] ret = new double[0];
 		int i;
@@ -433,31 +425,31 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 			break;
 		}
 		return ret;
-	}
+	} */
 
-	/**
+	/*
 	 * Check maximum length of data.
 	 *
 	 * @param length Length of current data.
 	 * @return Maximum length.
 	 */
-	private int getLimitMaxForPlot(int length) {
+	/*private int getLimitMaxForPlot(int length) {
 		if (length < 100) {
 			return length;
 
 		}
 		return 100;
-	}
+	}*/
 
-	/**
+	/*
 	 * Check minimum length of data.
 	 *
 	 * @param length Length of current data.
 	 * @return Minimum length.
 	 */
-	private int getLimitMinForPlot(int length) {
+	/*private int getLimitMinForPlot(int length) {
 		return 0;
-	}
+	}*/
 
 	/**
 	 * Method displaying info about connection error
@@ -466,12 +458,8 @@ public class DevicePanelCommandsFragment extends Fragment implements TangoConst 
 	 */
 	private void jsonRequestErrorHandler(VolleyError error) {
 		// Print error message to LogcCat
-		System.out.println("Connection error!");
+		Log.d("jsonRequestErrorHandler", "Connection error!");
 		error.printStackTrace();
-		//System.out.println("getMessage: "+error.getMessage());
-		//System.out.println("toString: "+error.toString());
-		//System.out.println("getCause: "+error.getCause());
-		//System.out.println("getStackTrace: "+error.getStackTrace().toString());
 
 		// show dialog box with error message
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);

@@ -40,6 +40,8 @@
         android:orderInCategory="7"
         android:title="@string/menu_item_untrack_status"
         android:visible="false"/>
-
-
+    <item
+        android:id="@+id/action_set_certificate_file"
+        android:orderInCategory="8"
+        android:title="@string/menu_item_new_certificate_file"/>
 </menu>

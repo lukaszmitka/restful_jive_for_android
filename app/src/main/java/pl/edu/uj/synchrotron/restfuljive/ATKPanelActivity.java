@@ -1,13 +1,13 @@
 package pl.edu.uj.synchrotron.restfuljive;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,22 +16,35 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
+import com.androidplot.ui.AnchorPosition;
+import com.androidplot.ui.DynamicTableModel;
+import com.androidplot.ui.SizeLayoutType;
+import com.androidplot.ui.SizeMetrics;
+import com.androidplot.ui.XLayoutStyle;
+import com.androidplot.ui.YLayoutStyle;
+import com.androidplot.xy.LineAndPointFormatter;
+import com.androidplot.xy.PointLabelFormatter;
+import com.androidplot.xy.SimpleXYSeries;
+import com.androidplot.xy.XYPlot;
+import com.androidplot.xy.XYSeries;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -43,7 +56,7 @@ import fr.esrf.TangoDs.TangoConst;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 
-public class ATKPanelActivity extends Activity implements TangoConst {
+public class ATKPanelActivity extends CertificateExceptionActivity implements TangoConst {
 	public static final String PREFS_NAME = "SolarisDeviceListPrefsFile";
 	private static final int DEFAULT_REFRESHING_PERIOD = 1000;
 	private int refreshingPeriod = DEFAULT_REFRESHING_PERIOD;
@@ -57,16 +70,22 @@ public class ATKPanelActivity extends Activity implements TangoConst {
 	private List<String> nonScalarAttributeArray;
 	private boolean[] attributeWritableArray;
 	private String attributeName;
+	private String plotAttributeName;
 	private String deviceName;
 	private String restHost;
 	private String tangoHost;
 	private String tangoPort;
 	private int[][] ids;
 	private int numberOfScalars;
-	private Runnable r;
-	private ScheduledFuture sFuture;
-	private RequestQueue queue;
+	private Runnable currentRunnable, rAttributes, rStatus, rAttributePlot;
+	private ScheduledFuture attributeFuture, statusFuture;
 	private boolean firstSelection;
+	private Number[] series1Numbers;
+	private XYPlot plot;
+	private int plotHeight, plotWidth;
+	private ScrollView scrollView;
+	private RelativeLayout relativeLayout;
+	private int maxId, minId, plotId, scaleId;
 
 	/**
 	 * Generate a value suitable for use in setId
@@ -89,44 +108,50 @@ public class ATKPanelActivity extends Activity implements TangoConst {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		firstSelection = true;
 		setContentView(R.layout.activity_atkpanel);
-		StrictMode.ThreadPolicy old = StrictMode.getThreadPolicy();
-		StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder(old).permitNetwork().build());
+		//StrictMode.ThreadPolicy old = StrictMode.getThreadPolicy();
+		//StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder(old).permitNetwork().build());
 
-		// start volley request queue
-		queue = Volley.newRequestQueue(this);
-		queue.start();
+		scrollView = (ScrollView) findViewById(R.id.scrollView);
+		relativeLayout = (RelativeLayout) findViewById(R.id.atkPanel_innerLayout);
+		plotId = generateViewId();
+		scaleId = generateViewId();
+		maxId = generateViewId();
+		minId = generateViewId();
+
+		restartQueue();
 
 		// gett device name from intent if was set
 		Intent i = getIntent();
-		Log.v("ATK Panel onCreate", "Got intent");
+		Log.v("onCreate()", "Got intent");
 		if (i.hasExtra("DEVICE_NAME")) {
-			Log.d("ATK Panel onCreate", "Got device name from intent");
+			Log.d("onCreate()", "Got device name from intent");
 			deviceName = i.getStringExtra("DEVICE_NAME");
 			setTitle(getString(R.string.title_activity_atkpanel) + " : " + deviceName);
 
 		} else { // prompt user for device name
-			Log.d("ATK Panel onCreate", "Requesting device name from user");
+			Log.d("onCreate()", "Requesting device name from user");
 			setDeviceName();
 		}
 
 		// check if tango host and rest address is saved in config, else prompt user for it
 		if (i.hasExtra("restHost") && i.hasExtra("tangoHost") && i.hasExtra("tangoPort")) {
-			Log.d("ATK Panel onCreate", "Got host from intent");
+			Log.d("onCreate()", "Got host from intent");
 			restHost = i.getStringExtra("restHost");
 			tangoHost = i.getStringExtra("tangoHost");
 			tangoPort = i.getStringExtra("tangoPort");
 			populatePanel();
 		} else {
-			Log.d("ATK Panel onCreate", "Request host from user");
+			Log.d("onCreate()", "Request host from user");
 			SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 			String settingsRestHost = settings.getString("RESTfulTangoHost", "");
 			String settingsTangoHost = settings.getString("TangoHost", "");
 			String settingsTangoPort = settings.getString("TangoPort", "");
-			Log.d("ATK Panel onCreate", "Found RESTful host: " + settingsRestHost);
-			Log.d("ATK Panel onCreate", "Found Tango host: " + settingsTangoHost);
-			Log.d("ATK Panel onCreate", "Found Tango port: " + settingsTangoPort);
+			Log.d("onCreate()", "Found RESTful host: " + settingsRestHost);
+			Log.d("onCreate()", "Found Tango host: " + settingsTangoHost);
+			Log.d("onCreate()", "Found Tango port: " + settingsTangoPort);
 			if (settingsRestHost.equals("") || settingsTangoHost.equals("") || settingsTangoPort.equals("")) {
 				Log.d("ATK Panel onCreate", "Requesting new tango host,port and RESTful host");
 				setHost();
@@ -134,14 +159,14 @@ public class ATKPanelActivity extends Activity implements TangoConst {
 				restHost = settingsRestHost;
 				tangoHost = settingsTangoHost;
 				tangoPort = settingsTangoPort;
-				Log.d("ATK Panel onCreate", "Populating panel from server:  " + restHost + "at Tango Host: " +
+				Log.d("onCreate()", "Populating panel from server:  " + restHost + "at Tango Host: " +
 						settingsTangoHost + ":" + settingsTangoPort);
 				populatePanel();
 			}
 		}
 
 		// define thread for refreshing attribute values
-		r = new Runnable() {
+		rAttributes = new Runnable() {
 			@Override
 			public void run() {
 				JSONObject request = new JSONObject();
@@ -154,7 +179,7 @@ public class ATKPanelActivity extends Activity implements TangoConst {
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
-				String urlReadAttributesQuery = restHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort +
+				final String urlReadAttributesQuery = restHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort +
 						"/Device/" + deviceName + "/read_attributes";
 				HeaderJsonObjectRequest jsObjRequestReadAttributes =
 						new HeaderJsonObjectRequest(Request.Method.PUT, urlReadAttributesQuery, request,
@@ -163,11 +188,12 @@ public class ATKPanelActivity extends Activity implements TangoConst {
 									public void onResponse(JSONObject response) {
 										try {
 											if (response.getString("connectionStatus").equals("OK")) {
-												Log.d("Runnable run()", "Device connection OK");
+												Log.d("rAttibutes.run()", "Device connection OK / method PUT / got attribute values");
+												Log.d("rAttibutes.run()", "From host: " + urlReadAttributesQuery);
 												updateScalarListView(response);
 											} else {
-												Log.d("Runnable run()", "Tango database API returned message:");
-												Log.d("Runnable run()", response.getString("connectionStatus"));
+												Log.d("rAttibutes.run()", "Tango database API returned message:");
+												Log.d("rAttibutes.run()", response.getString("connectionStatus"));
 											}
 										} catch (JSONException e) {
 											Log.d("Runnable run()", "Problem with JSON object");
@@ -185,6 +211,208 @@ public class ATKPanelActivity extends Activity implements TangoConst {
 				queue.add(jsObjRequestReadAttributes);
 			}
 		};
+
+		rAttributePlot = new Runnable() {
+			@Override
+			public void run() {
+				Log.d("rAttributePlot.run()", "Sending plot request");
+				String url = restHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/plot_attribute.json/" + plotAttributeName;
+				System.out.println("Sending JSON request");
+				HeaderJsonObjectRequest jsObjRequest =
+						new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+							@Override
+							public void onResponse(JSONObject response) {
+								try {
+									if (response.getString("connectionStatus").equals("OK")) {
+										Log.d("rAttributePlot.run()", "Device connection OK");
+										String dataFormat = response.getString("dataFormat");
+										String plotLabel = response.getString("plotLabel");
+										switch (dataFormat) {
+											case "SPECTRUM":
+												plot = new XYPlot(context, "");
+												plotHeight = scrollView.getHeight();
+												plot.setMinimumHeight(plotHeight);
+												Log.d("populateAttributePlot()", "Plot height set to: " + plotHeight);
+												relativeLayout.removeAllViews();
+												relativeLayout.addView(plot);
+												JSONArray array = response.getJSONArray("plotData");
+												series1Numbers = new Number[array.length()];
+												Log.v("rAttributePlot.run()", "Have " + series1Numbers.length + " elements");
+												for (int j = 0; j < series1Numbers.length; j++) {
+													series1Numbers[j] = array.getDouble(j);
+													Log.v("rAttributePlot.run()", "Data to plot: " + series1Numbers[j]);
+												}
+
+												XYSeries series1;
+												series1 =
+														new SimpleXYSeries(Arrays.asList(series1Numbers), SimpleXYSeries.ArrayFormat
+																.Y_VALS_ONLY,
+																plotLabel);
+
+												LineAndPointFormatter series1Format = new LineAndPointFormatter();
+												series1Format.setPointLabelFormatter(new PointLabelFormatter());
+												series1Format.configure(getApplicationContext(), R.xml.line_point_formatter_with_plf1);
+
+
+												// add a new series' to the xyplot:
+												plot.addSeries(series1, series1Format);
+												plot.setTicksPerRangeLabel(3);
+												plot.getGraphWidget().setDomainLabelOrientation(-45);
+												plot.getLegendWidget().setTableModel(new DynamicTableModel(1, 1));
+												plot.getLegendWidget()
+														.position(10, XLayoutStyle.ABSOLUTE_FROM_LEFT, 10,
+																YLayoutStyle.ABSOLUTE_FROM_BOTTOM,
+																AnchorPosition.LEFT_BOTTOM);
+												plot.getLegendWidget()
+														.setSize(new SizeMetrics(55, SizeLayoutType.ABSOLUTE, 100, SizeLayoutType.FILL));
+												break;
+											case "IMAGE":
+												//TODO implement plot
+
+												TextView textViewMaxValue = prepareTextViewMaxValue(maxId);
+												TextView textViewMinValue = prepareTextViewMinValue(minId);
+												ImageView imageViewScale = prepareScaleImageView(minId, maxId, scaleId);
+												ImageView imageViewPlot = preparePlotImageView(scaleId, plotId);
+												plotHeight = scrollView.getHeight();
+												plotWidth = scrollView.getWidth() - 50;
+												if (plotHeight < plotWidth) {
+													imageViewPlot.setMinimumHeight(plotHeight);
+													imageViewPlot.setMinimumWidth(plotHeight);
+												} else {
+													imageViewPlot.setMinimumHeight(plotWidth);
+													imageViewPlot.setMinimumWidth(plotWidth);
+												}
+
+												imageViewScale.setMinimumWidth(20);
+												imageViewScale.setMinimumHeight(plotHeight);
+												Log.d("rAttributePlot.run() IM", "Plot height: " + plotHeight);
+												imageViewScale.setScaleType(ImageView.ScaleType.FIT_XY);
+
+												relativeLayout.removeAllViews();
+												relativeLayout.addView(textViewMaxValue);
+												relativeLayout.addView(textViewMinValue);
+												relativeLayout.addView(imageViewPlot);
+												relativeLayout.addView(imageViewScale);
+
+												int rows = response.getInt("rows");
+												int cols = response.getInt("cols");
+												JSONArray oneDimArray;
+												double[][] ivalues = new double[rows][cols];
+												for (int i = 0; i < rows; i++) {
+													oneDimArray = response.getJSONArray("row" + i);
+													for (int j = 0; j < cols; j++) {
+														ivalues[i][j] = oneDimArray.getDouble(j);
+													}
+												}
+
+												Bitmap b = Bitmap.createBitmap(ivalues.length, ivalues[0].length,
+														Bitmap.Config.RGB_565);
+												double minValue = ivalues[0][0];
+												double maxValue = ivalues[0][0];
+												for (int i = 0; i < ivalues.length; i++) {
+													for (int j = 0; j < ivalues[0].length; j++) {
+														if (minValue > ivalues[i][j]) {
+															minValue = ivalues[i][j];
+														}
+														if (maxValue < ivalues[i][j]) {
+															maxValue = ivalues[i][j];
+														}
+													}
+												}
+												System.out.println("Min: " + minValue + "Max: " + maxValue);
+												double range = maxValue - minValue;
+												float step = (float) (330 / range);
+
+												int color = 0;
+												float hsv[] = {0, 1, 1};
+
+												for (int i = 1; i < ivalues.length; i++) {
+													for (int j = 1; j < ivalues[0].length; j++) {
+														hsv[0] = 330 - (float) (ivalues[i][j] * step);
+														color = Color.HSVToColor(hsv);
+														b.setPixel(ivalues.length - i, ivalues[0].length - j, color);
+													}
+												}
+												imageViewPlot.setImageBitmap(b);
+
+												textViewMaxValue.setText("" + maxValue);
+												textViewMinValue.setText("" + minValue);
+												Bitmap scaleBitmap = Bitmap.createBitmap(20, 330, Bitmap.Config.RGB_565);
+												for (int j = 0; j < 330; j++) {
+													hsv[0] = j;
+													color = Color.HSVToColor(hsv);
+													for (int k = 0; k < 20; k++) {
+														scaleBitmap.setPixel(k, j, color);
+													}
+												}
+												imageViewScale.setImageBitmap(scaleBitmap);
+												imageViewScale.setScaleType(ImageView.ScaleType.FIT_XY);
+												break;
+										}
+									} else {
+										AlertDialog.Builder builder = new AlertDialog.Builder(context);
+										String res = response.getString("connectionStatus");
+										System.out.println("Tango database API returned message:");
+										System.out.println(res);
+										builder.setTitle("Reply");
+										builder.setMessage(res);
+										AlertDialog dialog = builder.create();
+										dialog.show();
+									}
+								} catch (JSONException e) {
+									System.out.println("Problem with JSON object");
+									e.printStackTrace();
+								}
+							}
+						}, new Response.ErrorListener() {
+							@Override
+							public void onErrorResponse(VolleyError error) {
+								jsonRequestErrorHandler(error);
+							}
+						});
+				jsObjRequest.setShouldCache(false);
+				queue.add(jsObjRequest);
+			}
+		};
+
+		// define thread for refreshing attribute values
+		rStatus = new Runnable() {
+			@Override
+			public void run() {
+
+				final String urlGetStatus = restHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort +
+						"/Device/" + deviceName + "/command_inout.json/Status/DevVoidArgument";
+				HeaderJsonObjectRequest jsObjRequestStatus =
+						new HeaderJsonObjectRequest(Request.Method.PUT, urlGetStatus, null, new Response.Listener<JSONObject>() {
+							@Override
+							public void onResponse(JSONObject response) {
+								try {
+									if (response.getString("connectionStatus").equals("OK")) {
+										Log.d("rStatus.run()", "Device connection OK / Method PUT /  received status");
+										Log.d("rStatus.run()", "From host: " + urlGetStatus);
+										populateStatus(response);
+									} else {
+										Log.d("rStatus.run()", "Tango database API returned message:");
+										Log.d("rStatus.run()", response.getString("connectionStatus"));
+									}
+								} catch (JSONException e) {
+									Log.d("rStatus.run()", "Problem with JSON object");
+									e.printStackTrace();
+								}
+							}
+						}, new Response.ErrorListener() {
+							@Override
+							public void onErrorResponse(VolleyError error) {
+								jsonRequestErrorHandler(error);
+							}
+						});
+				jsObjRequestStatus.setShouldCache(false);
+				queue.add(jsObjRequestStatus);
+			}
+		};
+		statusFuture = scheduler.scheduleAtFixedRate(rStatus, refreshingPeriod, refreshingPeriod, MILLISECONDS);
+
 	}
 
 	@Override
@@ -192,6 +420,68 @@ public class ATKPanelActivity extends Activity implements TangoConst {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.menu_atkpanel, menu);
 		return true;
+	}
+
+	private ImageView preparePlotImageView(int scaleID, int plotId) {
+		ImageView plotImageView = new ImageView(context);
+		plotImageView.setId(plotId);
+		// create layout
+		RelativeLayout.LayoutParams plotImageViewLayParam = new RelativeLayout.LayoutParams
+				(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+		// add layout params
+		plotImageViewLayParam.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		plotImageViewLayParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+		plotImageViewLayParam.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+		//plotImageViewLayParam.addRule(RelativeLayout.CENTER_HORIZONTAL);
+		plotImageViewLayParam.addRule(RelativeLayout.LEFT_OF, scaleID);
+		// apply layout to view
+		plotImageView.setLayoutParams(plotImageViewLayParam);
+		plotImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+		return plotImageView;
+	}
+
+	private ImageView prepareScaleImageView(int minId, int maxId, int scaleId) {
+		ImageView scaleImageView = new ImageView(context);
+		scaleImageView.setId(scaleId);
+		// create layout
+		RelativeLayout.LayoutParams scaleImageViewLayParam = new RelativeLayout.LayoutParams
+				(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+		// add layout params
+		scaleImageViewLayParam.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		scaleImageViewLayParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+		scaleImageViewLayParam.addRule(RelativeLayout.LEFT_OF, maxId);
+		// apply layout to view
+		scaleImageView.setLayoutParams(scaleImageViewLayParam);
+		scaleImageView.setScaleType(ImageView.ScaleType.FIT_XY);
+		return scaleImageView;
+	}
+
+	private TextView prepareTextViewMaxValue(int maxId) {
+		TextView textViewMaxValue = new TextView(context);
+		textViewMaxValue.setId(maxId);
+		// create layout
+		RelativeLayout.LayoutParams textViewMaxValueLayParam = new RelativeLayout.LayoutParams
+				(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+		// add layout params
+		textViewMaxValueLayParam.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		textViewMaxValueLayParam.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+		// apply layout to view
+		textViewMaxValue.setLayoutParams(textViewMaxValueLayParam);
+		return textViewMaxValue;
+	}
+
+	private TextView prepareTextViewMinValue(int minId) {
+		TextView textViewMinValue = new TextView(context);
+		textViewMinValue.setId(minId);
+		// create layout
+		RelativeLayout.LayoutParams textViewMinValueLayParam = new RelativeLayout.LayoutParams
+				(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+		// add layout params
+		textViewMinValueLayParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+		textViewMinValueLayParam.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+		// apply layout to view
+		textViewMinValue.setLayoutParams(textViewMinValueLayParam);
+		return textViewMinValue;
 	}
 
 	@Override
@@ -235,10 +525,17 @@ public class ATKPanelActivity extends Activity implements TangoConst {
 				String value = input.getText().toString();
 				int period = Integer.parseInt(value);
 				if (period > 0) {
-					if (sFuture != null) {
-						sFuture.cancel(true);
+					if (attributeFuture != null) {
+						attributeFuture.cancel(true);
 					}
-					sFuture = scheduler.scheduleAtFixedRate(r, period, period, MILLISECONDS);
+					attributeFuture = scheduler.scheduleAtFixedRate(currentRunnable, period, period, MILLISECONDS);
+
+					if (statusFuture != null) {
+						statusFuture.cancel(true);
+					}
+
+					statusFuture = scheduler.scheduleAtFixedRate(rStatus, period, period, MILLISECONDS);
+
 					refreshingPeriod = period;
 				}
 			}
@@ -254,13 +551,17 @@ public class ATKPanelActivity extends Activity implements TangoConst {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		if (sFuture != null) {
-			sFuture.cancel(true);
+		if (attributeFuture != null) {
+			attributeFuture.cancel(true);
+		}
+		if (statusFuture != null) {
+			statusFuture.cancel(true);
 		}
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == 1) {
 			if (resultCode == RESULT_OK) {
 				restHost = data.getStringExtra("restHost");
@@ -321,10 +622,7 @@ public class ATKPanelActivity extends Activity implements TangoConst {
 	}
 
 	private void populatePanel() {
-		Log.v("ATK Panel populatePanel", "Populating panel");
-		// you need to have a list of data that you want the spinner to display
-		//RequestQueue queue = Volley.newRequestQueue(this);
-		//queue.start();
+		Log.v("populatePanel()", "Populating panel");
 		String urlCommandListQuery = restHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort +
 				"/Device/" + deviceName + "/command_list_query.json";
 		HeaderJsonObjectRequest jsObjRequestCommands =
@@ -333,11 +631,11 @@ public class ATKPanelActivity extends Activity implements TangoConst {
 					public void onResponse(JSONObject response) {
 						try {
 							if (response.getString("connectionStatus").equals("OK")) {
-								Log.d("ATK Panel populatePanel", "Device connection OK");
+								Log.d("populatePanel()", "Device connection OK - received command list");
 								populateCommandSpinner(response);
 							} else {
-								Log.d("ATK Panel populatePanel", "Tango database API returned message:");
-								Log.d("ATK Panel populatePanel", response.getString("connectionStatus"));
+								Log.d("populatePanel()", "Tango database API returned message:");
+								Log.d("populatePanel()", response.getString("connectionStatus"));
 							}
 						} catch (JSONException e) {
 							Log.d("ATK Panel populatePanel", "Problem with JSON object");
@@ -353,35 +651,6 @@ public class ATKPanelActivity extends Activity implements TangoConst {
 		jsObjRequestCommands.setShouldCache(false);
 		queue.add(jsObjRequestCommands);
 
-
-		String urlGetStatus = restHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort +
-				"/Device/" + deviceName + "/command_inout.json/Status/DevVoidArgument";
-		HeaderJsonObjectRequest jsObjRequestStatus =
-				new HeaderJsonObjectRequest(Request.Method.PUT, urlGetStatus, null, new Response.Listener<JSONObject>() {
-					@Override
-					public void onResponse(JSONObject response) {
-						try {
-							if (response.getString("connectionStatus").equals("OK")) {
-								Log.d("ATK Panel populatePanel", "Device connection OK");
-								populateStatus(response);
-							} else {
-								Log.d("ATK Panel populatePanel", "Tango database API returned message:");
-								Log.d("ATK Panel populatePanel", response.getString("connectionStatus"));
-							}
-						} catch (JSONException e) {
-							Log.d("ATK Panel populatePanel", "Problem with JSON object");
-							e.printStackTrace();
-						}
-					}
-				}, new Response.ErrorListener() {
-					@Override
-					public void onErrorResponse(VolleyError error) {
-						jsonRequestErrorHandler(error);
-					}
-				});
-		jsObjRequestStatus.setShouldCache(false);
-		queue.add(jsObjRequestStatus);
-
 		String urlGetAttribuesList = restHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort +
 				"/Device/" + deviceName + "/get_attribute_list.json";
 		HeaderJsonObjectRequest jsObjRequestAttributeList =
@@ -390,11 +659,11 @@ public class ATKPanelActivity extends Activity implements TangoConst {
 					public void onResponse(JSONObject response) {
 						try {
 							if (response.getString("connectionStatus").equals("OK")) {
-								Log.d("ATK Panel populatePanel", "Device connection OK");
+								Log.d("populatePanel()", "Device connection OK - received attribute list");
 								populateAttributeSpinner(response);
 							} else {
-								Log.d("ATK Panel populatePanel", "Tango database API returned message:");
-								Log.d("ATK Panel populatePanel", response.getString("connectionStatus"));
+								Log.d("populatePanel()", "Tango database API returned message:");
+								Log.d("populatePanel()", response.getString("connectionStatus"));
 							}
 						} catch (JSONException e) {
 							Log.d("ATK Panel populatePanel", "Problem with JSON object");
@@ -419,14 +688,14 @@ public class ATKPanelActivity extends Activity implements TangoConst {
 	private void jsonRequestErrorHandler(VolleyError error) {
 		// Print error message to LogcCat
 		Log.d("jsonRequestErrorHandler", "Connection error!");
-		error.printStackTrace();
+		//error.printStackTrace();
 
 		// show dialog box with error message
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		/*AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setMessage(error.toString()).setTitle("Connection error!").setPositiveButton(getString(R.string.ok_button),
 				null);
 		AlertDialog dialog = builder.create();
-		dialog.show();
+		dialog.show();*/
 	}
 
 	private void populateCommandSpinner(JSONObject response) {
@@ -530,6 +799,9 @@ public class ATKPanelActivity extends Activity implements TangoConst {
 							} else {
 								Log.d("ATK executeCommand", "Tango database API returned message:");
 								Log.d("ATK executeCommand", response.getString("connectionStatus"));
+								Toast.makeText(context,
+										getString(R.string.command_execution_error) + response.getString("connectionStatus"),
+										Toast.LENGTH_SHORT).show();
 							}
 						} catch (JSONException e) {
 							Log.d("ATK executeCommand", "Problem with JSON object");
@@ -589,26 +861,35 @@ public class ATKPanelActivity extends Activity implements TangoConst {
 						if (attName.equals("Scalar")) {
 							populateScalarListView();
 						} else {
-							//TODO add attribute plot
-							//RelativeLayout container = (RelativeLayout) findViewById(R.id.atkPanel_innerLayout);
-							//container.addView(plot);
+							if (attributeFuture != null) {
+								attributeFuture.cancel(true);
+							}
+							populateAttributePlot(attName);
 						}
 					}
 
 					@Override
 					public void onNothingSelected(AdapterView<?> parentView) {
 					}
-
 				});
 			} else {
 				Spinner attributeSpinner = (Spinner) findViewById(R.id.atk_panel_attribute_spinner);
 				attributeSpinner.setVisibility(View.INVISIBLE);
 				populateScalarListView();
-
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void populateAttributePlot(String attributeName) {
+		Log.d("populateAttributePlot()", "Polulating attribute plot");
+		if (attributeFuture != null) {
+			attributeFuture.cancel(true);
+		}
+		plotAttributeName = attributeName;
+		currentRunnable = rAttributePlot;
+		attributeFuture = scheduler.scheduleAtFixedRate(currentRunnable, refreshingPeriod, refreshingPeriod, MILLISECONDS);
 	}
 
 	private void populateScalarListView() {
@@ -616,6 +897,8 @@ public class ATKPanelActivity extends Activity implements TangoConst {
 
 			Log.d("populateScalarListView", "Getting RelativeLayout");
 			RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.atkPanel_innerLayout);
+
+			relativeLayout.removeAllViews();
 			numberOfScalars = scalarAttrbuteArray.size();
 			ids = new int[numberOfScalars][5];
 			for (int i = 0; i < numberOfScalars; i++) {
@@ -725,7 +1008,7 @@ public class ATKPanelActivity extends Activity implements TangoConst {
 								public void onResponse(JSONObject response) {
 									try {
 										if (response.getString("connectionStatus").equals("OK")) {
-											Log.d("populateScalarListView", "Device connection OK");
+											Log.d("populateScalarListView", "Device connection OK - read attribute values");
 											updateScalarListView(response);
 										} else {
 											Log.d("populateScalarListView", "Tango database API returned message:");
@@ -744,7 +1027,12 @@ public class ATKPanelActivity extends Activity implements TangoConst {
 					});
 			jsObjRequestCommands.setShouldCache(false);
 			queue.add(jsObjRequestCommands);
-			sFuture = scheduler.scheduleAtFixedRate(r, refreshingPeriod, refreshingPeriod, MILLISECONDS);
+			if (attributeFuture != null) {
+				attributeFuture.cancel(true);
+			}
+
+			currentRunnable = rAttributes;
+			attributeFuture = scheduler.scheduleAtFixedRate(currentRunnable, refreshingPeriod, refreshingPeriod, MILLISECONDS);
 		}
 	}
 
@@ -758,7 +1046,7 @@ public class ATKPanelActivity extends Activity implements TangoConst {
 					public void onResponse(JSONObject response) {
 						try {
 							if (response.getString("connectionStatus").equals("OK")) {
-								Log.v("Update attribute", "Device connection OK");
+								Log.v("Update attribute", "Device connection OK - wrote attribute");
 								Toast.makeText(getApplicationContext(), response.getString("connectionStatus"),
 										Toast.LENGTH_SHORT).show();
 							} else {

@@ -54,6 +54,7 @@
     <string name="menu_item_track_status">Track status</string>
     <string name="menu_item_untrack_status">Untrack status</string>
     <string name="menu_item_set_refreshing_period">Set refreshing period</string>
+    <string name="menu_item_new_certificate_file">Load SSL certificate file</string>
 
     <!--    Activity titles    -->
     <string name="title_activity_server_list">ServerList</string>
@@ -83,6 +84,7 @@
     <string name="command_input">Command input</string>
     <string name="command_input_type">Command input type: </string>
     <string name="command_execution_confirmation">Command executed without problems</string>
+    <string name="command_execution_error">Error occured while executing command: </string>
     <string name="attribute_new_value">Attribute new value</string>
     <string name="new_value_for_att">New value for </string>
 

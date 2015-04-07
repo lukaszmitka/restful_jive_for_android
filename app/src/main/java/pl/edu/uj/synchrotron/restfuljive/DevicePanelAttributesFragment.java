@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -20,95 +20,46 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import fr.esrf.Tango.AttrDataFormat;
-import fr.esrf.Tango.AttrWriteType;
-import fr.esrf.TangoApi.AttributeInfo;
 import fr.esrf.TangoDs.TangoConst;
 
 /**
  * A class for creating device panel attributes fragment.
  */
-public class DevicePanelAttributesFragment extends Fragment implements TangoConst {
-	final DevicePanelAttributesFragment devicePanelAttributesFragment = this;
+public class DevicePanelAttributesFragment extends CertificateExceptionFragment implements TangoConst {
 	private int selectedAttributeId;
-	//private AttributeInfo[] attList;
 	private String attributeNames[];
 	private View rootView;
 	private Context context;
 	private String RESTfulTangoHost;
 	private String tangoHost;
 	private String tangoPort;
-
-
 	private boolean attributePlottable[];
 	private boolean attributeWritable[];
 	private String attributeDesc[];
 
-	private RequestQueue queue;
-
-	/**
-	 * Check whether attribute could be read, written or both.
-	 *
-	 * @param ai Attribute to be checked.
-	 * @return String defining write permission.
-	 */
-	static String getWriteString(AttributeInfo ai) {
-		switch (ai.writable.value()) {
-			case AttrWriteType._READ:
-				return "READ";
-			case AttrWriteType._READ_WITH_WRITE:
-				return "READ_WITH_WRITE";
-			case AttrWriteType._READ_WRITE:
-				return "READ_WRITE";
-			case AttrWriteType._WRITE:
-				return "WRITE";
-		}
-		return "Unknown";
-	}
-
-	/**
-	 * Check whether attribute could be presented as scalar, spectrum or image.
-	 *
-	 * @param ai Attribute to be checked.
-	 * @return String defining presentation format.
-	 */
-	static String getFormatString(AttributeInfo ai) {
-		switch (ai.data_format.value()) {
-			case AttrDataFormat._SCALAR:
-				return "Scalar";
-			case AttrDataFormat._SPECTRUM:
-				return "Spectrum";
-			case AttrDataFormat._IMAGE:
-				return "Image";
-		}
-		return "Unknown";
-	}
-
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		super.onCreateView(inflater, container, savedInstanceState);
 		rootView = inflater.inflate(R.layout.fragment_device_panel_attributes, container, false);
 		final String deviceName = ((DevicePanelActivity) getActivity()).getDeviceName();
 		TextView tvDeviceName = (TextView) rootView.findViewById(R.id.devicePanel_attributes_deviceName);
 		tvDeviceName.setText(deviceName);
-		System.out.println("Device name: " + deviceName);
+		Log.d("onCreateView", "Device name: " + deviceName);
 		RESTfulTangoHost = ((DevicePanelActivity) getActivity()).getRestHost();
 		tangoHost = ((DevicePanelActivity) getActivity()).getTangoHost();
 		tangoPort = ((DevicePanelActivity) getActivity()).getTangoPort();
 		context = ((DevicePanelActivity) getActivity()).getContext();
 
-		System.out.println("Host: " + RESTfulTangoHost);
+		Log.d("onCreateView()", "Host: " + RESTfulTangoHost);
 
-		queue = Volley.newRequestQueue(context);
-		queue.start();
+		restartQueue();
 		String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 				"/get_attribute_list.json";
 		HeaderJsonObjectRequest jsObjRequest =
@@ -117,11 +68,11 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 					public void onResponse(JSONObject response) {
 						try {
 							if (response.getString("connectionStatus").equals("OK")) {
-								System.out.println("Device connection OK");
+								Log.d("onCreateView()", "Device connection OK / method GET / got attribute list");
 								// showDeviceInfo(response.getString("deviceInfo"));
 								// dp = new DeviceProxy(deviceName, dbHost, dbPort);
 								int attributeCount = response.getInt("attCount");
-								System.out.println("Received " + attributeCount + " attributes");
+								Log.d("onCreateView()", "Received " + attributeCount + " attributes");
 								attributeNames = new String[attributeCount];
 								attributePlottable = new boolean[attributeCount];
 								attributeDesc = new String[attributeCount];
@@ -167,11 +118,11 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 									}
 								});
 							} else {
-								System.out.println("Tango database API returned message:");
-								System.out.println(response.getString("connectionStatus"));
+								Log.d("onCreateView()", "Tango database API returned message from query get_attribute_list:");
+								Log.d("onCreateView()", response.getString("connectionStatus"));
 							}
 						} catch (JSONException e) {
-							System.out.println("Problem with JSON object");
+							Log.d("onCreateView()", "Problem with JSON object while getting attribute list");
 							e.printStackTrace();
 						}
 					}
@@ -189,7 +140,6 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 			@Override
 			public void onClick(View v) {
 				AlertDialog.Builder builder = new AlertDialog.Builder(rootView.getContext());
-				//AttributeInfo ai = attList[selectedAttributeId];
 				builder.setTitle("Attribute \"" + attributeNames[selectedAttributeId] + "\" description");
 				builder.setMessage(attributeDesc[selectedAttributeId]);
 				builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -205,18 +155,18 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 		final Button readButton = (Button) rootView.findViewById(R.id.devicePanel_attributes_readButton);
 		readButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				System.out.println("Processing read button");
+				Log.d("readButton.onClick()", "Processing read button");
 				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 						"/read_attribute.json/" +
 						attributeNames[selectedAttributeId];
-				System.out.println("Sending JSON request");
+				Log.d("readButton.onClick()", "Sending JSON request");
 				HeaderJsonObjectRequest jsObjRequest =
 						new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 							@Override
 							public void onResponse(JSONObject response) {
 								try {
 									if (response.getString("connectionStatus").equals("OK")) {
-										System.out.println("Device connection OK");
+										Log.d("readButton.onClick()", "Device connection OK / method GET / read attribute");
 										String attName = response.getString("attName");
 										String attValue = response.getString("attValue");
 										String devName = response.getString("devName");
@@ -230,11 +180,12 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 										AlertDialog dialog = builder.create();
 										dialog.show();
 									} else {
-										System.out.println("Tango database API returned message:");
-										System.out.println(response.getString("connectionStatus"));
+										Log.d("readButton.onClick()", "Tango database API returned message from query " +
+												"read_attribute:");
+										Log.d("readButton.onClick()", response.getString("connectionStatus"));
 									}
 								} catch (JSONException e) {
-									System.out.println("Problem with JSON object");
+									Log.d("readButton.onClick()", "Problem with JSON object while reading attribute");
 									e.printStackTrace();
 								}
 							}
@@ -418,12 +369,8 @@ public class DevicePanelAttributesFragment extends Fragment implements TangoCons
 	 */
 	private void jsonRequestErrorHandler(VolleyError error) {
 		// Print error message to LogcCat
-		System.out.println("Connection error!");
+		Log.d("jsonRequestErrorHandler", "Connection error!");
 		error.printStackTrace();
-		//System.out.println("getMessage: "+error.getMessage());
-		//System.out.println("toString: "+error.toString());
-		//System.out.println("getCause: "+error.getCause());
-		//System.out.println("getStackTrace: "+error.getStackTrace().toString());
 
 		// show dialog box with error message
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);

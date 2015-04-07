@@ -4,7 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,10 +14,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,14 +23,12 @@ import org.json.JSONObject;
 /**
  * A class for creating device panel admin fragment.
  */
-public class DevicePanelAdminFragment extends Fragment {
+public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 
 	EditText answerLimitMinEditText;
 	EditText answerLimitMaxEditText;
 	EditText timeoutEditText;
 	EditText blackBoxEditText;
-	//private DeviceProxy device = null;
-	//private DeviceProxy deviceAdm = null;
 	private int answerLimitMin = 0;
 	private int answerLimitMax = 1024;
 	private View rootView;
@@ -40,22 +36,21 @@ public class DevicePanelAdminFragment extends Fragment {
 	private String RESTfulTangoHost;
 	private String tangoHost;
 	private String tangoPort;
-	private RequestQueue queue;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		super.onCreateView(inflater, container, savedInstanceState);
 		rootView = inflater.inflate(R.layout.fragment_device_panel_admin, container, false);
 
 		final String deviceName = ((DevicePanelActivity) getActivity()).getDeviceName();
-		System.out.println("Device name: " + deviceName);
+		Log.d("onCreateView()", "Device name: " + deviceName);
 		RESTfulTangoHost = ((DevicePanelActivity) getActivity()).getRestHost();
 		tangoHost = ((DevicePanelActivity) getActivity()).getTangoHost();
 		tangoPort = ((DevicePanelActivity) getActivity()).getTangoPort();
-		System.out.println("Host: " + RESTfulTangoHost);
+		Log.d("onCreateView()", "Host: " + RESTfulTangoHost);
 		context = ((DevicePanelActivity) getActivity()).getContext();
-		queue = Volley.newRequestQueue(context);
-		queue.start();
 
+		restartQueue();
 		answerLimitMinEditText = (EditText) rootView.findViewById(R.id.devicePanel_adminFragment_limitMinEditText);
 		answerLimitMinEditText.setText("" + answerLimitMin);
 		answerLimitMaxEditText = (EditText) rootView.findViewById(R.id.devicePanel_adminFragment_limitMaxEditText);
@@ -71,7 +66,7 @@ public class DevicePanelAdminFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				String nbCmd = blackBoxEditText.getText().toString();
-				System.out.println("Processing BlackBox button");
+				Log.d("blackBoxButton.onClick", "Processing BlackBox button");
 
 				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 						"/black_box.json/" +
@@ -421,19 +416,19 @@ public class DevicePanelAdminFragment extends Fragment {
 
 		String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 				"/get_source.json";
-		System.out.println("Sending JSON request");
+		Log.d("onCreateView()", "Sending JSON request: get_source");
 		HeaderJsonObjectRequest jsObjRequest =
 				new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 					@Override
 					public void onResponse(JSONObject response) {
 						try {
 							if (response.getString("connectionStatus").equals("OK")) {
-								System.out.println("Device connection OK");
+								Log.d("onCreateView()", "Device connection OK / method GET / got source");
 								int source = response.getInt("source");
 								populateSpinner(source);
 							} else {
-								System.out.println("Tango database API returned message:");
-								System.out.println(response.getString("connectionStatus"));
+								Log.d("onCreateView()", "Tango database API returned message from query get source:");
+								Log.d("onCreateView()", response.getString("connectionStatus"));
 								AlertDialog.Builder builder = new AlertDialog.Builder(rootView.getContext());
 								builder.setTitle("Command error");
 								String message = response.getString("message");
@@ -446,7 +441,7 @@ public class DevicePanelAdminFragment extends Fragment {
 								dialog.show();
 							}
 						} catch (JSONException e) {
-							System.out.println("Problem with JSON object");
+							Log.d("onCreateView()", "Problem with JSON object while getting source");
 							e.printStackTrace();
 						}
 					}
@@ -459,14 +454,6 @@ public class DevicePanelAdminFragment extends Fragment {
 		jsObjRequest.setShouldCache(false);
 		queue.add(jsObjRequest);
 		return rootView;
-	}
-
-	public int getAnswerLimitMin() {
-		return answerLimitMin;
-	}
-
-	public int getAnswerLimitMax() {
-		return answerLimitMax;
 	}
 
 	private void populateSpinner(int source) {
@@ -502,10 +489,10 @@ public class DevicePanelAdminFragment extends Fragment {
 							public void onResponse(JSONObject response) {
 								try {
 									if (response.getString("connectionStatus").equals("OK")) {
-										System.out.println("Device connection OK");
+										Log.d("populateSpinner()", "Device connection OK / method PUT / set source");
 									} else {
-										System.out.println("Tango database API returned message:");
-										System.out.println(response.getString("connectionStatus"));
+										Log.d("populateSpinner()", "Tango database API returned message from query set_source:");
+										Log.d("populateSpinner()", response.getString("connectionStatus"));
 										AlertDialog.Builder builder = new AlertDialog.Builder(rootView.getContext());
 										builder.setTitle("Command error");
 										String message = response.getString("connectionStatus");
@@ -518,7 +505,7 @@ public class DevicePanelAdminFragment extends Fragment {
 										dialog.show();
 									}
 								} catch (JSONException e) {
-									System.out.println("Problem with JSON object");
+									Log.d("populateSpinner()", "Problem with JSON object while setting source");
 									e.printStackTrace();
 								}
 							}
@@ -542,7 +529,7 @@ public class DevicePanelAdminFragment extends Fragment {
 	/**
 	 * Method displaying info about connection error
 	 *
-	 * @param error Error tah caused exception
+	 * @param error Error that caused exception
 	 */
 	private void jsonRequestErrorHandler(VolleyError error) {
 		// Print error message to LogcCat

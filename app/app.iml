@@ -96,6 +96,7 @@
     <orderEntry type="library" exported="" name="support-annotations-21.0.3" level="project" />
     <orderEntry type="library" exported="" name="androidplot-core-0.6.1-sources" level="project" />
     <orderEntry type="library" exported="" name="TangORB-8.3.5_jeromq_android" level="project" />
+    <orderEntry type="module" module-name="fileExplorer" exported="" />
   </component>
 </module>
 
