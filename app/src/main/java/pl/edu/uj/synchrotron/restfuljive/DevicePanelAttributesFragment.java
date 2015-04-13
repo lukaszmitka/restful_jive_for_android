@@ -60,8 +60,8 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 		Log.d("onCreateView()", "Host: " + RESTfulTangoHost);
 
 		restartQueue();
-		String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
-				"/get_attribute_list.json";
+		String url = RESTfulTangoHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+				"/get_attribute_list";
 		HeaderJsonObjectRequest jsObjRequest =
 				new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 					@Override
@@ -156,8 +156,8 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 		readButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				Log.d("readButton.onClick()", "Processing read button");
-				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
-						"/read_attribute.json/" +
+				String url = RESTfulTangoHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/read_attribute/" +
 						attributeNames[selectedAttributeId];
 				Log.d("readButton.onClick()", "Sending JSON request");
 				HeaderJsonObjectRequest jsObjRequest =
@@ -207,8 +207,8 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 				EditText arginEditTextValue = (EditText) rootView
 						.findViewById(R.id.devicePanel_attributes_arginValueEditText);
 				String arginStr = arginEditTextValue.getText().toString();
-				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
-						"/write_attribute.json/" +
+				String url = RESTfulTangoHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/write_attribute/" +
 						attributeNames[selectedAttributeId] + "/" + arginStr;
 				System.out.println("Sending JSON request");
 				HeaderJsonObjectRequest jsObjRequest =
@@ -251,8 +251,8 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 		plotButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				System.out.println("Processing plot button");
-				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
-						"/plot_attribute.json/" +
+				String url = RESTfulTangoHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/plot_attribute/" +
 						attributeNames[selectedAttributeId];
 				System.out.println("Sending JSON request");
 				HeaderJsonObjectRequest jsObjRequest =

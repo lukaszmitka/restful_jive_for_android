@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,7 +16,7 @@ import android.widget.Toast;
 /**
  * A class for creating device panel activity screen.
  */
-public class DevicePanelActivity extends FragmentActivity implements ActionBar.TabListener {
+public class DevicePanelActivity extends WifiMonitorFragmentActivity implements ActionBar.TabListener {
 	/**
 	 * Name of preferences file to store application settings.
 	 */

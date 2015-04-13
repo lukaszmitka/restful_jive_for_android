@@ -68,8 +68,8 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 				String nbCmd = blackBoxEditText.getText().toString();
 				Log.d("blackBoxButton.onClick", "Processing BlackBox button");
 
-				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
-						"/black_box.json/" +
+				String url = RESTfulTangoHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/black_box/" +
 						nbCmd;
 				System.out.println("Sending JSON request");
 				HeaderJsonObjectRequest jsObjRequest =
@@ -141,8 +141,8 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 			@Override
 			public void onClick(View v) {
 				System.out.println("Processing timeout button");
-				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
-						"/set_timeout_milis.json/" +
+				String url = RESTfulTangoHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/set_timeout_milis/" +
 						timeoutEditText.getText().toString();
 				System.out.println("Sending JSON request");
 				HeaderJsonObjectRequest jsObjRequest =
@@ -196,8 +196,8 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 			@Override
 			public void onClick(View v) {
 				System.out.println("Processing deviceInfo button");
-				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
-						"/get_device_info.json";
+				String url = RESTfulTangoHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/get_device_info";
 				System.out.println("Sending JSON request");
 				HeaderJsonObjectRequest jsObjRequest =
 						new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -252,8 +252,8 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 			@Override
 			public void onClick(View v) {
 				System.out.println("Processing deviceInfo button");
-				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
-						"/ping_device.json";
+				String url = RESTfulTangoHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/ping_device";
 				System.out.println("Sending JSON request");
 				HeaderJsonObjectRequest jsObjRequest =
 						new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -309,8 +309,8 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 			public void onClick(View v) {
 
 				System.out.println("Processing deviceInfo button");
-				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
-						"/poll_status.json";
+				String url = RESTfulTangoHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/poll_status";
 				System.out.println("Sending JSON request");
 				HeaderJsonObjectRequest jsObjRequest =
 						new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -365,8 +365,8 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 			public void onClick(View v) {
 
 				System.out.println("Processing deviceInfo button");
-				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
-						"/restart.json";
+				String url = RESTfulTangoHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/restart";
 				System.out.println("Sending JSON request");
 				HeaderJsonObjectRequest jsObjRequest =
 						new HeaderJsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
@@ -414,8 +414,8 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 			}
 		});
 
-		String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
-				"/get_source.json";
+		String url = RESTfulTangoHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+				"/get_source";
 		Log.d("onCreateView()", "Sending JSON request: get_source");
 		HeaderJsonObjectRequest jsObjRequest =
 				new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -481,8 +481,8 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 					sourceId = -1;
 				}
 
-				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + devName +
-						"/set_source.json/" + sourceId;
+				String url = RESTfulTangoHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + devName +
+						"/set_source/" + sourceId;
 				HeaderJsonObjectRequest jsObjRequest =
 						new HeaderJsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
 							@Override

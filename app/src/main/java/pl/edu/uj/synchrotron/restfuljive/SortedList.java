@@ -25,6 +25,7 @@ import android.widget.TextView;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
@@ -60,6 +61,13 @@ public class SortedList extends CertificateExceptionActivity {
 	private String tangoPort;
 	private JSONObject lastResponse;
 	private int lastSortType;
+
+	private RequestQueue.RequestFilter reqFilter = new RequestQueue.RequestFilter() {
+		@Override
+		public boolean apply(Request<?> request) {
+			return true;
+		}
+	};
 
 
 	@Override
@@ -164,9 +172,6 @@ public class SortedList extends CertificateExceptionActivity {
 				return true;
 			case R.id.action_about_filter:
 				AlertDialog.Builder builder = new AlertDialog.Builder(context);
-				// Linkify the message
-				//final SpannableString s = new SpannableString(context.getText(R.string.sorted_list_filter_description));
-				//Linkify.addLinks(s, Linkify.ALL);
 				builder.setMessage(R.string.sorted_list_filter_description).setTitle(R.string.menu_item_about_filter);
 				AlertDialog dialog = builder.create();
 				dialog.show();
@@ -264,8 +269,8 @@ public class SortedList extends CertificateExceptionActivity {
 		TextView hostTextView = (TextView) findViewById(R.id.sortedList_hostTextView);
 		switch (sortType) {
 			case SORT_BY_CLASS:
-				String urlSortCase1 = RESTHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/SortedDeviceList" +
-						".json/1/" + trackDeviceStatus;
+				String urlSortCase1 = RESTHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/SortedDeviceList" +
+						"/1/" + trackDeviceStatus;
 				HeaderJsonObjectRequest jsObjRequestCase1 =
 						new HeaderJsonObjectRequest(Request.Method.GET, urlSortCase1, null, new Response.Listener<JSONObject>() {
 							@Override
@@ -295,13 +300,14 @@ public class SortedList extends CertificateExceptionActivity {
 						.setRetryPolicy(new DefaultRetryPolicy(REQUEST_LONG_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
 								DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 				jsObjRequestCase1.setShouldCache(false);
+				queue.cancelAll(reqFilter);
 				queue.add(jsObjRequestCase1);
 
 				hostTextView.setText(R.string.title_sort_by_classes);
 				break;
 			case SORT_BY_SERVER:
-				String urlSortCase2 = RESTHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/SortedDeviceList" +
-						".json/2/" + trackDeviceStatus;
+				String urlSortCase2 = RESTHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/SortedDeviceList" +
+						"/2/" + trackDeviceStatus;
 				HeaderJsonObjectRequest jsObjRequestCase2 =
 						new HeaderJsonObjectRequest(Request.Method.GET, urlSortCase2, null, new Response.Listener<JSONObject>() {
 							@Override
@@ -331,13 +337,14 @@ public class SortedList extends CertificateExceptionActivity {
 						.setRetryPolicy(new DefaultRetryPolicy(REQUEST_LONG_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
 								DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 				jsObjRequestCase2.setShouldCache(false);
+				queue.cancelAll(reqFilter);
 				queue.add(jsObjRequestCase2);
 				//TextView hostTextView2 = (TextView) findViewById(R.id.sortedList_hostTextView);
 				hostTextView.setText(R.string.title_sort_by_servers);
 				break;
 			case SORT_FULL_LIST:
 				String urlSortCase3 =
-						RESTHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device.json/" + trackDeviceStatus;
+						RESTHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + trackDeviceStatus;
 				HeaderJsonObjectRequest jsObjRequestCase3 =
 						new HeaderJsonObjectRequest(Request.Method.GET, urlSortCase3, null, new Response.Listener<JSONObject>() {
 							@Override
@@ -367,12 +374,13 @@ public class SortedList extends CertificateExceptionActivity {
 						.setRetryPolicy(new DefaultRetryPolicy(REQUEST_LONG_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
 								DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 				jsObjRequestCase3.setShouldCache(false);
+				queue.cancelAll(reqFilter);
 				queue.add(jsObjRequestCase3);
 				//TextView hostTextView3 = (TextView) findViewById(R.id.sortedList_hostTextView);
 				hostTextView.setText(R.string.title_sort_full_list);
 				break;
 			default: //sort by devices
-				String url = RESTHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/SortedDeviceList.json/3/" +
+				String url = RESTHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/SortedDeviceList/3/" +
 						trackDeviceStatus;
 				HeaderJsonObjectRequest jsObjRequest =
 						new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -403,6 +411,7 @@ public class SortedList extends CertificateExceptionActivity {
 				jsObjRequest.setRetryPolicy(new DefaultRetryPolicy(REQUEST_LONG_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
 						DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 				jsObjRequest.setShouldCache(false);
+				queue.cancelAll(reqFilter);
 				queue.add(jsObjRequest);
 				//TextView hostTextViewDef = (TextView) findViewById(R.id.sortedList_hostTextView);
 				hostTextView.setText(R.string.title_sort_by_devices);
@@ -442,7 +451,7 @@ public class SortedList extends CertificateExceptionActivity {
 		String devName = (String) v.getTag();
 		System.out.println("Clicked object: " + devName);
 		String url =
-				RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + devName + "/get_info.json";
+				RESTfulTangoHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + devName + "/get_info";
 		HeaderJsonObjectRequest jsObjRequest =
 				new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 					@Override
@@ -473,6 +482,7 @@ public class SortedList extends CertificateExceptionActivity {
 					}
 				});
 		jsObjRequest.setShouldCache(false);
+		queue.cancelAll(reqFilter);
 		queue.add(jsObjRequest);
 	}
 

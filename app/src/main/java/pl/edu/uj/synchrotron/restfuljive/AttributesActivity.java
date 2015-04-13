@@ -16,7 +16,6 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -88,10 +87,10 @@ public class AttributesActivity extends CertificateExceptionActivity {
 		Log.d("refreshAttributeList()", "REST host: " + RESTfulHost);
 		Log.d("refreshAttributeList()", "Tango host: " + tangoHost + ":" + tangoPort);
 
-		String url = RESTfulHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
-				"/get_attribute_list.json";
-		JsonObjectRequest jsObjRequest =
-				new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+		String url = RESTfulHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+				"/get_attribute_list";
+		HeaderJsonObjectRequest jsObjRequest =
+				new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 					@Override
 					public void onResponse(JSONObject response) {
 						try {
@@ -115,7 +114,7 @@ public class AttributesActivity extends CertificateExceptionActivity {
 								for (int i = 0; i < attr_list.length; i++) {
 									//System.out.println("Processing attribute no. " + i);
 									//System.out.println("Name: " + attr_list[i] + " Value: " + attr_list[i]);
-									View view = inflater.inflate(R.layout.editable_list_element, null);
+									View view = inflater.inflate(R.layout.editable_list_element, layout, false);
 									EditText et = (EditText) view.findViewById(R.id.editableListEditText);
 									TextView tv = (TextView) view.findViewById(R.id.editableListTextView);
 									tv.setText(attr_list[i]);
@@ -180,14 +179,11 @@ public class AttributesActivity extends CertificateExceptionActivity {
 			if (et.isFocusable()) {
 				String value = et.getText().toString();
 				String tag = (String) et.getTag();
-				// deviceName = "controller/dummycountertimercontroller/ctctrl01";
-				// String tag = "LogLevel";
-				// String value = "4";
-				String url = RESTfulHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
-						"/write_attribute.json/" + tag + "/" +
+				String url = RESTfulHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/write_attribute/" + tag + "/" +
 						value;
-				JsonObjectRequest jsObjRequest =
-						new JsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
+				HeaderJsonObjectRequest jsObjRequest =
+						new HeaderJsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
 							@Override
 							public void onResponse(JSONObject response) {
 								try {

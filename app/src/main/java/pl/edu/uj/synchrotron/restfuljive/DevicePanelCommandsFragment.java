@@ -59,8 +59,8 @@ public class DevicePanelCommandsFragment extends CertificateExceptionFragment im
 		Log.d("onCreateView", "Host: " + RESTfulTangoHost);
 		context = ((DevicePanelActivity) getActivity()).getContext();
 		restartQueue();
-		String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
-				"/command_list_query.json";
+		String url = RESTfulTangoHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+				"/command_list_query";
 		HeaderJsonObjectRequest jsObjRequest =
 				new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 					@Override
@@ -165,8 +165,8 @@ public class DevicePanelCommandsFragment extends CertificateExceptionFragment im
 				if (arginStr.equals("")) {
 					arginStr = "DevVoidArgument";
 				}
-				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
-						"/command_inout.json/" +
+				String url = RESTfulTangoHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/command_inout/" +
 						commandNames[selectedCommandId] + "/" + arginStr;
 				HeaderJsonObjectRequest jsObjRequest =
 						new HeaderJsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
@@ -214,8 +214,8 @@ public class DevicePanelCommandsFragment extends CertificateExceptionFragment im
 				if (arginStr.equals("")) {
 					arginStr = "DevVoidArgument";
 				}
-				String url = RESTfulTangoHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
-						"/extract_plot_data.json/" +
+				String url = RESTfulTangoHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/extract_plot_data/" +
 						commandNames[selectedCommandId] + "/" + arginStr;
 				HeaderJsonObjectRequest jsObjRequest =
 						new HeaderJsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {

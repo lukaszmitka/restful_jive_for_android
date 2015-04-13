@@ -179,7 +179,7 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
-				final String urlReadAttributesQuery = restHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort +
+				final String urlReadAttributesQuery = restHost + "/Tango/rest/" + tangoHost + ":" + tangoPort +
 						"/Device/" + deviceName + "/read_attributes";
 				HeaderJsonObjectRequest jsObjRequestReadAttributes =
 						new HeaderJsonObjectRequest(Request.Method.PUT, urlReadAttributesQuery, request,
@@ -216,8 +216,8 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 			@Override
 			public void run() {
 				Log.d("rAttributePlot.run()", "Sending plot request");
-				String url = restHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
-						"/plot_attribute.json/" + plotAttributeName;
+				String url = restHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+						"/plot_attribute/" + plotAttributeName;
 				System.out.println("Sending JSON request");
 				HeaderJsonObjectRequest jsObjRequest =
 						new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -379,8 +379,8 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 			@Override
 			public void run() {
 
-				final String urlGetStatus = restHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort +
-						"/Device/" + deviceName + "/command_inout.json/Status/DevVoidArgument";
+				final String urlGetStatus = restHost + "/Tango/rest/" + tangoHost + ":" + tangoPort +
+						"/Device/" + deviceName + "/command_inout/Status/DevVoidArgument";
 				HeaderJsonObjectRequest jsObjRequestStatus =
 						new HeaderJsonObjectRequest(Request.Method.PUT, urlGetStatus, null, new Response.Listener<JSONObject>() {
 							@Override
@@ -621,8 +621,8 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 
 	private void populatePanel() {
 		Log.v("populatePanel()", "Populating panel");
-		String urlCommandListQuery = restHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort +
-				"/Device/" + deviceName + "/command_list_query.json";
+		String urlCommandListQuery = restHost + "/Tango/rest/" + tangoHost + ":" + tangoPort +
+				"/Device/" + deviceName + "/command_list_query";
 		HeaderJsonObjectRequest jsObjRequestCommands =
 				new HeaderJsonObjectRequest(Request.Method.GET, urlCommandListQuery, null, new Response.Listener<JSONObject>() {
 					@Override
@@ -649,8 +649,8 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 		jsObjRequestCommands.setShouldCache(false);
 		queue.add(jsObjRequestCommands);
 
-		String urlGetAttribuesList = restHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort +
-				"/Device/" + deviceName + "/get_attribute_list.json";
+		String urlGetAttribuesList = restHost + "/Tango/rest/" + tangoHost + ":" + tangoPort +
+				"/Device/" + deviceName + "/get_attribute_list";
 		HeaderJsonObjectRequest jsObjRequestAttributeList =
 				new HeaderJsonObjectRequest(Request.Method.GET, urlGetAttribuesList, null, new Response.Listener<JSONObject>() {
 					@Override
@@ -769,8 +769,8 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 
 	private void executeCommand(String commandName, String arginStr) {
 
-		String url = restHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
-				"/command_inout.json/" +
+		String url = restHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+				"/command_inout/" +
 				commandName + "/" + arginStr;
 		HeaderJsonObjectRequest jsObjRequest =
 				new HeaderJsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
@@ -997,7 +997,7 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-			String urlReadAttributesQuery = restHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort +
+			String urlReadAttributesQuery = restHost + "/Tango/rest/" + tangoHost + ":" + tangoPort +
 					"/Device/" + deviceName + "/read_attributes";
 			HeaderJsonObjectRequest jsObjRequestCommands =
 					new HeaderJsonObjectRequest(Request.Method.PUT, urlReadAttributesQuery, request,
@@ -1035,8 +1035,8 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 	}
 
 	private void updateAttribute(String attName, String argin) {
-		String url = restHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
-				"/write_attribute.json/" + attName + "/" +
+		String url = restHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+				"/write_attribute/" + attName + "/" +
 				argin;
 		JsonObjectRequest jsObjRequest =
 				new JsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {

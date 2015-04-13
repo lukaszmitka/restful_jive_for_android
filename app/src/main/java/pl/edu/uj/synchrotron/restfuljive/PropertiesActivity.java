@@ -15,7 +15,6 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -83,11 +82,10 @@ public class PropertiesActivity extends CertificateExceptionActivity {
 		Log.d("refreshPropertiesList()", "REST host: " + RESTfulHost);
 		Log.d("refreshPropertiesList()", "Tango host: " + tangoHost + ":" + tangoPort);
 
-		String url = RESTfulHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
-				"/get_property_list" +
-				".json";
-		JsonObjectRequest jsObjRequest =
-				new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+		String url = RESTfulHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+				"/get_property_list";
+		HeaderJsonObjectRequest jsObjRequest =
+				new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 					@Override
 					public void onResponse(JSONObject response) {
 						try {
@@ -169,10 +167,10 @@ public class PropertiesActivity extends CertificateExceptionActivity {
 			String value = et.getText().toString();
 			String tag = (String) et.getTag();
 			String url =
-					RESTfulHost + "/RESTfulTangoApi/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName + "/put_property" +
-							".json/" + tag + "/" + value;
-			JsonObjectRequest jsObjRequest =
-					new JsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
+					RESTfulHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName + "/put_property" +
+							"/" + tag + "/" + value;
+			HeaderJsonObjectRequest jsObjRequest =
+					new HeaderJsonObjectRequest(Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
 						@Override
 						public void onResponse(JSONObject response) {
 							try {
