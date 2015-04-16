@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
 
 
 /**
- * Activity for listing devices in three level sorted list.
+ * Activity for listing devices in multi level sorted list.
  */
 public class SortedList extends CertificateExceptionActivity {
 
@@ -502,9 +502,6 @@ public class SortedList extends CertificateExceptionActivity {
 		startActivity(intent);
 	}
 
-	/*
-	 * private void showDeviceInfo(String deviceInfo) { } */
-
 	/**
 	 * Listener for button, start new activity which show attributes.
 	 *
@@ -531,7 +528,6 @@ public class SortedList extends CertificateExceptionActivity {
 		getSortedList(RESTfulTangoHost);
 	}
 
-
 	/**
 	 * Button listener, read pattern from text view and filter device list with it.
 	 *
@@ -548,7 +544,6 @@ public class SortedList extends CertificateExceptionActivity {
 	 * @param response JSON response from RESTful srever.
 	 * @param sortCase Method of sorting devices.
 	 */
-
 	private void updateDeviceList(JSONObject response, int sortCase) {
 		listView = (ListView) findViewById(R.id.sortedList_listView);
 		list = new ArrayList<>();
@@ -1110,7 +1105,6 @@ public class SortedList extends CertificateExceptionActivity {
 	 * @param sortCase Method of sorting devices.
 	 * @param pattern  String containing regular expression filter.
 	 */
-
 	private void filterDeviceList(JSONObject response, int sortCase, String pattern) {
 		Pattern p = Pattern.compile(".*" + pattern.toLowerCase() + ".*");
 		Matcher m;
@@ -1746,49 +1740,4 @@ public class SortedList extends CertificateExceptionActivity {
 	}
 
 
-	/**
-	 * Class for storing name and tag of list element.
-	 */
-	class SomeObject {
-		private String name;
-		private String tag;
-		private boolean isAlive;
-
-		/**
-		 * @param name Name of the object.
-		 * @param tag  Tag of the object.
-		 */
-		public SomeObject(String name, String tag, boolean isAlive) {
-			this.name = name;
-			this.tag = tag;
-			this.isAlive = isAlive;
-		}
-
-		/**
-		 * Get name of the object.
-		 *
-		 * @return Name of the object.
-		 */
-		public String getName() {
-			return name;
-		}
-
-		/**
-		 * Get tag of the object.
-		 *
-		 * @return Tag of the object.
-		 */
-		public String getTag() {
-			return tag;
-		}
-
-		/**
-		 * Check if device represented by object is alive
-		 *
-		 * @return if device is alive.
-		 */
-		public boolean getIsAlive() {
-			return isAlive;
-		}
-	}
 }
