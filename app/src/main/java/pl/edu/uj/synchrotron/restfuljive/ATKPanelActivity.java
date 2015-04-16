@@ -57,7 +57,6 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 
 public class ATKPanelActivity extends CertificateExceptionActivity implements TangoConst {
-	public static final String PREFS_NAME = "SolarisDeviceListPrefsFile";
 	private static final int DEFAULT_REFRESHING_PERIOD = 1000;
 	private int refreshingPeriod = DEFAULT_REFRESHING_PERIOD;
 	private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
