@@ -84,7 +84,7 @@
     <string name="command_input">Command input</string>
     <string name="command_input_type">Command input type: </string>
     <string name="command_execution_confirmation">Command executed without problems</string>
-    <string name="command_execution_error">Error occured while executing command: </string>
+    <string name="command_execution_error">Error occurred while executing command: </string>
     <string name="attribute_new_value">Attribute new value</string>
     <string name="new_value_for_att">New value for </string>
 
