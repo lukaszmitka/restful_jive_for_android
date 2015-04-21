@@ -55,6 +55,7 @@
     <string name="menu_item_untrack_status">Untrack status</string>
     <string name="menu_item_set_refreshing_period">Set refreshing period</string>
     <string name="menu_item_new_certificate_file">Load SSL certificate file</string>
+    <string name="menu_item_enter_login_pass">Enter login and password</string>
 
     <!--    Activity titles    -->
     <string name="title_activity_server_list">ServerList</string>
@@ -87,6 +88,7 @@
     <string name="command_execution_error">Error occurred while executing command: </string>
     <string name="attribute_new_value">Attribute new value</string>
     <string name="new_value_for_att">New value for </string>
+    <string name="enter_user_name_pass">Enter user name and password</string>
 
 
     <!--    Sorted list labels  -->
@@ -154,6 +156,9 @@
     <!--    Colours    -->
     <color name="gray">#FFDDDDDD</color>
     <color name="white">#FFFFFFFF</color>
+    <string name="title_activity_get_credentials">GetCredentialsActivity</string>
+
+    <string name="hello_world">Hello world!</string>
 
 
 </resources>

@@ -44,4 +44,8 @@
         android:id="@+id/action_set_certificate_file"
         android:orderInCategory="8"
         android:title="@string/menu_item_new_certificate_file"/>
+    <item
+        android:id="@+id/action_enter_login_pass"
+        android:orderInCategory="9"
+        android:title="@string/menu_item_enter_login_pass"/>
 </menu>

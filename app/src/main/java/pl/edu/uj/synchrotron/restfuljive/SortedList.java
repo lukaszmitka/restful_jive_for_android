@@ -68,6 +68,8 @@ public class SortedList extends CertificateExceptionActivity {
 			return true;
 		}
 	};
+	private String userName;
+	private String userPassword;
 
 
 	@Override
@@ -204,6 +206,9 @@ public class SortedList extends CertificateExceptionActivity {
 			case R.id.action_set_certificate_file:
 				promptForCertPath();
 				return true;
+			case R.id.action_enter_login_pass:
+				// TODO
+				return true;
 			default:
 				return super.onOptionsItemSelected(item);
 		}
@@ -231,6 +236,14 @@ public class SortedList extends CertificateExceptionActivity {
 		}
 		startActivityForResult(i, 1);
 	}
+
+	/**
+	 * Start new activity for getting user name and password.
+	 */
+
+	private void requestCredentials() {
+	}
+
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {

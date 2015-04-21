@@ -69,6 +69,10 @@
             android:label="@string/title_activity_set_device"
             android:theme="@style/Base.Theme.AppCompat.Light.Dialog">
         </activity>
+        <activity
+            android:name=".GetCredentialsActivity"
+            android:label="@string/title_activity_get_credentials">
+        </activity>
     </application>
 
 </manifest>
