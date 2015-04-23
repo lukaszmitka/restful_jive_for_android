@@ -47,6 +47,7 @@ public class PropertiesActivity extends CertificateExceptionActivity {
 	 * Application context.
 	 */
 	private Context context;
+	private String userName, userPassword;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -57,11 +58,12 @@ public class PropertiesActivity extends CertificateExceptionActivity {
 		RESTfulHost = intent.getStringExtra("restHost");
 		tangoHost = intent.getStringExtra("tangoHost");
 		tangoPort = intent.getStringExtra("tangoPort");
+		userName = intent.getStringExtra("userName");
+		userPassword = intent.getStringExtra("userPass");
 		context = this;
 		TextView devicePropTextView = (TextView) findViewById(R.id.devicePropertiesTextView1);
 		devicePropTextView.setText("Device " + deviceName + " properties");
 		setTitle("REST host: " + RESTfulHost + ", TANGO_HOST: " + tangoHost + ":" + tangoPort);
-
 		restartQueue();
 		refreshPropertiesList();
 	}
@@ -129,7 +131,7 @@ public class PropertiesActivity extends CertificateExceptionActivity {
 						Log.d("refreshPropertiesList()", "Connection error!");
 						error.printStackTrace();
 					}
-				});
+				}, userName, userPassword);
 		jsObjRequest.setShouldCache(false);
 		queue.add(jsObjRequest);
 	}
@@ -193,7 +195,7 @@ public class PropertiesActivity extends CertificateExceptionActivity {
 							Log.d("updateButton.onClick()", "Connection error!");
 							error.printStackTrace();
 						}
-					});
+					}, userName, userPassword);
 			jsObjRequest.setShouldCache(false);
 			queue.add(jsObjRequest);
 		}

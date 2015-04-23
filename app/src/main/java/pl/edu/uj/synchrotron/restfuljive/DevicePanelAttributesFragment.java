@@ -43,6 +43,8 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 	private boolean attributePlottable[];
 	private boolean attributeWritable[];
 	private String attributeDesc[];
+	private String userName, userPassword;
+
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -56,6 +58,8 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 		tangoHost = ((DevicePanelActivity) getActivity()).getTangoHost();
 		tangoPort = ((DevicePanelActivity) getActivity()).getTangoPort();
 		context = ((DevicePanelActivity) getActivity()).getContext();
+		userName = ((DevicePanelActivity) getActivity()).getUserName();
+		userPassword = ((DevicePanelActivity) getActivity()).getUserPassword();
 
 		Log.d("onCreateView()", "Host: " + RESTfulTangoHost);
 
@@ -131,7 +135,7 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 					public void onErrorResponse(VolleyError error) {
 						jsonRequestErrorHandler(error);
 					}
-				});
+				}, userName, userPassword);
 		jsObjRequest.setShouldCache(false);
 		queue.add(jsObjRequest);
 
@@ -194,7 +198,7 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 							public void onErrorResponse(VolleyError error) {
 								jsonRequestErrorHandler(error);
 							}
-						});
+						}, userName, userPassword);
 				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
@@ -241,7 +245,7 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 							public void onErrorResponse(VolleyError error) {
 								jsonRequestErrorHandler(error);
 							}
-						});
+						}, userName, userPassword);
 				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
@@ -352,7 +356,7 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 							public void onErrorResponse(VolleyError error) {
 								jsonRequestErrorHandler(error);
 							}
-						});
+						}, userName, userPassword);
 				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}

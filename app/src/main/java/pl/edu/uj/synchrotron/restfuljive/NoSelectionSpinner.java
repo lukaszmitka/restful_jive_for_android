@@ -64,35 +64,4 @@ public class NoSelectionSpinner extends Spinner {
 			getOnItemSelectedListener().onItemSelected(this, getSelectedView(), position, getSelectedItemId());
 		}
 	}
-
-
-	/*public void testReflectionForSelectionChanged() {
-		try {
-			Class noparams[] = {};
-			s_pSelectionChangedMethod.invoke(this, noparams);
-		} catch (Exception e) {
-			Log.e("Custom spinner, bug: ", e.getMessage());
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public void onClick(DialogInterface dialog, int which) {
-		super.onClick(dialog, which);
-		//if(lastSelected == which)
-		//	testReflectionForSelectionChanged();
-
-		//lastSelected = which;
-	}*/
-
-
-	/*@Override
-	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-		if (this.lastSelected == this.getSelectedItemPosition())
-			testReflectionForSelectionChanged();
-		if (!changed)
-			lastSelected = this.getSelectedItemPosition();
-
-		super.onLayout(changed, l, t, r, b);
-	}*/
 }

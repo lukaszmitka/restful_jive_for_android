@@ -45,7 +45,7 @@ public abstract class CertificateExceptionActivity extends WifiMonitorActivity {
 		super.onCreate(savedInstanceState);
 		SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		String lastCertPath = settings.getString("LastCertificatePath", "");
-		if (lastCertPath.equals("")) {
+		if (!lastCertPath.equals("")) {
 			setSSLCertificate(lastCertPath);
 		}
 	}
@@ -99,7 +99,6 @@ public abstract class CertificateExceptionActivity extends WifiMonitorActivity {
 					editor.putString("LastCertificatePath", filePath);
 					editor.apply();
 					Log.d("onActivityResult()", "Saved last cert path as: " + filePath);
-
 				}
 			}
 		} else if (resultCode == Activity.RESULT_CANCELED) {

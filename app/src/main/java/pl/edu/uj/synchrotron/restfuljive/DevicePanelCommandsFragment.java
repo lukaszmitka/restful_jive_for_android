@@ -44,6 +44,7 @@ public class DevicePanelCommandsFragment extends CertificateExceptionFragment im
 	private String tangoHost;
 	private String tangoPort;
 	private String deviceName;
+	private String userName, userPassword;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -56,6 +57,8 @@ public class DevicePanelCommandsFragment extends CertificateExceptionFragment im
 		RESTfulTangoHost = ((DevicePanelActivity) getActivity()).getRestHost();
 		tangoHost = ((DevicePanelActivity) getActivity()).getTangoHost();
 		tangoPort = ((DevicePanelActivity) getActivity()).getTangoPort();
+		userName = ((DevicePanelActivity) getActivity()).getUserName();
+		userPassword = ((DevicePanelActivity) getActivity()).getUserPassword();
 		Log.d("onCreateView", "Host: " + RESTfulTangoHost);
 		context = ((DevicePanelActivity) getActivity()).getContext();
 		restartQueue();
@@ -87,7 +90,7 @@ public class DevicePanelCommandsFragment extends CertificateExceptionFragment im
 								}
 								ListView lv = (ListView) rootView.findViewById(R.id.devicePanel_listView);
 								ArrayAdapter<String> adapter =
-										new ArrayAdapter<String>(getActivity(), R.layout.list_item, R.id.firstLine, commandNames);
+										new ArrayAdapter<>(getActivity(), R.layout.list_item, R.id.firstLine, commandNames);
 								lv.setAdapter(adapter);
 								lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 									@Override
@@ -134,7 +137,7 @@ public class DevicePanelCommandsFragment extends CertificateExceptionFragment im
 					public void onErrorResponse(VolleyError error) {
 						jsonRequestErrorHandler(error);
 					}
-				});
+				}, userName, userPassword);
 		jsObjRequest.setShouldCache(false);
 		queue.add(jsObjRequest);
 
@@ -144,8 +147,8 @@ public class DevicePanelCommandsFragment extends CertificateExceptionFragment im
 			public void onClick(View v) {
 				AlertDialog.Builder builder = new AlertDialog.Builder(rootView.getContext());
 				builder.setTitle("Command \"" + commandNames[selectedCommandId] + " \"description");
-				String message = new String(
-						"Argin:\n" + commandInDesc[selectedCommandId] + "\nArgout:\n" + commandOutDesc[selectedCommandId]);
+				String message =
+						"Argin:\n" + commandInDesc[selectedCommandId] + "\nArgout:\n" + commandOutDesc[selectedCommandId];
 				builder.setMessage(message);
 				builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
@@ -199,7 +202,7 @@ public class DevicePanelCommandsFragment extends CertificateExceptionFragment im
 							public void onErrorResponse(VolleyError error) {
 								jsonRequestErrorHandler(error);
 							}
-						});
+						}, userName, userPassword);
 				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
@@ -252,7 +255,7 @@ public class DevicePanelCommandsFragment extends CertificateExceptionFragment im
 							public void onErrorResponse(VolleyError error) {
 								jsonRequestErrorHandler(error);
 							}
-						});
+						}, userName, userPassword);
 				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 
@@ -262,194 +265,6 @@ public class DevicePanelCommandsFragment extends CertificateExceptionFragment im
 		});
 		return rootView;
 	}
-
-	/*
-	 * Adds value to DeviceData.
-	 *
-	 * @param argin   Value to be added.
-	 * @param send    Value will be added to this DeviceData.
-	 * @param outType Identifier of data type.
-	 * @return DeviceData with new value.
-	 * @throws NumberFormatException
-	 */
-	/*private DeviceData insertData(String argin, DeviceData send, int outType) throws NumberFormatException {
-
-		if (outType == Tango_DEV_VOID)
-			return send;
-
-		ArgParser arg = new ArgParser(argin);
-
-		switch (outType) {
-			case Tango_DEV_BOOLEAN:
-				send.insert(arg.parse_boolean());
-				break;
-			case Tango_DEV_USHORT:
-				send.insert_us(arg.parse_ushort());
-				break;
-			case Tango_DEV_SHORT:
-				send.insert(arg.parse_short());
-				break;
-			case Tango_DEV_ULONG:
-				send.insert_ul(arg.parse_ulong());
-				break;
-			case Tango_DEV_LONG:
-				send.insert(arg.parse_long());
-				break;
-			case Tango_DEV_FLOAT:
-				send.insert(arg.parse_float());
-				break;
-			case Tango_DEV_DOUBLE:
-				send.insert(arg.parse_double());
-				break;
-			case Tango_DEV_STRING:
-				send.insert(arg.parse_string());
-				break;
-			case Tango_DEVVAR_CHARARRAY:
-				send.insert(arg.parse_char_array());
-				break;
-			case Tango_DEVVAR_USHORTARRAY:
-				send.insert_us(arg.parse_ushort_array());
-				break;
-			case Tango_DEVVAR_SHORTARRAY:
-				send.insert(arg.parse_short_array());
-				break;
-			case Tango_DEVVAR_ULONGARRAY:
-				send.insert_ul(arg.parse_ulong_array());
-				break;
-			case Tango_DEVVAR_LONGARRAY:
-				send.insert(arg.parse_long_array());
-				break;
-			case Tango_DEVVAR_FLOATARRAY:
-				send.insert(arg.parse_float_array());
-				break;
-			case Tango_DEVVAR_DOUBLEARRAY:
-				send.insert(arg.parse_double_array());
-				break;
-			case Tango_DEVVAR_STRINGARRAY:
-				send.insert(arg.parse_string_array());
-				break;
-			case Tango_DEVVAR_LONGSTRINGARRAY:
-				send.insert(new DevVarLongStringArray(arg.parse_long_array(), arg.parse_string_array()));
-				break;
-			case Tango_DEVVAR_DOUBLESTRINGARRAY:
-				send.insert(new DevVarDoubleStringArray(arg.parse_double_array(), arg.parse_string_array()));
-				break;
-			case Tango_DEV_STATE:
-				send.insert(DevState.from_int(arg.parse_ushort()));
-				break;
-
-			default:
-				throw new NumberFormatException("Command type not supported code=" + outType);
-
-		}
-		return send;
-
-	}*/
-
-	/*
-	 * Extract data from DeviceData to one dimensional array.
-	 *
-	 * @param data    DeviceData to extract data from.
-	 * @param outType Identifier of data type.
-	 * @return Array of data that can be plotted.
-	 */
-	/*private double[] extractPlotData(DeviceData data, int outType) {
-
-		double[] ret = new double[0];
-		int i;
-
-		switch (outType) {
-
-			case Tango_DEVVAR_CHARARRAY: {
-				byte[] dummy = data.extractByteArray();
-				int start = this.getLimitMinForPlot(dummy.length);
-				int end = this.getLimitMaxForPlot(dummy.length);
-				ret = new double[end - start];
-				for (i = start; i < end; i++)
-					ret[i - start] = (double) dummy[i];
-			}
-			break;
-			case Tango_DEVVAR_USHORTARRAY: {
-				int[] dummy = data.extractUShortArray();
-				int start = this.getLimitMinForPlot(dummy.length);
-				int end = this.getLimitMaxForPlot(dummy.length);
-				ret = new double[end - start];
-				for (i = start; i < end; i++)
-					ret[i - start] = (double) dummy[i];
-			}
-			break;
-			case Tango_DEVVAR_SHORTARRAY: {
-				short[] dummy = data.extractShortArray();
-				int start = this.getLimitMinForPlot(dummy.length);
-				int end = this.getLimitMaxForPlot(dummy.length);
-				ret = new double[end - start];
-				for (i = start; i < end; i++)
-					ret[i - start] = (double) dummy[i];
-			}
-			break;
-			case Tango_DEVVAR_ULONGARRAY: {
-				long[] dummy = data.extractULongArray();
-				int start = this.getLimitMinForPlot(dummy.length);
-				int end = this.getLimitMaxForPlot(dummy.length);
-				ret = new double[end - start];
-				for (i = start; i < end; i++)
-					ret[i - start] = (double) dummy[i];
-			}
-			break;
-			case Tango_DEVVAR_LONGARRAY: {
-				int[] dummy = data.extractLongArray();
-				int start = this.getLimitMinForPlot(dummy.length);
-				int end = this.getLimitMaxForPlot(dummy.length);
-				ret = new double[end - start];
-				for (i = start; i < end; i++)
-					ret[i - start] = (double) dummy[i];
-			}
-			break;
-			case Tango_DEVVAR_FLOATARRAY: {
-				float[] dummy = data.extractFloatArray();
-				int start = this.getLimitMinForPlot(dummy.length);
-				int end = this.getLimitMaxForPlot(dummy.length);
-				ret = new double[end - start];
-				for (i = start; i < end; i++)
-					ret[i - start] = (double) dummy[i];
-			}
-			break;
-			case Tango_DEVVAR_DOUBLEARRAY: {
-				double dummy[] = data.extractDoubleArray();
-				int start = this.getLimitMinForPlot(dummy.length);
-				int end = this.getLimitMaxForPlot(dummy.length);
-				ret = new double[end - start];
-				for (i = start; i < end; i++)
-					ret[i - start] = dummy[i];
-			}
-			break;
-		}
-		return ret;
-	} */
-
-	/*
-	 * Check maximum length of data.
-	 *
-	 * @param length Length of current data.
-	 * @return Maximum length.
-	 */
-	/*private int getLimitMaxForPlot(int length) {
-		if (length < 100) {
-			return length;
-
-		}
-		return 100;
-	}*/
-
-	/*
-	 * Check minimum length of data.
-	 *
-	 * @param length Length of current data.
-	 * @return Minimum length.
-	 */
-	/*private int getLimitMinForPlot(int length) {
-		return 0;
-	}*/
 
 	/**
 	 * Method displaying info about connection error

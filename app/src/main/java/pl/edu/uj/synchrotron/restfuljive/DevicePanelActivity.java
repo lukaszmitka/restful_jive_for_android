@@ -50,6 +50,7 @@ public class DevicePanelActivity extends WifiMonitorFragmentActivity implements 
 	 */
 	private String tangoPort;
 	private Context context;
+	private String userName, userPassword;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +67,8 @@ public class DevicePanelActivity extends WifiMonitorFragmentActivity implements 
 			restHost = i.getStringExtra("restHost");
 			tangoHost = i.getStringExtra("tangoHost");
 			tangoPort = i.getStringExtra("tangoPort");
+			userName = i.getStringExtra("userName");
+			userPassword = i.getStringExtra("userPass");
 		}
 		setTitle("REST host: " + restHost + ", TANGO_HOST: " + tangoHost + ":" + tangoPort);
 		// Tab titles
@@ -143,6 +146,10 @@ public class DevicePanelActivity extends WifiMonitorFragmentActivity implements 
 	public String getTangoPort() {
 		return tangoPort;
 	}
+
+	protected String getUserName() {return userName;}
+
+	protected String getUserPassword() {return userPassword;}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {

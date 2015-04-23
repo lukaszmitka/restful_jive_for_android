@@ -85,6 +85,7 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 	private ScrollView scrollView;
 	private RelativeLayout relativeLayout;
 	private int maxId, minId, plotId, scaleId;
+	private String userName, userPassword;
 
 	/**
 	 * Generate a value suitable for use in setId
@@ -141,6 +142,8 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 			restHost = i.getStringExtra("restHost");
 			tangoHost = i.getStringExtra("tangoHost");
 			tangoPort = i.getStringExtra("tangoPort");
+			userName = i.getStringExtra("userName");
+			userPassword = i.getStringExtra("userPass");
 			populatePanel();
 		} else {
 			Log.d("onCreate()", "Request host from user");
@@ -204,7 +207,7 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 							public void onErrorResponse(VolleyError error) {
 								jsonRequestErrorHandler(error);
 							}
-						});
+						}, userName, userPassword);
 				//queue.getCache().clear();
 				jsObjRequestReadAttributes.setShouldCache(false);
 				queue.add(jsObjRequestReadAttributes);
@@ -367,7 +370,7 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 							public void onErrorResponse(VolleyError error) {
 								jsonRequestErrorHandler(error);
 							}
-						});
+						}, userName, userPassword);
 				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
@@ -403,7 +406,7 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 							public void onErrorResponse(VolleyError error) {
 								jsonRequestErrorHandler(error);
 							}
-						});
+						}, userName, userPassword);
 				jsObjRequestStatus.setShouldCache(false);
 				queue.add(jsObjRequestStatus);
 			}
@@ -644,7 +647,7 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 					public void onErrorResponse(VolleyError error) {
 						jsonRequestErrorHandler(error);
 					}
-				});
+				}, userName, userPassword);
 		jsObjRequestCommands.setShouldCache(false);
 		queue.add(jsObjRequestCommands);
 
@@ -672,7 +675,7 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 					public void onErrorResponse(VolleyError error) {
 						jsonRequestErrorHandler(error);
 					}
-				});
+				}, userName, userPassword);
 		jsObjRequestAttributeList.setShouldCache(false);
 		queue.add(jsObjRequestAttributeList);
 	}
@@ -810,7 +813,7 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 					public void onErrorResponse(VolleyError error) {
 						jsonRequestErrorHandler(error);
 					}
-				});
+				}, userName, userPassword);
 		jsObjRequest.setShouldCache(false);
 		queue.add(jsObjRequest);
 	}
@@ -1021,7 +1024,7 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 						public void onErrorResponse(VolleyError error) {
 							jsonRequestErrorHandler(error);
 						}
-					});
+					}, userName, userPassword);
 			jsObjRequestCommands.setShouldCache(false);
 			queue.add(jsObjRequestCommands);
 			if (attributeFuture != null) {

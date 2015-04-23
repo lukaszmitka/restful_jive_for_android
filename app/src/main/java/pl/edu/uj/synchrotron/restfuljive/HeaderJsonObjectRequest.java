@@ -26,10 +26,10 @@ public class HeaderJsonObjectRequest extends JsonObjectRequest {
 		userPassword = password;
 	}
 
-	public HeaderJsonObjectRequest(int method, String url, JSONObject jsonRequest,
+	/*public HeaderJsonObjectRequest(int method, String url, JSONObject jsonRequest,
 	                               Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
 		super(method, url, jsonRequest, listener, errorListener);
-	}
+	}*/
 
 	@Override
 	public Map<String, String> getHeaders() throws AuthFailureError {

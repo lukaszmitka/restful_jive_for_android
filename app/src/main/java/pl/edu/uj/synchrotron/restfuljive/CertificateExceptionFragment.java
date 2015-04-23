@@ -106,6 +106,7 @@ public class CertificateExceptionFragment extends Fragment {
 			sslContext.init(null, tmf.getTrustManagers(), null);
 			certificateFileInput.close();
 			restartQueue();
+
 			return true;
 		} catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException
 				e) {

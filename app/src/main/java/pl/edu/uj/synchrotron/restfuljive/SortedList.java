@@ -32,6 +32,10 @@ import com.android.volley.VolleyError;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -52,6 +56,9 @@ public class SortedList extends CertificateExceptionActivity {
 	private int sortType = DEFAULT_SORTING_TYPE;
 	private static final int REQUEST_LONG_TIMEOUT = 60000; // in miliseconds
 
+	private static final int ACTIVITY_REQUEST_HOST = 1;
+	private static final int ACTIVITY_REQUEST_CREDENTIALS = 2;
+
 	private final Context context = this;
 	private List<NLevelItem> list;
 	private ListView listView;
@@ -70,6 +77,8 @@ public class SortedList extends CertificateExceptionActivity {
 	};
 	private String userName;
 	private String userPassword;
+	private boolean rememberCredentials;
+	private OnLongClickListener onLongClickListener;
 
 
 	@Override
@@ -77,13 +86,77 @@ public class SortedList extends CertificateExceptionActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_sorted_list);
 
+		onLongClickListener = new OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View v) {
+				TextView tv = (TextView) v;
+				AlertDialog.Builder builder = new AlertDialog.Builder(tv.getContext());
+				builder.setTitle("Choose action");
+				builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+					}
+				});
+				String[] s = {"Monitor", "Test"};
+				final String name = tv.getTag().toString();
+				builder.setItems(s, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int choice) {
+						if (choice == 0) {
+							Intent i = new Intent(context, ATKPanelActivity.class);
+							i.putExtra("DEVICE_NAME", name);
+							i.putExtra("restHost", RESTfulTangoHost);
+							i.putExtra("tangoHost", tangoHost);
+							i.putExtra("tangoPort", tangoPort);
+							i.putExtra("userName", userName);
+							i.putExtra("userPass", userPassword);
+							startActivity(i);
+						/*Toast toast = Toast.makeText(context, "This should run ATKPanel",
+							Toast.LENGTH_LONG);
+						toast.show();*/
+						}
+						if (choice == 1) {
+							Intent i = new Intent(context, DevicePanelActivity.class);
+							i.putExtra("devName", name);
+							i.putExtra("restHost", RESTfulTangoHost);
+							i.putExtra("tangoHost", tangoHost);
+							i.putExtra("tangoPort", tangoPort);
+							i.putExtra("userName", userName);
+							i.putExtra("userPass", userPassword);
+							startActivity(i);
+						}
+					}
+				});
+				AlertDialog dialog = builder.create();
+				dialog.show();
+				return true;
+			}
+		};
+
 		SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+
+		if (savedInstanceState != null) {
+			userName = savedInstanceState.getString("userName");
+			userPassword = savedInstanceState.getString("userPassword");
+			Log.d("onCreate()", "User name: " + userName);
+			Log.d("onCreate()", "Password: " + userPassword);
+			if (userName.equals("") && userPassword.equals("")) {
+				readCredentialsFromStorage();
+				Log.d("onCreate()", "User name: " + userName);
+				Log.d("onCreate()", "Password: " + userPassword);
+			}
+		} else {
+			if (((userName == null) && userPassword == null)) {
+				readCredentialsFromStorage();
+				Log.d("onCreate()", "User name: " + userName);
+				Log.d("onCreate()", "Password: " + userPassword);
+			}
+		}
+
 		String settingsRestHost = settings.getString("RESTfulTangoHost", "");
 		String settingsTangoHost = settings.getString("TangoHost", "");
 		String settingsTangoPort = settings.getString("TangoPort", "");
-		System.out.println("Found RESTful host: " + settingsRestHost);
-		System.out.println("Found Tango host: " + settingsTangoHost);
-		System.out.println("Found Tango port: " + settingsTangoPort);
+		Log.d("onCreate()", "Found RESTful host: " + settingsRestHost);
+		Log.d("onCreate()", "Found Tango host: " + settingsTangoHost);
+		Log.d("onCreate()", "Found Tango port: " + settingsTangoPort);
 		if (settingsRestHost.equals("") || settingsTangoHost.equals("") || settingsTangoPort.equals("")) {
 			System.out.println("Requesting new tango host,port and RESTful host");
 			setHost();
@@ -111,6 +184,13 @@ public class SortedList extends CertificateExceptionActivity {
 			}
 		}
 		setTitle("REST host: " + RESTfulTangoHost + ", TANGO_HOST: " + tangoHost + ":" + tangoPort);
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putString("userName", userName);
+		outState.putString("userPassword", userPassword);
 	}
 
 	@Override
@@ -207,10 +287,43 @@ public class SortedList extends CertificateExceptionActivity {
 				promptForCertPath();
 				return true;
 			case R.id.action_enter_login_pass:
-				// TODO
+				requestCredentials();
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
+		}
+	}
+
+	private void readCredentialsFromStorage() {
+		Log.d("readCredentials()", "Getting credentials from file");
+		FileInputStream fileInputStream;
+		try {
+			fileInputStream = openFileInput("RESTfulJiveCredentials");
+			Log.d("readCredentials()", "Opened file: " + fileInputStream);
+			byte[] buffer = new byte[100];
+			try {
+				fileInputStream.read(buffer);
+				Log.d("readCredentials()", "Read buffer");
+				String credentials = new String(buffer);
+				Log.d("readCredentials()", "Credentials: " + credentials);
+				String[] nameAndPassword = credentials.split(":");
+				userName = nameAndPassword[0];
+				Log.d("readCredentials()", "User name: " + userName);
+				userPassword = nameAndPassword[1];
+				Log.d("readCredentials()", "Password: " + userPassword);
+			} catch (IOException e) {
+				Log.d("readCredentials()", "Problem with writing to file");
+				e.printStackTrace();
+			}
+			try {
+				fileInputStream.close();
+			} catch (IOException e) {
+				Log.d("readCredentials()", "Problem with closing file: " + e.getMessage());
+				e.printStackTrace();
+			}
+		} catch (FileNotFoundException e) {
+			Log.d("readCredentials()", "Can not open file, reason:" + e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
@@ -240,10 +353,10 @@ public class SortedList extends CertificateExceptionActivity {
 	/**
 	 * Start new activity for getting user name and password.
 	 */
-
 	private void requestCredentials() {
+		Intent i = new Intent(this, GetCredentialsActivity.class);
+		startActivityForResult(i, ACTIVITY_REQUEST_CREDENTIALS);
 	}
-
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -267,6 +380,40 @@ public class SortedList extends CertificateExceptionActivity {
 			}
 			if (resultCode == RESULT_CANCELED) {
 				System.out.println("Host not changed");
+			}
+		} else if (requestCode == ACTIVITY_REQUEST_CREDENTIALS) {
+			Log.d("onActivityresult()", "requestCode = ACTIVITY_REQUEST_CREDENTIALS, new user name and password");
+			if (resultCode == RESULT_OK) {
+				userName = data.getStringExtra("userName");
+				userPassword = data.getStringExtra("userPass");
+				rememberCredentials = data.getBooleanExtra("rememberCredentials", false);
+				if (rememberCredentials) {
+					FileOutputStream fileOutputStream;
+					try {
+						fileOutputStream = openFileOutput("RESTfulJiveCredentials", MODE_PRIVATE);
+						String credentials = userName + ":" + userPassword + ":";
+						Log.d("onActivityResult()", "Saving credentials: " + credentials);
+						try {
+							fileOutputStream.write(credentials.getBytes());
+						} catch (IOException e) {
+							Log.d("onActivityResult()", "Problem with writing to file");
+							e.printStackTrace();
+						}
+						try {
+							fileOutputStream.close();
+						} catch (IOException e) {
+							Log.d("onActivityResult()", "Problem with closing file: " + e.getMessage());
+							e.printStackTrace();
+						}
+					} catch (FileNotFoundException e) {
+						Log.d("onActivityResult()", "Can not open file, reason:" + e.getMessage());
+						e.printStackTrace();
+					}
+				}
+				getSortedList(RESTfulTangoHost);
+			}
+			if (resultCode == RESULT_CANCELED) {
+				Log.d("onActivityResult()", "No new credentials");
 			}
 		}
 	}
@@ -308,7 +455,7 @@ public class SortedList extends CertificateExceptionActivity {
 							public void onErrorResponse(VolleyError error) {
 								jsonRequestErrorHandler(error);
 							}
-						});
+						}, userName, userPassword);
 				jsObjRequestCase1
 						.setRetryPolicy(new DefaultRetryPolicy(REQUEST_LONG_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
 								DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
@@ -345,7 +492,7 @@ public class SortedList extends CertificateExceptionActivity {
 							public void onErrorResponse(VolleyError error) {
 								jsonRequestErrorHandler(error);
 							}
-						});
+						}, userName, userPassword);
 				jsObjRequestCase2
 						.setRetryPolicy(new DefaultRetryPolicy(REQUEST_LONG_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
 								DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
@@ -382,7 +529,7 @@ public class SortedList extends CertificateExceptionActivity {
 							public void onErrorResponse(VolleyError error) {
 								jsonRequestErrorHandler(error);
 							}
-						});
+						}, userName, userPassword);
 				jsObjRequestCase3
 						.setRetryPolicy(new DefaultRetryPolicy(REQUEST_LONG_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
 								DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
@@ -420,7 +567,7 @@ public class SortedList extends CertificateExceptionActivity {
 							public void onErrorResponse(VolleyError error) {
 								jsonRequestErrorHandler(error);
 							}
-						});
+						}, userName, userPassword);
 				jsObjRequest.setRetryPolicy(new DefaultRetryPolicy(REQUEST_LONG_TIMEOUT, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
 						DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 				jsObjRequest.setShouldCache(false);
@@ -493,7 +640,7 @@ public class SortedList extends CertificateExceptionActivity {
 						System.out.println("Connection error!");
 						error.printStackTrace();
 					}
-				});
+				}, userName, userPassword);
 		jsObjRequest.setShouldCache(false);
 		queue.cancelAll(reqFilter);
 		queue.add(jsObjRequest);
@@ -611,46 +758,7 @@ public class SortedList extends CertificateExceptionActivity {
 													String name = ((SomeObject) item.getWrappedObject()).getName();
 													tv.setText(name);
 													tv.setTag(((SomeObject) item.getWrappedObject()).getTag());
-													tv.setOnLongClickListener(new OnLongClickListener() {
-														@Override
-														public boolean onLongClick(View v) {
-															TextView tv = (TextView) v;
-															AlertDialog.Builder builder = new AlertDialog.Builder(tv.getContext());
-															builder.setTitle("Choose action");
-															builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-																public void onClick(DialogInterface dialog, int id) {
-																}
-															});
-															String[] s = {"Monitor", "Test"};
-															final String name = tv.getTag().toString();
-															builder.setItems(s, new DialogInterface.OnClickListener() {
-																public void onClick(DialogInterface dialog, int choice) {
-																	if (choice == 0) {
-																		Intent i = new Intent(context, ATKPanelActivity.class);
-																		i.putExtra("DEVICE_NAME", name);
-																		i.putExtra("restHost", RESTfulTangoHost);
-																		i.putExtra("tangoHost", tangoHost);
-																		i.putExtra("tangoPort", tangoPort);
-																		startActivity(i);
-																		/*Toast toast = Toast.makeText(context, "This should run ATKPanel",
-																				Toast.LENGTH_LONG);
-																		toast.show();*/
-																	}
-																	if (choice == 1) {
-																		Intent i = new Intent(context, DevicePanelActivity.class);
-																		i.putExtra("devName", name);
-																		i.putExtra("restHost", RESTfulTangoHost);
-																		i.putExtra("tangoHost", tangoHost);
-																		i.putExtra("tangoPort", tangoPort);
-																		startActivity(i);
-																	}
-																}
-															});
-															AlertDialog dialog = builder.create();
-															dialog.show();
-															return true;
-														}
-													});
+													tv.setOnLongClickListener(onLongClickListener);
 													Button properties = (Button) view.findViewById(R.id.nLevelList_member_properties);
 													properties.setTag(((SomeObject) item.getWrappedObject()).getTag());
 													Button attributes = (Button) view.findViewById(R.id.nLevelList_member_attributes);
@@ -742,7 +850,6 @@ public class SortedList extends CertificateExceptionActivity {
 								// add third level list item
 								list.add(classLevel);
 
-
 								// get count of devices for class
 								devicesCount = response.getInt("Se" + i + "In" + j + "Cl" + k + "DCnt");
 								if (devicesCount > 0) {
@@ -778,48 +885,7 @@ public class SortedList extends CertificateExceptionActivity {
 																String name = ((SomeObject) item.getWrappedObject()).getName();
 																tv.setText(name);
 																tv.setTag(((SomeObject) item.getWrappedObject()).getTag());
-																tv.setOnLongClickListener(new OnLongClickListener() {
-																	@Override
-																	public boolean onLongClick(View v) {
-																		TextView tv = (TextView) v;
-																		AlertDialog.Builder builder = new AlertDialog.Builder(tv.getContext
-																				());
-																		builder.setTitle("Choose action");
-																		builder.setNegativeButton("Cancel",
-																				new DialogInterface.OnClickListener() {
-																					public void onClick(DialogInterface dialog, int id) {
-																					}
-																				});
-																		String[] s = {"Monitor", "Test"};
-																		final String name = tv.getTag().toString();
-																		builder.setItems(s, new DialogInterface.OnClickListener() {
-																			public void onClick(DialogInterface dialog, int choice) {
-																				if (choice == 0) {
-																					Intent i = new Intent(context, ATKPanelActivity.class);
-																					i.putExtra("DEVICE_NAME", name);
-																					i.putExtra("restHost", RESTfulTangoHost);
-																					i.putExtra("tangoHost", tangoHost);
-																					i.putExtra("tangoPort", tangoPort);
-																					startActivity(i);
-																		/*Toast toast = Toast.makeText(context, "This should run ATKPanel",
-																				Toast.LENGTH_LONG);
-																		toast.show();*/
-																				}
-																				if (choice == 1) {
-																					Intent i = new Intent(context, DevicePanelActivity.class);
-																					i.putExtra("devName", name);
-																					i.putExtra("restHost", RESTfulTangoHost);
-																					i.putExtra("tangoHost", tangoHost);
-																					i.putExtra("tangoPort", tangoPort);
-																					startActivity(i);
-																				}
-																			}
-																		});
-																		AlertDialog dialog = builder.create();
-																		dialog.show();
-																		return true;
-																	}
-																});
+																tv.setOnLongClickListener(onLongClickListener);
 																Button properties =
 																		(Button) view.findViewById(R.id.nLevelList_member_properties);
 																properties.setTag(((SomeObject) item.getWrappedObject()).getTag());
@@ -833,8 +899,6 @@ public class SortedList extends CertificateExceptionActivity {
 										list.add(deviceLevel);
 									}
 								}
-
-
 							}
 						}
 					}
@@ -878,7 +942,6 @@ public class SortedList extends CertificateExceptionActivity {
 								});
 						// add frist level list item
 						list.add(serverLevel);
-
 
 						// get number of classes in the instance
 						classCount = response.getInt("domain" + i + "classCount");
@@ -935,48 +998,7 @@ public class SortedList extends CertificateExceptionActivity {
 															String name = ((SomeObject) item.getWrappedObject()).getName();
 															tv.setText(name);
 															tv.setTag(((SomeObject) item.getWrappedObject()).getTag());
-															tv.setOnLongClickListener(new OnLongClickListener() {
-																@Override
-																public boolean onLongClick(View v) {
-																	TextView tv = (TextView) v;
-																	AlertDialog.Builder builder = new AlertDialog.Builder(tv.getContext
-																			());
-																	builder.setTitle("Choose action");
-																	builder.setNegativeButton("Cancel",
-																			new DialogInterface.OnClickListener() {
-																				public void onClick(DialogInterface dialog, int id) {
-																				}
-																			});
-																	String[] s = {"Monitor", "Test"};
-																	final String name = tv.getTag().toString();
-																	builder.setItems(s, new DialogInterface.OnClickListener() {
-																		public void onClick(DialogInterface dialog, int choice) {
-																			if (choice == 0) {
-																				Intent i = new Intent(context, ATKPanelActivity.class);
-																				i.putExtra("DEVICE_NAME", name);
-																				i.putExtra("restHost", RESTfulTangoHost);
-																				i.putExtra("tangoHost", tangoHost);
-																				i.putExtra("tangoPort", tangoPort);
-																				startActivity(i);
-																		/*Toast toast = Toast.makeText(context, "This should run ATKPanel",
-																				Toast.LENGTH_LONG);
-																		toast.show();*/
-																			}
-																			if (choice == 1) {
-																				Intent i = new Intent(context, DevicePanelActivity.class);
-																				i.putExtra("devName", name);
-																				i.putExtra("restHost", RESTfulTangoHost);
-																				i.putExtra("tangoHost", tangoHost);
-																				i.putExtra("tangoPort", tangoPort);
-																				startActivity(i);
-																			}
-																		}
-																	});
-																	AlertDialog dialog = builder.create();
-																	dialog.show();
-																	return true;
-																}
-															});
+															tv.setOnLongClickListener(onLongClickListener);
 															Button properties =
 																	(Button) view.findViewById(R.id.nLevelList_member_properties);
 															properties.setTag(((SomeObject) item.getWrappedObject()).getTag());
@@ -990,10 +1012,7 @@ public class SortedList extends CertificateExceptionActivity {
 									list.add(deviceLevel);
 								}
 							}
-
-
 						}
-
 					}
 				} catch (JSONException e) {
 					e.printStackTrace();
@@ -1041,46 +1060,7 @@ public class SortedList extends CertificateExceptionActivity {
 												String name = ((SomeObject) item.getWrappedObject()).getName();
 												tv.setText(name);
 												tv.setTag(((SomeObject) item.getWrappedObject()).getTag());
-												tv.setOnLongClickListener(new OnLongClickListener() {
-													@Override
-													public boolean onLongClick(View v) {
-														TextView tv = (TextView) v;
-														AlertDialog.Builder builder = new AlertDialog.Builder(tv.getContext());
-														builder.setTitle("Choose action");
-														builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-															public void onClick(DialogInterface dialog, int id) {
-															}
-														});
-														String[] s = {"Monitor", "Test"};
-														final String name = tv.getTag().toString();
-														builder.setItems(s, new DialogInterface.OnClickListener() {
-															public void onClick(DialogInterface dialog, int choice) {
-																if (choice == 0) {
-																	Intent i = new Intent(context, ATKPanelActivity.class);
-																	i.putExtra("DEVICE_NAME", name);
-																	i.putExtra("restHost", RESTfulTangoHost);
-																	i.putExtra("tangoHost", tangoHost);
-																	i.putExtra("tangoPort", tangoPort);
-																	startActivity(i);
-																		/*Toast toast = Toast.makeText(context, "This should run ATKPanel",
-																				Toast.LENGTH_LONG);
-																		toast.show();*/
-																}
-																if (choice == 1) {
-																	Intent i = new Intent(context, DevicePanelActivity.class);
-																	i.putExtra("devName", name);
-																	i.putExtra("restHost", RESTfulTangoHost);
-																	i.putExtra("tangoHost", tangoHost);
-																	i.putExtra("tangoPort", tangoPort);
-																	startActivity(i);
-																}
-															}
-														});
-														AlertDialog dialog = builder.create();
-														dialog.show();
-														return true;
-													}
-												});
+												tv.setOnLongClickListener(onLongClickListener);
 												Button properties = (Button) view.findViewById(R.id.nLevelList_member_properties);
 												properties.setTag(((SomeObject) item.getWrappedObject()).getTag());
 												Button attributes = (Button) view.findViewById(R.id.nLevelList_member_attributes);
@@ -1183,46 +1163,7 @@ public class SortedList extends CertificateExceptionActivity {
 														String name = ((SomeObject) item.getWrappedObject()).getName();
 														tv.setText(name);
 														tv.setTag(((SomeObject) item.getWrappedObject()).getTag());
-														tv.setOnLongClickListener(new OnLongClickListener() {
-															@Override
-															public boolean onLongClick(View v) {
-																TextView tv = (TextView) v;
-																AlertDialog.Builder builder = new AlertDialog.Builder(tv.getContext());
-																builder.setTitle("Choose action");
-																builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-																	public void onClick(DialogInterface dialog, int id) {
-																	}
-																});
-																String[] s = {"Monitor", "Test"};
-																final String name = tv.getTag().toString();
-																builder.setItems(s, new DialogInterface.OnClickListener() {
-																	public void onClick(DialogInterface dialog, int choice) {
-																		if (choice == 0) {
-																			Intent i = new Intent(context, ATKPanelActivity.class);
-																			i.putExtra("DEVICE_NAME", name);
-																			i.putExtra("restHost", RESTfulTangoHost);
-																			i.putExtra("tangoHost", tangoHost);
-																			i.putExtra("tangoPort", tangoPort);
-																			startActivity(i);
-																		/*Toast toast = Toast.makeText(context, "This should run ATKPanel",
-																				Toast.LENGTH_LONG);
-																		toast.show();*/
-																		}
-																		if (choice == 1) {
-																			Intent i = new Intent(context, DevicePanelActivity.class);
-																			i.putExtra("devName", name);
-																			i.putExtra("restHost", RESTfulTangoHost);
-																			i.putExtra("tangoHost", tangoHost);
-																			i.putExtra("tangoPort", tangoPort);
-																			startActivity(i);
-																		}
-																	}
-																});
-																AlertDialog dialog = builder.create();
-																dialog.show();
-																return true;
-															}
-														});
+														tv.setOnLongClickListener(onLongClickListener);
 														Button properties = (Button) view.findViewById(R.id.nLevelList_member_properties);
 														properties.setTag(((SomeObject) item.getWrappedObject()).getTag());
 														Button attributes = (Button) view.findViewById(R.id.nLevelList_member_attributes);
@@ -1365,45 +1306,7 @@ public class SortedList extends CertificateExceptionActivity {
 																	String name = ((SomeObject) item.getWrappedObject()).getName();
 																	tv.setText(name);
 																	tv.setTag(((SomeObject) item.getWrappedObject()).getTag());
-																	tv.setOnLongClickListener(new OnLongClickListener() {
-																		@Override
-																		public boolean onLongClick(View v) {
-																			TextView tv = (TextView) v;
-																			AlertDialog.Builder builder = new AlertDialog.Builder(tv.getContext
-																					());
-																			builder.setTitle("Choose action");
-																			builder.setNegativeButton("Cancel",
-																					new DialogInterface.OnClickListener() {
-																						public void onClick(DialogInterface dialog, int id) {
-																						}
-																					});
-																			String[] s = {"Monitor", "Test"};
-																			final String name = tv.getTag().toString();
-																			builder.setItems(s, new DialogInterface.OnClickListener() {
-																				public void onClick(DialogInterface dialog, int choice) {
-																					if (choice == 0) {
-																						Intent i = new Intent(context, ATKPanelActivity.class);
-																						i.putExtra("DEVICE_NAME", name);
-																						i.putExtra("restHost", RESTfulTangoHost);
-																						i.putExtra("tangoHost", tangoHost);
-																						i.putExtra("tangoPort", tangoPort);
-																						startActivity(i);
-																					}
-																					if (choice == 1) {
-																						Intent i = new Intent(context, DevicePanelActivity.class);
-																						i.putExtra("devName", name);
-																						i.putExtra("restHost", RESTfulTangoHost);
-																						i.putExtra("tangoHost", tangoHost);
-																						i.putExtra("tangoPort", tangoPort);
-																						startActivity(i);
-																					}
-																				}
-																			});
-																			AlertDialog dialog = builder.create();
-																			dialog.show();
-																			return true;
-																		}
-																	});
+																	tv.setOnLongClickListener(onLongClickListener);
 																	Button properties =
 																			(Button) view.findViewById(R.id.nLevelList_member_properties);
 																	properties
@@ -1536,48 +1439,7 @@ public class SortedList extends CertificateExceptionActivity {
 																String name = ((SomeObject) item.getWrappedObject()).getName();
 																tv.setText(name);
 																tv.setTag(((SomeObject) item.getWrappedObject()).getTag());
-																tv.setOnLongClickListener(new OnLongClickListener() {
-																	@Override
-																	public boolean onLongClick(View v) {
-																		TextView tv = (TextView) v;
-																		AlertDialog.Builder builder = new AlertDialog.Builder(tv.getContext
-																				());
-																		builder.setTitle("Choose action");
-																		builder.setNegativeButton("Cancel",
-																				new DialogInterface.OnClickListener() {
-																					public void onClick(DialogInterface dialog, int id) {
-																					}
-																				});
-																		String[] s = {"Monitor", "Test"};
-																		final String name = tv.getTag().toString();
-																		builder.setItems(s, new DialogInterface.OnClickListener() {
-																			public void onClick(DialogInterface dialog, int choice) {
-																				if (choice == 0) {
-																					Intent i = new Intent(context, ATKPanelActivity.class);
-																					i.putExtra("DEVICE_NAME", name);
-																					i.putExtra("restHost", RESTfulTangoHost);
-																					i.putExtra("tangoHost", tangoHost);
-																					i.putExtra("tangoPort", tangoPort);
-																					startActivity(i);
-																		/*Toast toast = Toast.makeText(context, "This should run ATKPanel",
-																				Toast.LENGTH_LONG);
-																		toast.show();*/
-																				}
-																				if (choice == 1) {
-																					Intent i = new Intent(context, DevicePanelActivity.class);
-																					i.putExtra("devName", name);
-																					i.putExtra("restHost", RESTfulTangoHost);
-																					i.putExtra("tangoHost", tangoHost);
-																					i.putExtra("tangoPort", tangoPort);
-																					startActivity(i);
-																				}
-																			}
-																		});
-																		AlertDialog dialog = builder.create();
-																		dialog.show();
-																		return true;
-																	}
-																});
+																tv.setOnLongClickListener(onLongClickListener);
 																Button properties =
 																		(Button) view.findViewById(R.id.nLevelList_member_properties);
 																properties.setTag(((SomeObject) item.getWrappedObject()).getTag());
@@ -1646,46 +1508,7 @@ public class SortedList extends CertificateExceptionActivity {
 													String name = ((SomeObject) item.getWrappedObject()).getName();
 													tv.setText(name);
 													tv.setTag(((SomeObject) item.getWrappedObject()).getTag());
-													tv.setOnLongClickListener(new OnLongClickListener() {
-														@Override
-														public boolean onLongClick(View v) {
-															TextView tv = (TextView) v;
-															AlertDialog.Builder builder = new AlertDialog.Builder(tv.getContext());
-															builder.setTitle("Choose action");
-															builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-																public void onClick(DialogInterface dialog, int id) {
-																}
-															});
-															String[] s = {"Monitor", "Test"};
-															final String name = tv.getTag().toString();
-															builder.setItems(s, new DialogInterface.OnClickListener() {
-																public void onClick(DialogInterface dialog, int choice) {
-																	if (choice == 0) {
-																		Intent i = new Intent(context, ATKPanelActivity.class);
-																		i.putExtra("DEVICE_NAME", name);
-																		i.putExtra("restHost", RESTfulTangoHost);
-																		i.putExtra("tangoHost", tangoHost);
-																		i.putExtra("tangoPort", tangoPort);
-																		startActivity(i);
-																		/*Toast toast = Toast.makeText(context, "This should run ATKPanel",
-																				Toast.LENGTH_LONG);
-																		toast.show();*/
-																	}
-																	if (choice == 1) {
-																		Intent i = new Intent(context, DevicePanelActivity.class);
-																		i.putExtra("devName", name);
-																		i.putExtra("restHost", RESTfulTangoHost);
-																		i.putExtra("tangoHost", tangoHost);
-																		i.putExtra("tangoPort", tangoPort);
-																		startActivity(i);
-																	}
-																}
-															});
-															AlertDialog dialog = builder.create();
-															dialog.show();
-															return true;
-														}
-													});
+													tv.setOnLongClickListener(onLongClickListener);
 													Button properties = (Button) view.findViewById(R.id.nLevelList_member_properties);
 													properties.setTag(((SomeObject) item.getWrappedObject()).getTag());
 													Button attributes = (Button) view.findViewById(R.id.nLevelList_member_attributes);

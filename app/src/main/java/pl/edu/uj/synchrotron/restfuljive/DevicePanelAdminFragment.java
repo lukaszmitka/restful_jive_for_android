@@ -36,6 +36,8 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 	private String RESTfulTangoHost;
 	private String tangoHost;
 	private String tangoPort;
+	private String userName, userPassword;
+
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -47,6 +49,8 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 		RESTfulTangoHost = ((DevicePanelActivity) getActivity()).getRestHost();
 		tangoHost = ((DevicePanelActivity) getActivity()).getTangoHost();
 		tangoPort = ((DevicePanelActivity) getActivity()).getTangoPort();
+		userName = ((DevicePanelActivity) getActivity()).getUserName();
+		userPassword = ((DevicePanelActivity) getActivity()).getUserPassword();
 		Log.d("onCreateView()", "Host: " + RESTfulTangoHost);
 		context = ((DevicePanelActivity) getActivity()).getContext();
 
@@ -113,7 +117,7 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 							public void onErrorResponse(VolleyError error) {
 								jsonRequestErrorHandler(error);
 							}
-						});
+						}, userName, userPassword);
 				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
@@ -185,7 +189,7 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 							public void onErrorResponse(VolleyError error) {
 								jsonRequestErrorHandler(error);
 							}
-						});
+						}, userName, userPassword);
 				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
@@ -241,7 +245,7 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 							public void onErrorResponse(VolleyError error) {
 								jsonRequestErrorHandler(error);
 							}
-						});
+						}, userName, userPassword);
 				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
@@ -297,7 +301,7 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 							public void onErrorResponse(VolleyError error) {
 								jsonRequestErrorHandler(error);
 							}
-						});
+						}, userName, userPassword);
 				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
@@ -353,7 +357,7 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 							public void onErrorResponse(VolleyError error) {
 								jsonRequestErrorHandler(error);
 							}
-						});
+						}, userName, userPassword);
 				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
@@ -408,7 +412,7 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 							public void onErrorResponse(VolleyError error) {
 								jsonRequestErrorHandler(error);
 							}
-						});
+						}, userName, userPassword);
 				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
@@ -450,7 +454,7 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 					public void onErrorResponse(VolleyError error) {
 						jsonRequestErrorHandler(error);
 					}
-				});
+				}, userName, userPassword);
 		jsObjRequest.setShouldCache(false);
 		queue.add(jsObjRequest);
 		return rootView;
@@ -514,7 +518,7 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 							public void onErrorResponse(VolleyError error) {
 								jsonRequestErrorHandler(error);
 							}
-						});
+						}, userName, userPassword);
 				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}

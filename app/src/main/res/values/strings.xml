@@ -16,7 +16,7 @@
     <string name="tango_port">Tango port</string>
     <string name="host_port">Port</string>
     <string name="warning">Warning!</string>
-    <string name="track_status_warning">Tracking device status may take a long time, depanding on number of devices. Do you
+    <string name="track_status_warning">Tracking device status may take a long time, depending on number of devices. Do you
         want to continue?</string>
 
     <!--    Buttons    -->
@@ -71,7 +71,7 @@
     <string name="title_activity_sorted_list">SortedList</string>
     <string name="title_activity_atkpanel">ATK Panel</string>
     <string name="title_activity_set_device">SetDeviceDialogActivity</string>
-
+    <string name="title_activity_get_credentials">GetCredentialsActivity</string>
 
     <!--    Set device name strings -->
     <string name="set_device_dialog">Type device name</string>
@@ -89,6 +89,9 @@
     <string name="attribute_new_value">Attribute new value</string>
     <string name="new_value_for_att">New value for </string>
     <string name="enter_user_name_pass">Enter user name and password</string>
+    <string name="user_name">User name</string>
+    <string name="user_password">Password</string>
+    <string name="store_credentials_checkbox">Store credentials</string>
 
 
     <!--    Sorted list labels  -->
@@ -156,9 +159,4 @@
     <!--    Colours    -->
     <color name="gray">#FFDDDDDD</color>
     <color name="white">#FFFFFFFF</color>
-    <string name="title_activity_get_credentials">GetCredentialsActivity</string>
-
-    <string name="hello_world">Hello world!</string>
-
-
 </resources>

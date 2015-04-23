@@ -19,10 +19,6 @@ import com.android.volley.VolleyError;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-//import fr.esrf.Tango.AttributeDataType;
-//import fr.esrf.Tango.DevFailed;
-//import fr.esrf.TangoApi.DeviceAttribute;
-//import fr.esrf.TangoApi.DeviceProxy;
 
 /**
  * A class for creating attributes activity screen.
@@ -53,6 +49,8 @@ public class AttributesActivity extends CertificateExceptionActivity {
 	 */
 	private Context context;
 
+	private String userName, userPassword;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -62,6 +60,8 @@ public class AttributesActivity extends CertificateExceptionActivity {
 		RESTfulHost = intent.getStringExtra("restHost");
 		tangoHost = intent.getStringExtra("tangoHost");
 		tangoPort = intent.getStringExtra("tangoPort");
+		userName = intent.getStringExtra("userName");
+		userPassword = intent.getStringExtra("userPass");
 		context = this;
 		TextView deviceAttTextView = (TextView) findViewById(R.id.attributesActivityTextView1);
 		deviceAttTextView.setText("Device " + deviceName + " attributes");
@@ -140,7 +140,7 @@ public class AttributesActivity extends CertificateExceptionActivity {
 						Log.d("refreshAttributeList()", "Connection error!");
 						error.printStackTrace();
 					}
-				});
+				}, userName, userPassword);
 		jsObjRequest.setShouldCache(false);
 		queue.add(jsObjRequest);
 
@@ -207,7 +207,7 @@ public class AttributesActivity extends CertificateExceptionActivity {
 								Log.d("updateButton.onClick()", "Connection error!");
 								error.printStackTrace();
 							}
-						});
+						}, userName, userPassword);
 				jsObjRequest.setShouldCache(false);
 				queue.add(jsObjRequest);
 			}
