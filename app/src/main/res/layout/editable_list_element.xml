@@ -11,24 +11,28 @@
         android:layout_alignParentStart="false"
         android:layout_alignParentTop="true"
         android:onClick="attributesActivityPlotButton"
-        android:text="@string/plotButton"/>
+        android:text="@string/plotButton"
+        android:textSize="20dp"/>
 
     <TextView
         android:id="@+id/editableListTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/editableList_plotButton"
+        android:layout_marginTop="5dp"
         android:layout_toEndOf="@+id/editableList_plotButton"
-        android:layout_toRightOf="@+id/editableList_plotButton"/>
+        android:layout_toRightOf="@+id/editableList_plotButton"
+        android:textSize="20dp"/>
 
     <EditText
         android:id="@+id/editableListEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/editableList_plotButton"
+        android:layout_alignBaseline="@+id/editableListTextView"
         android:layout_alignParentRight="true"
         android:layout_toRightOf="@+id/editableListTextView"
         android:ems="10"
-        android:inputType="text"/>
+        android:inputType="text"
+        android:textSize="20dp"/>
 
 </RelativeLayout>
