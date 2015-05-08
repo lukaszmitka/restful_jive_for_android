@@ -53,13 +53,11 @@ public class SortedList extends CertificateExceptionActivity {
 	private static final int SORT_BY_SERVER = 2;
 	private static final int SORT_FULL_LIST = 3;
 	private static final int DEFAULT_SORTING_TYPE = SORT_FULL_LIST;
-	private int sortType = DEFAULT_SORTING_TYPE;
 	private static final int REQUEST_LONG_TIMEOUT = 60000; // in miliseconds
-
 	private static final int ACTIVITY_REQUEST_HOST = 1;
 	private static final int ACTIVITY_REQUEST_CREDENTIALS = 2;
-
 	private final Context context = this;
+	private int sortType = DEFAULT_SORTING_TYPE;
 	private List<NLevelItem> list;
 	private ListView listView;
 	private boolean trackDeviceStatus = false;
@@ -659,6 +657,8 @@ public class SortedList extends CertificateExceptionActivity {
 		intent.putExtra("restHost", RESTfulTangoHost);
 		intent.putExtra("tangoHost", tangoHost);
 		intent.putExtra("tangoPort", tangoPort);
+		intent.putExtra("userName", userName);
+		intent.putExtra("userPass", userPassword);
 		startActivity(intent);
 	}
 
@@ -675,6 +675,8 @@ public class SortedList extends CertificateExceptionActivity {
 		intent.putExtra("restHost", RESTfulTangoHost);
 		intent.putExtra("tangoHost", tangoHost);
 		intent.putExtra("tangoPort", tangoPort);
+		intent.putExtra("userName", userName);
+		intent.putExtra("userPass", userPassword);
 		//intent.putExtra("dbPort", dbPort);
 		startActivity(intent);
 	}
