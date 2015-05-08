@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -113,6 +114,8 @@ public class PropertiesActivity extends CertificateExceptionActivity {
 									tv.setText(prop_list[i]);
 									et.setText(prop_values[i]);
 									et.setTag(prop_list[i]);
+									Button plotButton = (Button) view.findViewById(R.id.editableList_plotButton);
+									plotButton.setVisibility(View.GONE);
 									layout.addView(view);
 								}
 							} else {
