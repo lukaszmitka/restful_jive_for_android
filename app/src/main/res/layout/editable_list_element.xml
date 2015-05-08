@@ -3,21 +3,30 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
+    <Button
+        android:id="@+id/editableList_plotButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="false"
+        android:layout_alignParentTop="true"
+        android:onClick="attributesActivityPlotButton"
+        android:text="@string/plotButton"/>
+
     <TextView
         android:id="@+id/editableListTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/editableListEditText"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginRight="10dp"/>
+        android:layout_alignBaseline="@+id/editableList_plotButton"
+        android:layout_toEndOf="@+id/editableList_plotButton"
+        android:layout_toRightOf="@+id/editableList_plotButton"/>
 
     <EditText
         android:id="@+id/editableListEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/editableList_plotButton"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/editableListTextView"
         android:ems="10"
         android:inputType="text"/>
