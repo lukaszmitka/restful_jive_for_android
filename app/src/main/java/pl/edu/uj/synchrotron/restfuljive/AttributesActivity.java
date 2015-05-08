@@ -1,13 +1,17 @@
 package pl.edu.uj.synchrotron.restfuljive;
 
-
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -17,8 +21,11 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 /**
  * A class for creating attributes activity screen.
@@ -32,6 +39,12 @@ public class AttributesActivity extends CertificateExceptionActivity {
 	 * Name of device, which attributes should be listed.
 	 */
 	String deviceName;
+	String[] attr_list;
+	String[] attr_values;
+	boolean[] writable;
+	boolean[] scalar;
+	boolean[] plottable;
+	boolean[] numeric;
 	/**
 	 * RESTful host address.
 	 */
@@ -48,7 +61,6 @@ public class AttributesActivity extends CertificateExceptionActivity {
 	 * Application context.
 	 */
 	private Context context;
-
 	private String userName, userPassword;
 
 	@Override
@@ -86,6 +98,7 @@ public class AttributesActivity extends CertificateExceptionActivity {
 		Log.d("refreshAttributeList()", "Device name: " + deviceName);
 		Log.d("refreshAttributeList()", "REST host: " + RESTfulHost);
 		Log.d("refreshAttributeList()", "Tango host: " + tangoHost + ":" + tangoPort);
+		Log.d("refreshAttributeList()", "User: " + userName + ", pass: " + userPassword);
 
 		String url = RESTfulHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 				"/get_attribute_list";
@@ -101,17 +114,20 @@ public class AttributesActivity extends CertificateExceptionActivity {
 								final LayoutInflater inflater = LayoutInflater.from(context);
 								int attributeCount = response.getInt("attCount");
 								Log.d("refreshAttributeList()", "Received " + attributeCount + " attributes");
-								String[] attr_list = new String[attributeCount];
-								String[] attr_values = new String[attributeCount];
-								boolean[] writable = new boolean[attributeCount];
-								boolean[] scalar = new boolean[attributeCount];
+								attr_list = new String[attributeCount];
+								attr_values = new String[attributeCount];
+								writable = new boolean[attributeCount];
+								scalar = new boolean[attributeCount];
+								plottable = new boolean[attributeCount];
+								numeric = new boolean[attributeCount];
 								for (int i = 0; i < attr_list.length; i++) {
 									attr_list[i] = response.getString("attribute" + i);
 									attr_values[i] = response.getString("attValue" + i);
 									writable[i] = response.getBoolean("attWritable" + i);
 									scalar[i] = response.getBoolean("attScalar" + i);
-								}
-								for (int i = 0; i < attr_list.length; i++) {
+									plottable[i] = response.getBoolean("attPlotable" + i);
+									numeric[i] = response.getBoolean("isNumeric" + i);
+
 									//System.out.println("Processing attribute no. " + i);
 									//System.out.println("Name: " + attr_list[i] + " Value: " + attr_list[i]);
 									View view = inflater.inflate(R.layout.editable_list_element, layout, false);
@@ -123,6 +139,17 @@ public class AttributesActivity extends CertificateExceptionActivity {
 									et.setEnabled(writable[i] && scalar[i]);
 									et.setFocusable(writable[i] && scalar[i]);
 									layout.addView(view);
+
+									// button
+									Button plotButton = (Button) view.findViewById(R.id.editableList_plotButton);
+									plotButton.setTag(deviceName);
+									ArrayList<Object> tag = new ArrayList<>();
+									tag.add(0, attr_list[i]);
+									tag.add(1, i);
+									plotButton.setTag(tag);
+									plotButton.setClickable(numeric[i] || plottable[i]);
+									plotButton.setEnabled(numeric[i] || plottable[i]);
+									plotButton.setFocusable(numeric[i] || plottable[i]);
 								}
 							} else {
 								Log.d("refreshAttributeList()", "Tango database API returned message from query " +
@@ -144,6 +171,134 @@ public class AttributesActivity extends CertificateExceptionActivity {
 		jsObjRequest.setShouldCache(false);
 		queue.add(jsObjRequest);
 
+	}
+
+	public void attributesActivityPlotButton(View view) {
+
+		ArrayList tag = (ArrayList) view.getTag();
+		String attName = (String) tag.get(0);
+		int selectedAttributeId = (int) tag.get(1);
+		if (scalar[selectedAttributeId]) {
+			startPlotInTime(attName, deviceName, tangoHost, tangoPort);
+		} else {
+			Log.d("attPlotButton", "Tag: " + tag);
+			System.out.println("Processing plot button");
+			String url = RESTfulHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
+					"/plot_attribute/" + attr_list[selectedAttributeId];
+			System.out.println("Sending JSON request");
+			HeaderJsonObjectRequest jsObjRequest =
+					new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+						@Override
+						public void onResponse(JSONObject response) {
+							try {
+								if (response.getString("connectionStatus").equals("OK")) {
+									System.out.println("Device connection OK");
+									String dataFormat = response.getString("dataFormat");
+									String plotLabel = response.getString("plotLabel");
+									switch (dataFormat) {
+										case "SPECTRUM":
+											JSONArray array = response.getJSONArray("plotData");
+											double[] values = new double[array.length()];
+											for (int i = 0; i < array.length(); i++) {
+												values[i] = array.getDouble(i);
+											}
+											DataToPlot dtp = new DataToPlot(values);
+											Intent intent = new Intent(context, PlotActivity.class);
+											intent.putExtra("data", dtp);
+											intent.putExtra("domainLabel", plotLabel);
+											startActivity(intent);
+											break;
+										case "IMAGE":
+											int rows = response.getInt("rows");
+											int cols = response.getInt("cols");
+											JSONArray oneDimArray;
+											double[][] ivalues = new double[rows][cols];
+											for (int i = 0; i < rows; i++) {
+												oneDimArray = response.getJSONArray("row" + i);
+												for (int j = 0; j < cols; j++) {
+													ivalues[i][j] = oneDimArray.getDouble(j);
+												}
+											}
+
+											Bitmap b = Bitmap.createBitmap(ivalues.length, ivalues[0].length, Bitmap.Config.RGB_565);
+											double minValue = ivalues[0][0];
+											double maxValue = ivalues[0][0];
+											for (int i = 0; i < ivalues.length; i++) {
+												for (int j = 0; j < ivalues[0].length; j++) {
+													if (minValue > ivalues[i][j]) {
+														minValue = ivalues[i][j];
+													}
+													if (maxValue < ivalues[i][j]) {
+														maxValue = ivalues[i][j];
+													}
+												}
+											}
+											System.out.println("Min: " + minValue + "Max: " + maxValue);
+											double range = maxValue - minValue;
+											float step = (float) (330 / range);
+
+											int color = 0;
+											float hsv[] = {0, 1, 1};
+
+											for (int i = 1; i < ivalues.length; i++) {
+												for (int j = 1; j < ivalues[0].length; j++) {
+
+													hsv[0] = 330 - (float) (ivalues[i][j] * step);
+													color = Color.HSVToColor(hsv);
+													b.setPixel(ivalues.length - i, ivalues[0].length - j, color);
+													// System.out.println("Value["+i+"]["+j+"]= "+color);
+												}
+											}
+											Intent imageIntent = new Intent(context, ImagePlotActivity.class);
+											imageIntent.putExtra("imageData", b);
+											imageIntent.putExtra("minValue", String.valueOf(minValue));
+											imageIntent.putExtra("maxValue", String.valueOf(maxValue));
+											// intent.putExtra("plotTitle",
+											// dp.name()+"/"+commInfo.cmd_name);
+											startActivity(imageIntent);
+											break;
+									}
+								} else {
+									AlertDialog.Builder builder = new AlertDialog.Builder(context);
+									String res = response.getString("connectionStatus");
+									System.out.println("Tango database API returned message:");
+									System.out.println(res);
+									builder.setTitle("Reply");
+									builder.setMessage(res);
+									builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+										public void onClick(DialogInterface dialog, int id) {
+										}
+									});
+									AlertDialog dialog = builder.create();
+									dialog.show();
+								}
+							} catch (JSONException e) {
+								System.out.println("Problem with JSON object");
+								e.printStackTrace();
+							}
+						}
+					}, new Response.ErrorListener() {
+						@Override
+						public void onErrorResponse(VolleyError error) {
+							jsonRequestErrorHandler(error);
+						}
+					}, userName, userPassword);
+			jsObjRequest.setShouldCache(false);
+			queue.add(jsObjRequest);
+		}
+
+	}
+
+	private void startPlotInTime(String attributeName, String deviceName, String host, String port) {
+		Intent i = new Intent(this, PlotInTimeActivity.class);
+		i.putExtra("attName", attributeName);
+		i.putExtra("devName", deviceName);
+		i.putExtra("host", host);
+		i.putExtra("port", port);
+		i.putExtra("RESThost", RESTfulHost);
+		i.putExtra("user", userName);
+		i.putExtra("pass", userPassword);
+		startActivity(i);
 	}
 
 	/**
@@ -212,6 +367,24 @@ public class AttributesActivity extends CertificateExceptionActivity {
 				queue.add(jsObjRequest);
 			}
 		}
+	}
+
+	/**
+	 * Method displaying info about connection error
+	 *
+	 * @param error Error tah caused exception
+	 */
+	private void jsonRequestErrorHandler(VolleyError error) {
+		// Print error message to LogcCat
+		Log.d("jsonRequestErrorHandler", "Connection error!");
+		error.printStackTrace();
+
+		// show dialog box with error message
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setMessage(error.toString()).setTitle("Connection error!")
+				.setPositiveButton(getString(R.string.ok_button), null);
+		AlertDialog dialog = builder.create();
+		dialog.show();
 	}
 }
 
