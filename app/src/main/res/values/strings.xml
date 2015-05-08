@@ -31,6 +31,7 @@
     <string name="properties">Properties</string>
     <string name="attributes">Attributes</string>
     <string name="sortedList_filterButton">Filter</string>
+    <string name="plotButton">Plot</string>
 
     <!--    Hints    -->
     <string name="new_host_port">Enter new port here</string>
@@ -159,4 +160,7 @@
     <!--    Colours    -->
     <color name="gray">#FFDDDDDD</color>
     <color name="white">#FFFFFFFF</color>
+    <string name="title_activity_plot_in_time">PlotInTime</string>
+
+    <string name="hello_world">Hello world!</string>
 </resources>
