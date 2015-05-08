@@ -58,11 +58,6 @@
             android:label="@string/title_activity_atkpanel"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="stateHidden">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
         </activity>
         <activity
             android:name=".SetDeviceActivity"
@@ -73,6 +68,10 @@
             android:name=".GetCredentialsActivity"
             android:label="@string/title_activity_get_credentials"
             android:theme="@style/Base.Theme.AppCompat.Light.Dialog">
+        </activity>
+        <activity
+            android:name=".PlotInTimeActivity"
+            android:label="@string/title_activity_plot_in_time">
         </activity>
     </application>
 
