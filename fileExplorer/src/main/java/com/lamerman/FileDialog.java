@@ -75,7 +75,6 @@ public class FileDialog extends ListActivity {
 	private LinearLayout layoutCreate;
 	private InputMethodManager inputManager;
 	private String parentPath;
-	private int selectionMode = SelectionMode.MODE_CREATE;
 
 	private String[] formatFilter = null;
 
@@ -125,7 +124,7 @@ public class FileDialog extends ListActivity {
 			}
 		});
 
-		selectionMode = getIntent().getIntExtra(SELECTION_MODE, SelectionMode.MODE_CREATE);
+		int selectionMode = getIntent().getIntExtra(SELECTION_MODE, SelectionMode.MODE_CREATE);
 
 		formatFilter = getIntent().getStringArrayExtra(FORMAT_FILTER);
 
@@ -164,8 +163,7 @@ public class FileDialog extends ListActivity {
 		String startPath = getIntent().getStringExtra(START_PATH);
 		startPath = startPath != null ? startPath : ROOT;
 		if (canSelectDir) {
-			File file = new File(startPath);
-			selectedFile = file;
+			selectedFile = new File(startPath);
 			selectButton.setEnabled(true);
 		}
 		getDir(startPath);
