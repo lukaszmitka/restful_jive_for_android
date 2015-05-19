@@ -57,7 +57,9 @@
             android:layout_toRightOf="@+id/textViewAddress"
             android:ems="10"
             android:hint="@string/new_rest_address"
+            android:inputType="textVisiblePassword|textNoSuggestions"
             android:maxLines="1"
+            android:singleLine="true"
             android:textSize="16sp"/>
 
         <EditText
@@ -69,6 +71,8 @@
             android:layout_alignStart="@+id/textNewHost"
             android:layout_below="@+id/textNewHost"
             android:hint="@string/new_tango_host"
+            android:inputType="textVisiblePassword|textNoSuggestions"
+            android:singleLine="true"
             android:textSize="16sp"/>
 
         <EditText
@@ -79,6 +83,8 @@
             android:layout_alignParentRight="true"
             android:layout_below="@+id/editTextTangoHost"
             android:hint="@string/new_tango_port"
+            android:inputType="number"
+            android:singleLine="true"
             android:textSize="16sp"/>
 
     </RelativeLayout>

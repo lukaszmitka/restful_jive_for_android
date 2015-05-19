@@ -26,6 +26,7 @@
         android:layout_margin="5dp"
         android:background="#ffffffff"
         android:hint="@string/hint_device_name"
+        android:inputType="textVisiblePassword|textNoSuggestions"
         android:singleLine="true"
         android:textSize="30dp"/>
 
