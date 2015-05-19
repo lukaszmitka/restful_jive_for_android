@@ -36,7 +36,7 @@
     <!--    Hints    -->
     <string name="new_host_port">Enter new port here</string>
     <string name="sorted_list_filter">Your filter here</string>
-    <string name="hint_argin_value">Argin value</string>
+    <string name="hint_argin_value">Input argument value</string>
     <string name="new_rest_address">example: http://192.168.105.140</string>
     <string name="new_tango_host">example: 192.168.130.100</string>
     <string name="new_tango_port">example: 10000</string>
@@ -125,9 +125,9 @@
     <string name="devicepanel_adminfragment_answer_min_label">Answer limit (min)</string>
     <string name="devicepanel_adminfragment_answer_max_label">Answer limit (max)</string>
     <string name="device_panel_device">Device: </string>
-    <string name="device_panel_argin_type">Argin type: </string>
-    <string name="device_panel_argout_type">Argout type: </string>
-    <string name="devicePanel_arginValueLabel">Argin value:</string>
+    <string name="device_panel_argin_type">Input argument type: </string>
+    <string name="device_panel_argout_type">Output argument type: </string>
+    <string name="devicePanel_arginValueLabel">Input argument value:</string>
     <string name="devicePanel_showDescription">Description</string>
     <string name="devicePanel_execute">Execute</string>
     <string name="devicePanel_plot">Plot</string>
@@ -162,5 +162,4 @@
     <color name="white">#FFFFFFFF</color>
     <string name="title_activity_plot_in_time">PlotInTime</string>
 
-    <string name="hello_world">Hello world!</string>
 </resources>
