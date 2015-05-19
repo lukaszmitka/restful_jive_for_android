@@ -20,6 +20,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+/**
+ * This class observes device's wifi state and inform user about changes.
+ */
 public class WifiMonitorActivity extends Activity {
 	protected Context context;
 	protected boolean isConnected;
@@ -38,6 +41,9 @@ public class WifiMonitorActivity extends Activity {
 		checkInternetConnectionStatus();
 	}
 
+	/**
+	 * Check network state, and inform user if networkis present and what type of connection is used.
+	 */
 	private void checkInternetConnectionStatus() {
 		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
@@ -73,6 +79,9 @@ public class WifiMonitorActivity extends Activity {
 		}
 	}
 
+	/**
+	 * Inform user that there is no internet connection.
+	 */
 	private void noNetworkConnection() {
 		isConnected = false;
 		Log.d("noNetworkConnection()", "No internet connection.");

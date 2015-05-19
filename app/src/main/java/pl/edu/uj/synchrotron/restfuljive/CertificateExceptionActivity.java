@@ -1,6 +1,3 @@
-/*
- * Created by lukasz on 02.04.15.
- */
 package pl.edu.uj.synchrotron.restfuljive;
 
 import android.app.Activity;
@@ -30,7 +27,6 @@ import java.security.cert.CertificateFactory;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-
 
 /**
  * Class that enable to add security exception for self signed SSL certificate in application fragment.
@@ -62,6 +58,9 @@ public abstract class CertificateExceptionActivity extends WifiMonitorActivity {
 		super.onDestroy();
 	}
 
+	/**
+	 * Stop pending tasks from queue, clear cache and start queue again.
+	 */
 	protected void restartQueue() {
 		if (queue != null) {
 			queue.stop();
@@ -75,6 +74,9 @@ public abstract class CertificateExceptionActivity extends WifiMonitorActivity {
 		queue.start();
 	}
 
+	/**
+	 * Start activity to get SSL certificate file path.
+	 */
 	protected void promptForCertPath() {
 		Intent intent = new Intent(getBaseContext(), FileDialog.class);
 		intent.putExtra(FileDialog.START_PATH, Environment.getExternalStorageDirectory().getPath());
@@ -87,8 +89,7 @@ public abstract class CertificateExceptionActivity extends WifiMonitorActivity {
 	}
 
 	@Override
-	protected synchronized void onActivityResult(final int requestCode,
-	                                             int resultCode, final Intent data) {
+	protected synchronized void onActivityResult(final int requestCode, int resultCode, final Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		Log.d("onActivityResult", "Processing certificate path from activity");
 		if (resultCode == Activity.RESULT_OK) {
@@ -112,6 +113,14 @@ public abstract class CertificateExceptionActivity extends WifiMonitorActivity {
 		}
 	}
 
+	/**
+	 * Set new SSL certificate from selected file.
+	 *
+	 * @param certPath
+	 * 		Path to SSL certificate file.
+	 *
+	 * @return True if set certificate without problems.
+	 */
 	private boolean setSSLCertificate(String certPath) {
 		Log.d("setSSLCertificate", "Received path: " + certPath);
 		TrustManagerFactory tmf;
@@ -119,9 +128,7 @@ public abstract class CertificateExceptionActivity extends WifiMonitorActivity {
 		File f = new File(certPath);
 		Log.d("setSSLCertificate", "Created file");
 		try {
-			/*
-			get certificate file from path specified by user
-			 */
+			// get certificate file from path specified by user
 			FileInputStream certificateFileInput = new FileInputStream(f);
 			cf = CertificateFactory.getInstance("X.509");
 			Certificate ca;
@@ -145,20 +152,25 @@ public abstract class CertificateExceptionActivity extends WifiMonitorActivity {
 		} catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException
 				e) {
 			e.printStackTrace();
-
 		}
 		return false;
 	}
 
+	/**
+	 * Set new SSL certificate from selected resource.
+	 *
+	 * @param resID
+	 * 		Resource ID of selected SSL certificate file.
+	 *
+	 * @return True if set certificate without problems.
+	 */
 	private boolean setSSLCertificate(int resID) {
 
 		TrustManagerFactory tmf;
 		CertificateFactory cf;
 		Log.d("setSSLCertificate", "Created file");
 		try {
-			/*
-			get certificate file from path specified by user
-			 */
+			// get certificate file from path specified by user
 			InputStream is = getResources().openRawResource(resID);
 
 			//FileInputStream certificateFileInput =  new FileInputStream();
@@ -185,7 +197,6 @@ public abstract class CertificateExceptionActivity extends WifiMonitorActivity {
 		} catch (IOException | CertificateException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException
 				e) {
 			e.printStackTrace();
-
 		}
 		return false;
 	}

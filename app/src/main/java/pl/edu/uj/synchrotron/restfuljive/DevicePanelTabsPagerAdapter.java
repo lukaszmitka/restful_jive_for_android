@@ -1,13 +1,12 @@
 package pl.edu.uj.synchrotron.restfuljive;
 
-/**
- * Created by lukasz on 17.01.15.
- */
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
+/**
+ * Class for handling device panel tabs.
+ */
 public class DevicePanelTabsPagerAdapter extends FragmentPagerAdapter {
 
 	public DevicePanelTabsPagerAdapter(FragmentManager fm) {

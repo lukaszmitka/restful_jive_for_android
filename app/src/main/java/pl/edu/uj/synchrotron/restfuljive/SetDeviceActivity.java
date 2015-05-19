@@ -8,7 +8,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
-
+/**
+ * Activity to get new device name from user.
+ */
 public class SetDeviceActivity extends Activity {
 
 	@Override
@@ -16,7 +18,6 @@ public class SetDeviceActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_set_device);
 	}
-
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -37,7 +38,8 @@ public class SetDeviceActivity extends Activity {
 	/**
 	 * Listener for the button click, get data from user and send them to parent activity.
 	 *
-	 * @param view Reference to the widget that was clicked.
+	 * @param view
+	 * 		Reference to the widget that was clicked.
 	 */
 	public void buttonClickOk(View view) {
 		Intent returnIntent = new Intent();
@@ -51,7 +53,8 @@ public class SetDeviceActivity extends Activity {
 	/**
 	 * Listener for the button click, close the activity.
 	 *
-	 * @param view Reference to the widget that was clicked.
+	 * @param view
+	 * 		Reference to the widget that was clicked.
 	 */
 	public void buttonClickCancel(View view) {
 		Intent returnIntent = new Intent();

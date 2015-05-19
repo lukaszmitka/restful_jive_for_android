@@ -1,7 +1,3 @@
-/*
- * Created by lukasz on 04.04.15.
- */
-
 package pl.edu.uj.synchrotron.restfuljive;
 
 import android.content.SharedPreferences;
@@ -67,6 +63,9 @@ public class CertificateExceptionFragment extends Fragment {
 		}
 	}
 
+	/**
+	 * Stop pending tasks from queue, clear cache and start queue again.
+	 */
 	protected void restartQueue() {
 		if (queue != null) {
 			queue.stop();
@@ -81,6 +80,14 @@ public class CertificateExceptionFragment extends Fragment {
 		queue.start();
 	}
 
+	/**
+	 * Set new SSL certificate from selected file.
+	 *
+	 * @param certPath
+	 * 		Path to SSL certificate file.
+	 *
+	 * @return True if set certificate without problems.
+	 */
 	private boolean setSSLCertificate(String certPath) {
 		Log.d("setSSLCertificate", "Received path: " + certPath);
 		TrustManagerFactory tmf;
@@ -88,9 +95,7 @@ public class CertificateExceptionFragment extends Fragment {
 		File f = new File(certPath);
 		Log.d("setSSLCertificate", "Created file");
 		try {
-			/*
-			get certificate file from path specified by user
-			 */
+			// get certificate file from path specified by user
 			FileInputStream certificateFileInput = new FileInputStream(f);
 			cf = CertificateFactory.getInstance("X.509");
 			Certificate ca;
@@ -120,15 +125,21 @@ public class CertificateExceptionFragment extends Fragment {
 		return false;
 	}
 
+	/**
+	 * Set new SSL certificate from selected resource.
+	 *
+	 * @param resID
+	 * 		Resource ID of selected SSL certificate file.
+	 *
+	 * @return True if set certificate without problems.
+	 */
 	private boolean setSSLCertificate(int resID) {
 
 		TrustManagerFactory tmf;
 		CertificateFactory cf;
 		Log.d("setSSLCertificate", "Created file");
 		try {
-			/*
-			get certificate file from path specified by user
-			 */
+			// get certificate file from path specified by user
 			InputStream is = getResources().openRawResource(resID);
 
 			//FileInputStream certificateFileInput =  new FileInputStream();

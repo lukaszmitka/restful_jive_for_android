@@ -1,9 +1,5 @@
 package pl.edu.uj.synchrotron.restfuljive;
 
-/**
- * Created by lukasz on 17.01.15.
- */
-
 import java.io.StringReader;
 import java.util.Vector;
 
@@ -22,12 +18,12 @@ public class ArgParser {
 	/**
 	 * Construct an parser for the given string.
 	 *
-	 * @param s String to be parsed.
+	 * @param s
+	 * 		String to be parsed.
 	 */
 	public ArgParser(String s) throws NumberFormatException {
 
-		if (s == null || s.length() == 0)
-			throw new NumberFormatException("Empty argument, you must specify a value");
+		if (s == null || s.length() == 0) throw new NumberFormatException("Empty argument, you must specify a value");
 
 		theStream = new StringReader(s);
 		width = 0;
@@ -134,7 +130,9 @@ public class ArgParser {
 	 * Parse a boolean value.
 	 *
 	 * @return The boolean.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public boolean parse_boolean() throws NumberFormatException {
 
@@ -151,7 +149,9 @@ public class ArgParser {
 	 * Parse a boolean array.
 	 *
 	 * @return The boolean array.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public boolean[] parse_boolean_array() throws NumberFormatException {
 
@@ -167,7 +167,9 @@ public class ArgParser {
 	 * Parse a boolean image.
 	 *
 	 * @return The boolean image.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 * @see #get_image_width
 	 * @see #get_image_height
 	 */
@@ -185,7 +187,9 @@ public class ArgParser {
 	 * Parse a char value.
 	 *
 	 * @return The char.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public byte parse_char() throws NumberFormatException {
 
@@ -202,7 +206,9 @@ public class ArgParser {
 	 * Parse a char array.
 	 *
 	 * @return The char array.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public byte[] parse_char_array() throws NumberFormatException {
 
@@ -218,7 +224,9 @@ public class ArgParser {
 	 * Parse a char image.
 	 *
 	 * @return The char image.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 * @see #get_image_width
 	 * @see #get_image_height
 	 */
@@ -236,7 +244,9 @@ public class ArgParser {
 	 * Parse an unsigned char value (8 bit unsigned).
 	 *
 	 * @return The char.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public short parse_uchar() throws NumberFormatException {
 
@@ -253,7 +263,9 @@ public class ArgParser {
 	 * Parse a char array.
 	 *
 	 * @return The char array.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public short[] parse_uchar_array() throws NumberFormatException {
 
@@ -269,7 +281,9 @@ public class ArgParser {
 	 * Parse a char image.
 	 *
 	 * @return The char image.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 * @see #get_image_width
 	 * @see #get_image_height
 	 */
@@ -287,7 +301,9 @@ public class ArgParser {
 	 * Parse a short value.
 	 *
 	 * @return The short.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public short parse_short() throws NumberFormatException {
 
@@ -304,7 +320,9 @@ public class ArgParser {
 	 * Parse a short array.
 	 *
 	 * @return The short array.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public short[] parse_short_array() throws NumberFormatException {
 
@@ -320,7 +338,9 @@ public class ArgParser {
 	 * Parse a short image.
 	 *
 	 * @return The short image.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 * @see #get_image_width
 	 * @see #get_image_height
 	 */
@@ -338,7 +358,9 @@ public class ArgParser {
 	 * Parse an unsigned short value.
 	 *
 	 * @return The ushort.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public int parse_ushort() throws NumberFormatException {
 
@@ -355,7 +377,9 @@ public class ArgParser {
 	 * Parse an unsigned short array.
 	 *
 	 * @return The unsigned short array.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public int[] parse_ushort_array() throws NumberFormatException {
 
@@ -371,7 +395,9 @@ public class ArgParser {
 	 * Parse an unsigned short image.
 	 *
 	 * @return The unsigned short image.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 * @see #get_image_width
 	 * @see #get_image_height
 	 */
@@ -389,7 +415,9 @@ public class ArgParser {
 	 * Parse a long value (32bit signed).
 	 *
 	 * @return The long.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public int parse_long() throws NumberFormatException {
 
@@ -406,7 +434,9 @@ public class ArgParser {
 	 * Parse a long array (32bit signed).
 	 *
 	 * @return The long array.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public int[] parse_long_array() throws NumberFormatException {
 
@@ -422,7 +452,9 @@ public class ArgParser {
 	 * Parse a long image (32bit signed).
 	 *
 	 * @return The long image.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 * @see #get_image_width
 	 * @see #get_image_height
 	 */
@@ -440,7 +472,9 @@ public class ArgParser {
 	 * Parse an unsigned long value (32bit unsigned).
 	 *
 	 * @return The ulong.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public long parse_ulong() throws NumberFormatException {
 
@@ -457,7 +491,9 @@ public class ArgParser {
 	 * Parse an unsigned long array (32bit unsigned).
 	 *
 	 * @return The ulong array.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public long[] parse_ulong_array() throws NumberFormatException {
 
@@ -473,7 +509,9 @@ public class ArgParser {
 	 * Parse an unsigned long image (32bit unsigned).
 	 *
 	 * @return The ulong image.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 * @see #get_image_width
 	 * @see #get_image_height
 	 */
@@ -495,7 +533,9 @@ public class ArgParser {
 	 * Parse a long64 value (64bit signed).
 	 *
 	 * @return The long64.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public long parse_long64() throws NumberFormatException {
 
@@ -512,7 +552,9 @@ public class ArgParser {
 	 * Parse an unsigned long array (64bit signed).
 	 *
 	 * @return The ulong array.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public long[] parse_long64_array() throws NumberFormatException {
 
@@ -528,7 +570,9 @@ public class ArgParser {
 	 * Parse an unsigned long image (64bit signed).
 	 *
 	 * @return The long64 image.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 * @see #get_image_width
 	 * @see #get_image_height
 	 */
@@ -546,7 +590,9 @@ public class ArgParser {
 	 * Parse a float value.
 	 *
 	 * @return The float.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public float parse_float() throws NumberFormatException {
 
@@ -563,7 +609,9 @@ public class ArgParser {
 	 * Parse a float array.
 	 *
 	 * @return The float array.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public float[] parse_float_array() throws NumberFormatException {
 
@@ -579,7 +627,9 @@ public class ArgParser {
 	 * Parse a float image.
 	 *
 	 * @return The float image.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 * @see #get_image_width
 	 * @see #get_image_height
 	 */
@@ -597,7 +647,9 @@ public class ArgParser {
 	 * Parse a double value.
 	 *
 	 * @return The double.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public double parse_double() throws NumberFormatException {
 
@@ -614,7 +666,9 @@ public class ArgParser {
 	 * Parse a double array.
 	 *
 	 * @return The double array.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public double[] parse_double_array() throws NumberFormatException {
 
@@ -630,7 +684,9 @@ public class ArgParser {
 	 * Parse a double image.
 	 *
 	 * @return The double image.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 * @see #get_image_width
 	 * @see #get_image_height
 	 */
@@ -648,7 +704,9 @@ public class ArgParser {
 	 * Parse a string.
 	 *
 	 * @return The string.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public String parse_string() throws NumberFormatException {
 
@@ -665,7 +723,9 @@ public class ArgParser {
 	 * Parse a string array.
 	 *
 	 * @return The string array.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 */
 	public String[] parse_string_array() throws NumberFormatException {
 
@@ -681,7 +741,9 @@ public class ArgParser {
 	 * Parse a string.
 	 *
 	 * @return The string image.
-	 * @throws NumberFormatException In case of failure
+	 *
+	 * @throws NumberFormatException
+	 * 		In case of failure
 	 * @see #get_image_width
 	 * @see #get_image_height
 	 */
@@ -737,8 +799,7 @@ public class ArgParser {
 
 	// ****************************************************
 	private void jump_space() {
-		while (currentChar <= 32 && currentChar > 0)
-			read_char();
+		while (currentChar <= 32 && currentChar > 0) read_char();
 	}
 
 	// ****************************************************
@@ -764,8 +825,7 @@ public class ArgParser {
 				read_char();
 			}
 			if (currentChar == 0 || currentChar == '\n') {
-				NumberFormatException e = new NumberFormatException("Unterminated string.");
-				throw e;
+				throw new NumberFormatException("Unterminated string.");
 			}
 			read_char();
 			return ret_word.toString();
@@ -787,19 +847,13 @@ public class ArgParser {
 	// ****************************************************
 	private void jump_sep(String sep) throws NumberFormatException {
 		String w = read_word();
-		if (w == null)
-			throw new NumberFormatException("Separator " + sep + " expected.");
-		if (!w.equals(sep))
-			throw new NumberFormatException("Separator " + sep + " expected.");
+		if (w == null) throw new NumberFormatException("Separator " + sep + " expected.");
+		if (!w.equals(sep)) throw new NumberFormatException("Separator " + sep + " expected.");
 	}
 
 	// ****************************************************
 	private boolean is_array_end() {
-		if (currentChar == 0)
-			return true;
-		if (currentChar == ']')
-			return true;
-		return false;
+		return currentChar != 0 && currentChar != ']';
 	}
 
 	// ****************************************************
@@ -815,17 +869,16 @@ public class ArgParser {
 			jump_space();
 		}
 
-		while (!is_array_end()) {
+		while (is_array_end()) {
 			ret.add(read_word());
 			jump_space();
-			if (!is_array_end()) {
+			if (is_array_end()) {
 				jump_sep(",");
 				jump_space();
 			}
 		}
 
-		if (isClosed)
-			jump_sep("]");
+		if (isClosed) jump_sep("]");
 
 		return ret;
 
@@ -843,8 +896,7 @@ public class ArgParser {
 		while (currentChar == '[') {
 
 			Vector tmp = parse_array();
-			if (tmp.size() != width)
-				throw new NumberFormatException("All lines in an image must have the same size.");
+			if (tmp.size() != width) throw new NumberFormatException("All lines in an image must have the same size.");
 			ret.addAll(tmp);
 			height++;
 			jump_space();
@@ -858,11 +910,9 @@ public class ArgParser {
 	// ****************************************************
 	private boolean get_boolean(String w) throws NumberFormatException {
 
-		if (w.equalsIgnoreCase("true") || w.equalsIgnoreCase("1"))
-			return true;
+		if (w.equalsIgnoreCase("true") || w.equalsIgnoreCase("1")) return true;
 
-		if (w.equalsIgnoreCase("false") || w.equalsIgnoreCase("0"))
-			return false;
+		if (w.equalsIgnoreCase("false") || w.equalsIgnoreCase("0")) return false;
 
 		throw new NumberFormatException("invalid boolean value " + w + " [true,false or 0,1].");
 

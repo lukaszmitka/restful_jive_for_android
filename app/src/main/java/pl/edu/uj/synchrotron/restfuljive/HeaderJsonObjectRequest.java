@@ -12,24 +12,36 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by lukasz on 17.03.15.
+ * Class for sending JSONObject requests with header containing user credentials.
  */
 public class HeaderJsonObjectRequest extends JsonObjectRequest {
 	private String userName;
 	private String userPassword;
 
-	public HeaderJsonObjectRequest(int method, String url, JSONObject jsonRequest,
-	                               Response.Listener<JSONObject> listener, Response.ErrorListener errorListener,
-	                               String user, String password) {
+	/**
+	 * This constructor instantiates JSONObject request with header containing user credentials.
+	 *
+	 * @param method
+	 * 		HTTP method to be executed.
+	 * @param url
+	 * 		URL address to send request.
+	 * @param jsonRequest
+	 * 		JSONObject containing request data.
+	 * @param listener
+	 * 		Listener for response.
+	 * @param errorListener
+	 * 		Listener for error response.
+	 * @param user
+	 * 		User name.
+	 * @param password
+	 * 		User password.
+	 */
+	public HeaderJsonObjectRequest(int method, String url, JSONObject jsonRequest, Response.Listener<JSONObject> listener,
+	                               Response.ErrorListener errorListener, String user, String password) {
 		super(method, url, jsonRequest, listener, errorListener);
 		userName = user;
 		userPassword = password;
 	}
-
-	/*public HeaderJsonObjectRequest(int method, String url, JSONObject jsonRequest,
-	                               Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
-		super(method, url, jsonRequest, listener, errorListener);
-	}*/
 
 	@Override
 	public Map<String, String> getHeaders() throws AuthFailureError {

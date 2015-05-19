@@ -152,8 +152,8 @@ public class AttributesActivity extends CertificateExceptionActivity {
 									plotButton.setFocusable(numeric[i] || plottable[i]);
 								}
 							} else {
-								Log.d("refreshAttributeList()", "Tango database API returned message from query " +
-										"get_attribute_list:");
+								Log.d("refreshAttributeList()",
+										"Tango database API returned message from query " + "get_attribute_list:");
 								Log.d("refreshAttributeList()", response.getString("connectionStatus"));
 							}
 						} catch (JSONException e) {
@@ -173,6 +173,12 @@ public class AttributesActivity extends CertificateExceptionActivity {
 
 	}
 
+	/**
+	 * Start plot of selected attribute.
+	 *
+	 * @param view
+	 * 		Widget that was clicked.
+	 */
 	public void attributesActivityPlotButton(View view) {
 
 		ArrayList tag = (ArrayList) view.getTag();
@@ -289,6 +295,18 @@ public class AttributesActivity extends CertificateExceptionActivity {
 
 	}
 
+	/**
+	 * Start new activity plotting scalar value in time.
+	 *
+	 * @param attributeName
+	 * 		Name of selected attribute.
+	 * @param deviceName
+	 * 		Name of selected device.
+	 * @param host
+	 * 		Tango host address.
+	 * @param port
+	 * 		Tango port number.
+	 */
 	private void startPlotInTime(String attributeName, String deviceName, String host, String port) {
 		Intent i = new Intent(this, PlotInTimeActivity.class);
 		i.putExtra("attName", attributeName);
@@ -304,7 +322,8 @@ public class AttributesActivity extends CertificateExceptionActivity {
 	/**
 	 * Listener for the button click, refresh list of activities.
 	 *
-	 * @param view Reference to the widget that was clicked.
+	 * @param view
+	 * 		Reference to the widget that was clicked.
 	 */
 	public void attributesActivityListRefreshButton(View view) {
 		refreshAttributesList();
@@ -313,7 +332,8 @@ public class AttributesActivity extends CertificateExceptionActivity {
 	/**
 	 * Listener for the button click, close the activity.
 	 *
-	 * @param view Reference to the widget that was clicked.
+	 * @param view
+	 * 		Reference to the widget that was clicked.
 	 */
 	public void attributesActivityCancelButton(View view) {
 		finish();
@@ -322,7 +342,8 @@ public class AttributesActivity extends CertificateExceptionActivity {
 	/**
 	 * Listener for the button click, update attributes.
 	 *
-	 * @param view Reference to the widget that was clicked.
+	 * @param view
+	 * 		Reference to the widget that was clicked.
 	 */
 	public void attributesActivityUpdateButton(View view) {
 		LinearLayout linearLayout = (LinearLayout) findViewById(R.id.attributesActivityLinearLayout);
@@ -347,8 +368,8 @@ public class AttributesActivity extends CertificateExceptionActivity {
 									} else {
 										Toast.makeText(getApplicationContext(), response.getString("connectionStatus"),
 												Toast.LENGTH_LONG).show();
-										Log.d("updateButton.onClick()", "Tango database API returned message from query " +
-												"write_attribute:");
+										Log.d("updateButton.onClick()",
+												"Tango database API returned message from query " + "write_attribute:");
 										Log.d("updateButton.onClick()", response.getString("connectionStatus"));
 									}
 								} catch (JSONException e) {
@@ -372,7 +393,8 @@ public class AttributesActivity extends CertificateExceptionActivity {
 	/**
 	 * Method displaying info about connection error
 	 *
-	 * @param error Error tah caused exception
+	 * @param error
+	 * 		Error tah caused exception
 	 */
 	private void jsonRequestErrorHandler(VolleyError error) {
 		// Print error message to LogcCat

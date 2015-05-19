@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.EditText;
 
 /**
- * Activity for getting database host and port from user.
+ * Activity for getting REST host, database host and port from user.
  */
 public class SetHostActivity extends Activity {
 

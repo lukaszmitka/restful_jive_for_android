@@ -1,6 +1,5 @@
 package pl.edu.uj.synchrotron.restfuljive;
 
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -188,8 +187,8 @@ public class DevicePanelCommandsFragment extends CertificateExceptionFragment im
 										AlertDialog dialog = builder.create();
 										dialog.show();
 									} else {
-										Log.d("executeButton.onClick()", "Tango database API returned message from query " +
-												"command_imout:");
+										Log.d("executeButton.onClick()",
+												"Tango database API returned message from query " + "command_imout:");
 										Log.d("executeButton.onClick()", response.getString("connectionStatus"));
 									}
 								} catch (JSONException e) {
@@ -241,8 +240,8 @@ public class DevicePanelCommandsFragment extends CertificateExceptionFragment im
 										// intent.putExtra("plotTitle", dp.name()+"/"+commInfo.cmd_name);
 										startActivity(intent);
 									} else {
-										Log.d("plotButton.onClick()", "Tango database API returned message from query " +
-												"extract+plot_data: ");
+										Log.d("plotButton.onClick()",
+												"Tango database API returned message from query " + "extract+plot_data: ");
 										Log.d("plotButton.onClick()", response.getString("connectionStatus"));
 									}
 								} catch (JSONException e) {
@@ -261,7 +260,6 @@ public class DevicePanelCommandsFragment extends CertificateExceptionFragment im
 
 			}
 
-
 		});
 		return rootView;
 	}
@@ -269,7 +267,8 @@ public class DevicePanelCommandsFragment extends CertificateExceptionFragment im
 	/**
 	 * Method displaying info about connection error
 	 *
-	 * @param error Error tah caused exception
+	 * @param error
+	 * 		Error tah caused exception
 	 */
 	private void jsonRequestErrorHandler(VolleyError error) {
 		// Print error message to LogcCat
@@ -278,8 +277,8 @@ public class DevicePanelCommandsFragment extends CertificateExceptionFragment im
 
 		// show dialog box with error message
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setMessage(error.toString()).setTitle("Connection error!").setPositiveButton(getString(R.string.ok_button),
-				null);
+		builder.setMessage(error.toString()).setTitle("Connection error!")
+				.setPositiveButton(getString(R.string.ok_button), null);
 		AlertDialog dialog = builder.create();
 		dialog.show();
 	}

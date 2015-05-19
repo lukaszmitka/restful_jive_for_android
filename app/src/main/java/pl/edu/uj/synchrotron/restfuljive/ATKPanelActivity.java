@@ -55,20 +55,20 @@ import fr.esrf.TangoDs.TangoConst;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-
+/**
+ * Class for creating ATKPanel activity. This activity is listing all device attributes and monitor their values.
+ */
 public class ATKPanelActivity extends CertificateExceptionActivity implements TangoConst {
 	private static final int DEFAULT_REFRESHING_PERIOD = 1000;
-	private int refreshingPeriod = DEFAULT_REFRESHING_PERIOD;
 	private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
 	private final Context context = this;
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	private int refreshingPeriod = DEFAULT_REFRESHING_PERIOD;
 	private List<String> commandArray;
 	private List<String> commandInTypeArray;
-	private List<String> commandOutTypeArray;
 	private List<String> scalarAttrbuteArray;
 	private List<String> nonScalarAttributeArray;
 	private boolean[] attributeWritableArray;
-	private String attributeName;
 	private String plotAttributeName;
 	private String deviceName;
 	private String restHost;
@@ -88,8 +88,8 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 	private String userName, userPassword;
 
 	/**
-	 * Generate a value suitable for use in setId
-	 * This value will not collide with ID values generated at build time by aapt for R.id.
+	 * Generate a value suitable for use in setId This value will not collide with ID values generated at build time by aapt
+	 * for R.id.
 	 *
 	 * @return a generated ID value
 	 */
@@ -247,25 +247,20 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 												}
 
 												XYSeries series1;
-												series1 =
-														new SimpleXYSeries(Arrays.asList(series1Numbers), SimpleXYSeries.ArrayFormat
-																.Y_VALS_ONLY,
-																plotLabel);
+												series1 = new SimpleXYSeries(Arrays.asList(series1Numbers),
+														SimpleXYSeries.ArrayFormat.Y_VALS_ONLY, plotLabel);
 
 												LineAndPointFormatter series1Format = new LineAndPointFormatter();
 												series1Format.setPointLabelFormatter(new PointLabelFormatter());
 												series1Format.configure(getApplicationContext(), R.xml.line_point_formatter_with_plf1);
-
 
 												// add a new series' to the xyplot:
 												plot.addSeries(series1, series1Format);
 												plot.setTicksPerRangeLabel(3);
 												plot.getGraphWidget().setDomainLabelOrientation(-45);
 												plot.getLegendWidget().setTableModel(new DynamicTableModel(1, 1));
-												plot.getLegendWidget()
-														.position(10, XLayoutStyle.ABSOLUTE_FROM_LEFT, 10,
-																YLayoutStyle.ABSOLUTE_FROM_BOTTOM,
-																AnchorPosition.LEFT_BOTTOM);
+												plot.getLegendWidget().position(10, XLayoutStyle.ABSOLUTE_FROM_LEFT, 10,
+														YLayoutStyle.ABSOLUTE_FROM_BOTTOM, AnchorPosition.LEFT_BOTTOM);
 												plot.getLegendWidget()
 														.setSize(new SizeMetrics(55, SizeLayoutType.ABSOLUTE, 100, SizeLayoutType.FILL));
 												break;
@@ -306,8 +301,8 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 													}
 												}
 
-												Bitmap b = Bitmap.createBitmap(ivalues.length, ivalues[0].length,
-														Bitmap.Config.RGB_565);
+												Bitmap b = Bitmap.createBitmap(ivalues.length, ivalues[0].length, Bitmap.Config
+														.RGB_565);
 												double minValue = ivalues[0][0];
 												double maxValue = ivalues[0][0];
 												for (int i = 0; i < ivalues.length; i++) {
@@ -422,12 +417,22 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 		return true;
 	}
 
+	/**
+	 * This method prepares ImageView widget for displaying plat as an image.
+	 *
+	 * @param scaleID
+	 * 		ID number of scale widget, used to define layout relations.
+	 * @param plotId
+	 * 		ID number of returned widget.
+	 *
+	 * @return widget with defined relations, ready to display plot.
+	 */
 	private ImageView preparePlotImageView(int scaleID, int plotId) {
 		ImageView plotImageView = new ImageView(context);
 		plotImageView.setId(plotId);
 		// create layout
-		RelativeLayout.LayoutParams plotImageViewLayParam = new RelativeLayout.LayoutParams
-				(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+		RelativeLayout.LayoutParams plotImageViewLayParam =
+				new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
 		// add layout params
 		plotImageViewLayParam.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 		plotImageViewLayParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
@@ -440,12 +445,22 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 		return plotImageView;
 	}
 
+	/**
+	 * This method prepares ImageView widget for displaying plat scale.
+	 *
+	 * @param maxId
+	 * 		ID number of TextView widget, that display maximum value on the plot.
+	 * @param scaleId
+	 * 		ID number of returned widget.
+	 *
+	 * @return widget with defined relations, ready to display scale.
+	 */
 	private ImageView prepareScaleImageView(int maxId, int scaleId) {
 		ImageView scaleImageView = new ImageView(context);
 		scaleImageView.setId(scaleId);
 		// create layout
-		RelativeLayout.LayoutParams scaleImageViewLayParam = new RelativeLayout.LayoutParams
-				(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+		RelativeLayout.LayoutParams scaleImageViewLayParam =
+				new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
 		// add layout params
 		scaleImageViewLayParam.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 		scaleImageViewLayParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
@@ -456,12 +471,21 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 		return scaleImageView;
 	}
 
+	/**
+	 * This method prepares TextView widget, that display plot maximum value.
+	 *
+	 * @param maxId
+	 * 		ID number of returned widget.
+	 *
+	 * @return widget ready to display plot maximum value.
+	 */
 	private TextView prepareTextViewMaxValue(int maxId) {
 		TextView textViewMaxValue = new TextView(context);
 		textViewMaxValue.setId(maxId);
 		// create layout
-		RelativeLayout.LayoutParams textViewMaxValueLayParam = new RelativeLayout.LayoutParams
-				(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+		RelativeLayout.LayoutParams textViewMaxValueLayParam =
+				new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams
+						.WRAP_CONTENT);
 		// add layout params
 		textViewMaxValueLayParam.addRule(RelativeLayout.ALIGN_PARENT_TOP);
 		textViewMaxValueLayParam.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
@@ -470,12 +494,21 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 		return textViewMaxValue;
 	}
 
+	/**
+	 * This method prepares TextView widget, that display plot minimum value.
+	 *
+	 * @param minId
+	 * 		ID number of returned widget.
+	 *
+	 * @return widget ready to display plot minimum value.
+	 */
 	private TextView prepareTextViewMinValue(int minId) {
 		TextView textViewMinValue = new TextView(context);
 		textViewMinValue.setId(minId);
 		// create layout
-		RelativeLayout.LayoutParams textViewMinValueLayParam = new RelativeLayout.LayoutParams
-				(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+		RelativeLayout.LayoutParams textViewMinValueLayParam =
+				new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams
+						.WRAP_CONTENT);
 		// add layout params
 		textViewMinValueLayParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 		textViewMinValueLayParam.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
@@ -621,6 +654,9 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 		startActivityForResult(i, 1);
 	}
 
+	/**
+	 * This method start queries for getting device commands and attributes.
+	 */
 	private void populatePanel() {
 		Log.v("populatePanel()", "Populating panel");
 		String urlCommandListQuery = restHost + "/Tango/rest/" + tangoHost + ":" + tangoPort +
@@ -683,7 +719,8 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 	/**
 	 * Method displaying info about connection error
 	 *
-	 * @param error Error tah caused exception
+	 * @param error
+	 * 		Error tah caused exception
 	 */
 	private void jsonRequestErrorHandler(VolleyError error) {
 		// Print error message to LogcCat
@@ -692,17 +729,23 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 
 		// show dialog box with error message
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setMessage(error.toString()).setTitle("Connection error!").setPositiveButton(getString(R.string.ok_button),
-				null);
+		builder.setMessage(error.toString()).setTitle("Connection error!")
+				.setPositiveButton(getString(R.string.ok_button), null);
 		AlertDialog dialog = builder.create();
 		dialog.show();
 	}
 
+	/**
+	 * Add commands retrieved from server to spinner.
+	 *
+	 * @param response
+	 * 		JSONObject containing command list and their parameters
+	 */
 	private void populateCommandSpinner(JSONObject response) {
 		Log.d("populateCommandSpinner", "Populating command spinner");
 		commandArray = new ArrayList<>();
 		commandInTypeArray = new ArrayList<>();
-		commandOutTypeArray = new ArrayList<>();
+		ArrayList<String> commandOutTypeArray = new ArrayList<>();
 		try {
 			int commandCount = response.getInt("commandCount");
 			//String commandName;
@@ -714,8 +757,7 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 						"Command " + commandArray.get(i) + ", inType: " + commandInTypeArray.get(i) + ", " +
 								"outType: " + commandOutTypeArray.get(i));
 			}
-			ArrayAdapter<String> adapter = new ArrayAdapter<>(
-					this, android.R.layout.simple_spinner_item, commandArray);
+			ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, commandArray);
 			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			NoSelectionSpinner sItems = (NoSelectionSpinner) findViewById(R.id.atk_panel_command_spinner);
 			sItems.setAdapter(adapter);
@@ -769,6 +811,14 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 		}
 	}
 
+	/**
+	 * Execute selected command with specified argument.
+	 *
+	 * @param commandName
+	 * 		Command name.
+	 * @param arginStr
+	 * 		Command argument.
+	 */
 	private void executeCommand(String commandName, String arginStr) {
 
 		String url = restHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
@@ -818,6 +868,12 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 		queue.add(jsObjRequest);
 	}
 
+	/**
+	 * Write device status to appropriate TextView.
+	 *
+	 * @param response
+	 * 		JSONObject conatining device status.
+	 */
 	private void populateStatus(JSONObject response) {
 		try {
 			String status = response.getString("commandReply");
@@ -828,6 +884,13 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 		}
 	}
 
+	/**
+	 * Populate attribute spinner with attributes provided in response. If attribute is of type spectrum or image it is added
+	 * to spinner, else it is added to scalars list.
+	 *
+	 * @param response
+	 * 		JSONObject containing attributes and their parameters.
+	 */
 	private void populateAttributeSpinner(JSONObject response) {
 		Log.d("popAttributeSpinner", "Populating attribute spinner");
 		scalarAttrbuteArray = new ArrayList<>();
@@ -837,7 +900,7 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 			int attributeCount = response.getInt("attCount");
 			attributeWritableArray = new boolean[attributeCount];
 			for (int i = 0; i < attributeCount; i++) {
-				attributeName = response.getString("attribute" + i);
+				String attributeName = response.getString("attribute" + i);
 				if (response.getBoolean("attScalar" + i)) {
 					if (!attributeName.equals("State") && !attributeName.equals("Status")) {
 						scalarAttrbuteArray.add(attributeName);
@@ -849,8 +912,8 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 			}
 			if (!nonScalarAttributeArray.isEmpty()) {
 				nonScalarAttributeArray.add(0, "Scalar");
-				ArrayAdapter<String> adapter = new ArrayAdapter<>(
-						this, android.R.layout.simple_spinner_item, nonScalarAttributeArray);
+				ArrayAdapter<String> adapter =
+						new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, nonScalarAttributeArray);
 				adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 				Spinner attributeSpinner = (Spinner) findViewById(R.id.atk_panel_attribute_spinner);
 				attributeSpinner.setAdapter(adapter);
@@ -882,6 +945,12 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 		}
 	}
 
+	/**
+	 * Begins task for refreshing plot of selected attribute.
+	 *
+	 * @param attributeName
+	 * 		Name of selected attribute.
+	 */
 	private void populateAttributePlot(String attributeName) {
 		Log.d("populateAttributePlot()", "Polulating attribute plot");
 		if (attributeFuture != null) {
@@ -892,6 +961,9 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 		attributeFuture = scheduler.scheduleAtFixedRate(currentRunnable, refreshingPeriod, refreshingPeriod, MILLISECONDS);
 	}
 
+	/**
+	 * Add attributes from scalar list to ListView widget.
+	 */
 	private void populateScalarListView() {
 		if (!scalarAttrbuteArray.isEmpty()) {
 
@@ -902,15 +974,15 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 			numberOfScalars = scalarAttrbuteArray.size();
 			ids = new int[numberOfScalars][5];
 			for (int i = 0; i < numberOfScalars; i++) {
-				RelativeLayout.LayoutParams textViewLayParam = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams
-						.WRAP_CONTENT,
-						RelativeLayout.LayoutParams.WRAP_CONTENT);
-				RelativeLayout.LayoutParams editTextLayParam = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams
-						.WRAP_CONTENT,
-						RelativeLayout.LayoutParams.WRAP_CONTENT);
-				RelativeLayout.LayoutParams buttonLayParam = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams
-						.WRAP_CONTENT,
-						RelativeLayout.LayoutParams.WRAP_CONTENT);
+				RelativeLayout.LayoutParams textViewLayParam =
+						new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
+								RelativeLayout.LayoutParams.WRAP_CONTENT);
+				RelativeLayout.LayoutParams editTextLayParam =
+						new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
+								RelativeLayout.LayoutParams.WRAP_CONTENT);
+				RelativeLayout.LayoutParams buttonLayParam =
+						new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams
+								.WRAP_CONTENT);
 
 				TextView tv = new TextView(this);
 				ids[i][1] = generateViewId();
@@ -938,7 +1010,6 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 
 				textViewLayParam.addRule(RelativeLayout.ALIGN_BASELINE, ids[i][2]);
 				textViewLayParam.addRule(RelativeLayout.LEFT_OF, ids[i][2]);
-
 
 				tv.setText(scalarAttrbuteArray.get(i));
 				tv.setLayoutParams(textViewLayParam);
@@ -1036,6 +1107,14 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 		}
 	}
 
+	/**
+	 * Begins query to set new attribute value.
+	 *
+	 * @param attName
+	 * 		Selected atribute name.
+	 * @param argin
+	 * 		Attibute new value.
+	 */
 	private void updateAttribute(String attName, String argin) {
 		String url = restHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 				"/write_attribute/" + attName + "/" +
@@ -1047,11 +1126,11 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 						try {
 							if (response.getString("connectionStatus").equals("OK")) {
 								Log.v("Update attribute", "Device connection OK - wrote attribute");
-								Toast.makeText(getApplicationContext(), response.getString("connectionStatus"),
-										Toast.LENGTH_SHORT).show();
+								Toast.makeText(getApplicationContext(), response.getString("connectionStatus"), Toast.LENGTH_SHORT)
+										.show();
 							} else {
-								Toast.makeText(getApplicationContext(), response.getString("connectionStatus"),
-										Toast.LENGTH_SHORT).show();
+								Toast.makeText(getApplicationContext(), response.getString("connectionStatus"), Toast.LENGTH_SHORT)
+										.show();
 								Log.d("Update attribute", "Tango database API returned message:");
 								Log.d("Update attribute", response.getString("connectionStatus"));
 							}
@@ -1071,6 +1150,12 @@ public class ATKPanelActivity extends CertificateExceptionActivity implements Ta
 		queue.add(jsObjRequest);
 	}
 
+	/**
+	 * Update list of scalars with their new values.
+	 *
+	 * @param response
+	 * 		JSONObject containing new attribute values.
+	 */
 	private void updateScalarListView(JSONObject response) {
 		EditText editText;
 		try {

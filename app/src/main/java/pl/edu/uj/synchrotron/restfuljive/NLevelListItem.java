@@ -7,11 +7,11 @@ import android.view.View;
  */
 public interface NLevelListItem {
 
-	public boolean isExpanded();
+	boolean isExpanded();
 
-	public void toggle();
+	void toggle();
 
-	public NLevelListItem getParent();
+	NLevelListItem getParent();
 
-	public View getView();
+	View getView();
 }

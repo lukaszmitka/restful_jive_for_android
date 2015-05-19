@@ -38,7 +38,6 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 	private String tangoPort;
 	private String userName, userPassword;
 
-
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
@@ -122,7 +121,6 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 				queue.add(jsObjRequest);
 			}
 		});
-
 
 		Button setAnswerLimitMin = (Button) rootView.findViewById(R.id.devicePanel_adminFragment_LimitMinButton);
 		setAnswerLimitMin.setOnClickListener(new View.OnClickListener() {
@@ -460,6 +458,12 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 		return rootView;
 	}
 
+	/**
+	 * Add source names to spinner.
+	 *
+	 * @param source
+	 * 		ID of selected source, 0 - CACHE, 1 - CACHE_DEVICE, 2 - DEVICE.
+	 */
 	private void populateSpinner(int source) {
 		Spinner spinner = (Spinner) rootView.findViewById(R.id.devicePanel_adminFragment_sourceSpinner);
 		spinner.setSelection(source);
@@ -533,7 +537,8 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 	/**
 	 * Method displaying info about connection error
 	 *
-	 * @param error Error that caused exception
+	 * @param error
+	 * 		Error that caused exception
 	 */
 	private void jsonRequestErrorHandler(VolleyError error) {
 		// Print error message to LogcCat
@@ -546,8 +551,8 @@ public class DevicePanelAdminFragment extends CertificateExceptionFragment {
 
 		// show dialog box with error message
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setMessage(error.toString()).setTitle("Connection error!").setPositiveButton(getString(R.string.ok_button),
-				null);
+		builder.setMessage(error.toString()).setTitle("Connection error!")
+				.setPositiveButton(getString(R.string.ok_button), null);
 		AlertDialog dialog = builder.create();
 		dialog.show();
 	}

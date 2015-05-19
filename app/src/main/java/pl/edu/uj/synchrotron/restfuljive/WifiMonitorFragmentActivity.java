@@ -15,10 +15,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 /**
- * Created by lukasz on 07.04.15.
- * This file is element of RESTful Jive application project.
- * You are free to use, copy and edit whole application or any of its components.
- * Application comes with no warranty. Although author is trying to make it best, it may work or it may not work.
+ * This class observes device's wifi state and inform user about changes.
  */
 public class WifiMonitorFragmentActivity extends FragmentActivity {
 	protected Context context;
@@ -38,6 +35,9 @@ public class WifiMonitorFragmentActivity extends FragmentActivity {
 		checkInternetConnectionStatus();
 	}
 
+	/**
+	 * Check network state, and inform user if networkis present and what type of connection is used.
+	 */
 	private void checkInternetConnectionStatus() {
 		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
@@ -73,6 +73,9 @@ public class WifiMonitorFragmentActivity extends FragmentActivity {
 		}
 	}
 
+	/**
+	 * Inform user that there is no internet connection.
+	 */
 	private void noNetworkConnection() {
 		isConnected = false;
 		Log.d("noNetworkConnection()", "No internet connection.");

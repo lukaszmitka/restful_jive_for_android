@@ -1,9 +1,5 @@
 package pl.edu.uj.synchrotron.restfuljive;
 
-/**
- * Created by lukasz on 17.01.15.
- */
-
 import android.os.AsyncTask;
 import android.view.View;
 import android.view.ViewGroup;

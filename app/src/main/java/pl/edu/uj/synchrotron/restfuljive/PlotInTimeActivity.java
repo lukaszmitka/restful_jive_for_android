@@ -32,18 +32,16 @@ import java.util.concurrent.ScheduledFuture;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+/**
+ * Activity that creates plot of selected scalar attribute. It acquire data every second and add it to plot.
+ */
 public class PlotInTimeActivity extends CertificateExceptionActivity {
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	RelativeLayout relativeLayout;
 	VolleyError e;
 	private String attributeName, deviceName, host, port, RESThost, user, pass;
-	//private XYPlot plot;
-//private LineAndPointFormatter series1Format;
-	private Thread plotThread;
-	private boolean interruptThreads = false;
 	private Number[] data, dataTmp;
 	private Context context = this;
-	private Runnable plotRunnable;
 	private ScheduledFuture plotFuture;
 
 	@Override
@@ -83,7 +81,7 @@ public class PlotInTimeActivity extends CertificateExceptionActivity {
 		relativeLayout = (RelativeLayout) findViewById(R.id.plotInTimeRelativeLayout);
 
 		// define thread for refreshing attribute values
-		plotRunnable = new Runnable() {
+		Runnable plotRunnable = new Runnable() {
 			@Override
 			public void run() {
 				JSONObject request = new JSONObject();
@@ -141,6 +139,9 @@ public class PlotInTimeActivity extends CertificateExceptionActivity {
 		plotFuture = scheduler.scheduleAtFixedRate(plotRunnable, 1000, 1000, MILLISECONDS);
 	}
 
+	/**
+	 * Refresh plot with new data.
+	 */
 	public void updatePlot() {
 		Log.d("updatePlot", "Updating plot");
 		Log.d("updatePlot", "Received data: " + data.toString());

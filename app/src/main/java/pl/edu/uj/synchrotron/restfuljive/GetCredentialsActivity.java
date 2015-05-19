@@ -7,7 +7,9 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
-
+/**
+ * Activity for getting credentials from user.
+ */
 public class GetCredentialsActivity extends Activity {
 
 	@Override

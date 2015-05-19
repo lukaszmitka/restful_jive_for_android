@@ -45,7 +45,6 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 	private String attributeDesc[];
 	private String userName, userPassword;
 
-
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
@@ -82,7 +81,6 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 								attributeDesc = new String[attributeCount];
 								attributeWritable = new boolean[attributeCount];
 
-
 								for (int i = 0; i < attributeNames.length; i++) {
 									attributeNames[i] = response.getString("attribute" + i);
 									attributePlottable[i] = response.getBoolean("attPlotable" + i);
@@ -91,8 +89,7 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 								}
 								ListView lv = (ListView) rootView.findViewById(R.id.devicePanel_attributes_listView);
 								ArrayAdapter<String> adapter =
-										new ArrayAdapter<String>(getActivity(), R.layout.list_item, R.id.firstLine,
-												attributeNames);
+										new ArrayAdapter<String>(getActivity(), R.layout.list_item, R.id.firstLine, attributeNames);
 								lv.setAdapter(adapter);
 								lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 									@Override
@@ -103,20 +100,17 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 										}
 										view.setBackgroundColor(Color.GRAY);
 										boolean clickablePlotButton = attributePlottable[selectedAttributeId];
-										Button plotButton =
-												(Button) rootView.findViewById(R.id.devicePanel_attributes_plotButton);
+										Button plotButton = (Button) rootView.findViewById(R.id.devicePanel_attributes_plotButton);
 										plotButton.setClickable(clickablePlotButton);
 										plotButton.setEnabled(clickablePlotButton);
-										Button descriptionButton = (Button) rootView
-												.findViewById(R.id.devicePanel_attributes_descriptionButton);
+										Button descriptionButton =
+												(Button) rootView.findViewById(R.id.devicePanel_attributes_descriptionButton);
 										descriptionButton.setClickable(true);
 										descriptionButton.setEnabled(true);
-										Button readButton =
-												(Button) rootView.findViewById(R.id.devicePanel_attributes_readButton);
+										Button readButton = (Button) rootView.findViewById(R.id.devicePanel_attributes_readButton);
 										readButton.setClickable(true);
 										readButton.setEnabled(true);
-										Button writeButton =
-												(Button) rootView.findViewById(R.id.devicePanel_attributes_writeButton);
+										Button writeButton = (Button) rootView.findViewById(R.id.devicePanel_attributes_writeButton);
 										writeButton.setClickable(attributeWritable[selectedAttributeId]);
 										writeButton.setEnabled(attributeWritable[selectedAttributeId]);
 									}
@@ -155,7 +149,6 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 			}
 		});
 
-
 		final Button readButton = (Button) rootView.findViewById(R.id.devicePanel_attributes_readButton);
 		readButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -184,8 +177,8 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 										AlertDialog dialog = builder.create();
 										dialog.show();
 									} else {
-										Log.d("readButton.onClick()", "Tango database API returned message from query " +
-												"read_attribute:");
+										Log.d("readButton.onClick()",
+												"Tango database API returned message from query " + "read_attribute:");
 										Log.d("readButton.onClick()", response.getString("connectionStatus"));
 									}
 								} catch (JSONException e) {
@@ -208,8 +201,7 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 		writeButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				System.out.println("Processing write button");
-				EditText arginEditTextValue = (EditText) rootView
-						.findViewById(R.id.devicePanel_attributes_arginValueEditText);
+				EditText arginEditTextValue = (EditText) rootView.findViewById(R.id.devicePanel_attributes_arginValueEditText);
 				String arginStr = arginEditTextValue.getText().toString();
 				String url = RESTfulTangoHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + deviceName +
 						"/write_attribute/" +
@@ -293,8 +285,8 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 													}
 												}
 
-												Bitmap b = Bitmap.createBitmap(ivalues.length, ivalues[0].length,
-														Bitmap.Config.RGB_565);
+												Bitmap b = Bitmap.createBitmap(ivalues.length, ivalues[0].length, Bitmap.Config
+														.RGB_565);
 												double minValue = ivalues[0][0];
 												double maxValue = ivalues[0][0];
 												for (int i = 0; i < ivalues.length; i++) {
@@ -361,7 +353,6 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 				queue.add(jsObjRequest);
 			}
 
-			;
 		});
 		return rootView;
 	}
@@ -369,7 +360,8 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 	/**
 	 * Method displaying info about connection error
 	 *
-	 * @param error Error tah caused exception
+	 * @param error
+	 * 		Error tah caused exception
 	 */
 	private void jsonRequestErrorHandler(VolleyError error) {
 		// Print error message to LogcCat
@@ -378,8 +370,8 @@ public class DevicePanelAttributesFragment extends CertificateExceptionFragment 
 
 		// show dialog box with error message
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setMessage(error.toString()).setTitle("Connection error!").setPositiveButton(getString(R.string.ok_button),
-				null);
+		builder.setMessage(error.toString()).setTitle("Connection error!")
+				.setPositiveButton(getString(R.string.ok_button), null);
 		AlertDialog dialog = builder.create();
 		dialog.show();
 	}

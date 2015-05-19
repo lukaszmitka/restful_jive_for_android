@@ -25,10 +25,6 @@ import org.json.JSONObject;
  */
 public class PropertiesActivity extends CertificateExceptionActivity {
 	/**
-	 * The intent that activity was called with.
-	 */
-	private Intent intent;
-	/**
 	 * Name of device, which attributes should be listed.
 	 */
 	private String deviceName;
@@ -54,7 +50,10 @@ public class PropertiesActivity extends CertificateExceptionActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_properties);
-		intent = getIntent();
+		/*
+	  The intent that activity was called with.
+	 */
+		Intent intent = getIntent();
 		deviceName = intent.getStringExtra("deviceName");
 		RESTfulHost = intent.getStringExtra("restHost");
 		tangoHost = intent.getStringExtra("tangoHost");

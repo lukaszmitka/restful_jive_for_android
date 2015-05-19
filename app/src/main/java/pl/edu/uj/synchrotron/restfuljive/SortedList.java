@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 /**
  * Activity for listing devices in multi level sorted list.
  */
@@ -75,9 +74,7 @@ public class SortedList extends CertificateExceptionActivity {
 	};
 	private String userName;
 	private String userPassword;
-	private boolean rememberCredentials;
 	private OnLongClickListener onLongClickListener;
-
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -204,8 +201,7 @@ public class SortedList extends CertificateExceptionActivity {
 		} catch (Exception e) {
 			AlertDialog.Builder builder = new AlertDialog.Builder(context);
 			builder.setMessage("Problem with connecting to REST server, check if internet connection is available and " +
-					"server address is set properly")
-					.setTitle("Error");
+					"server address is set properly").setTitle("Error");
 			AlertDialog dialog = builder.create();
 			dialog.show();
 		}
@@ -292,6 +288,9 @@ public class SortedList extends CertificateExceptionActivity {
 		}
 	}
 
+	/**
+	 * This method check if user credential were stored in file and if yes, loads them to memory.
+	 */
 	private void readCredentialsFromStorage() {
 		Log.d("readCredentials()", "Getting credentials from file");
 		FileInputStream fileInputStream;
@@ -384,7 +383,7 @@ public class SortedList extends CertificateExceptionActivity {
 			if (resultCode == RESULT_OK) {
 				userName = data.getStringExtra("userName");
 				userPassword = data.getStringExtra("userPass");
-				rememberCredentials = data.getBooleanExtra("rememberCredentials", false);
+				boolean rememberCredentials = data.getBooleanExtra("rememberCredentials", false);
 				if (rememberCredentials) {
 					FileOutputStream fileOutputStream;
 					try {
@@ -419,7 +418,8 @@ public class SortedList extends CertificateExceptionActivity {
 	/**
 	 * Generate request for RESTful host and set listener for incoming reply.
 	 *
-	 * @param RESTHost RESTful host address.
+	 * @param RESTHost
+	 * 		RESTful host address.
 	 */
 	private void getSortedList(String RESTHost) {
 
@@ -501,8 +501,7 @@ public class SortedList extends CertificateExceptionActivity {
 				hostTextView.setText(R.string.title_sort_by_servers);
 				break;
 			case SORT_FULL_LIST:
-				String urlSortCase3 =
-						RESTHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + trackDeviceStatus;
+				String urlSortCase3 = RESTHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + trackDeviceStatus;
 				HeaderJsonObjectRequest jsObjRequestCase3 =
 						new HeaderJsonObjectRequest(Request.Method.GET, urlSortCase3, null, new Response.Listener<JSONObject>() {
 							@Override
@@ -579,7 +578,8 @@ public class SortedList extends CertificateExceptionActivity {
 	/**
 	 * Method displaying info about connection error
 	 *
-	 * @param error Error tah caused exception
+	 * @param error
+	 * 		Error tah caused exception
 	 */
 	private void jsonRequestErrorHandler(VolleyError error) {
 		// Print error message to LogcCat
@@ -592,8 +592,8 @@ public class SortedList extends CertificateExceptionActivity {
 
 		// show dialog box with error message
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setMessage(error.toString()).setTitle("Connection error!").setPositiveButton(getString(R.string.ok_button),
-				null);
+		builder.setMessage(error.toString()).setTitle("Connection error!")
+				.setPositiveButton(getString(R.string.ok_button), null);
 		AlertDialog dialog = builder.create();
 		dialog.show();
 
@@ -603,13 +603,13 @@ public class SortedList extends CertificateExceptionActivity {
 	/**
 	 * Listener for button, show device info.
 	 *
-	 * @param v Reference to the widget that was clicked.
+	 * @param v
+	 * 		Reference to the widget that was clicked.
 	 */
 	public void buttonClick(View v) {
 		String devName = (String) v.getTag();
 		System.out.println("Clicked object: " + devName);
-		String url =
-				RESTfulTangoHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + devName + "/get_info";
+		String url = RESTfulTangoHost + "/Tango/rest/" + tangoHost + ":" + tangoPort + "/Device/" + devName + "/get_info";
 		HeaderJsonObjectRequest jsObjRequest =
 				new HeaderJsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 					@Override
@@ -647,7 +647,8 @@ public class SortedList extends CertificateExceptionActivity {
 	/**
 	 * Listener for button, start new activity which show properties.
 	 *
-	 * @param v Reference to the widget that was clicked.
+	 * @param v
+	 * 		Reference to the widget that was clicked.
 	 */
 	public void buttonProperties(View v) {
 		String devName = (String) v.getTag();
@@ -665,7 +666,8 @@ public class SortedList extends CertificateExceptionActivity {
 	/**
 	 * Listener for button, start new activity which show attributes.
 	 *
-	 * @param v Reference to the widget that was clicked.
+	 * @param v
+	 * 		Reference to the widget that was clicked.
 	 */
 	public void buttonAttributes(View v) {
 		String devName = (String) v.getTag();
@@ -684,7 +686,8 @@ public class SortedList extends CertificateExceptionActivity {
 	/**
 	 * Listener for button, refresh list of devices.
 	 *
-	 * @param v Reference to the widget that was clicked.
+	 * @param v
+	 * 		Reference to the widget that was clicked.
 	 */
 	public void buttonSortedListRefresh(View v) {
 		getSortedList(RESTfulTangoHost);
@@ -693,7 +696,8 @@ public class SortedList extends CertificateExceptionActivity {
 	/**
 	 * Button listener, read pattern from text view and filter device list with it.
 	 *
-	 * @param view interface element that called method
+	 * @param view
+	 * 		interface element that called method
 	 */
 	public void buttonFilter(View view) {
 		EditText filterPattern = (EditText) findViewById(R.id.sortedList_filterPattern);
@@ -703,8 +707,10 @@ public class SortedList extends CertificateExceptionActivity {
 	/**
 	 * Update currently shown list of devices with list received from server in JSON format.
 	 *
-	 * @param response JSON response from RESTful srever.
-	 * @param sortCase Method of sorting devices.
+	 * @param response
+	 * 		JSON response from RESTful srever.
+	 * @param sortCase
+	 * 		Method of sorting devices.
 	 */
 	private void updateDeviceList(JSONObject response, int sortCase) {
 		listView = (ListView) findViewById(R.id.sortedList_listView);
@@ -738,36 +744,35 @@ public class SortedList extends CertificateExceptionActivity {
 							if (trackDeviceStatus) {
 								isDeviceAlive = response.getBoolean(className + "isDeviceAlive" + j);
 							}
-							NLevelItem child =
-									new NLevelItem(new SomeObject(deviceName, deviceName, isDeviceAlive), grandParent,
-											new NLevelView() {
-												public View getView(NLevelItem item) {
-													View view = inflater.inflate(R.layout.n_level_list_member_item, listView, false);
-													ImageView imageView = (ImageView) view.findViewById(R.id.nLevelListMemberDiode);
-													if (trackDeviceStatus) {
-														if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
-															imageView.setImageResource(R.drawable.dioda_zielona);
-														} else {
-															imageView.setImageResource(R.drawable.dioda_czerwona);
-														}
-													} else {
-														imageView.setVisibility(View.INVISIBLE);
-													}
-													Button b = (Button) view.findViewById(R.id.nLevelList_member_button);
-													b.setTag(((SomeObject) item.getWrappedObject()).getTag());
-													TextView tv = (TextView) view.findViewById(R.id.nLevelList_member_textView);
-													tv.setClickable(true);
-													String name = ((SomeObject) item.getWrappedObject()).getName();
-													tv.setText(name);
-													tv.setTag(((SomeObject) item.getWrappedObject()).getTag());
-													tv.setOnLongClickListener(onLongClickListener);
-													Button properties = (Button) view.findViewById(R.id.nLevelList_member_properties);
-													properties.setTag(((SomeObject) item.getWrappedObject()).getTag());
-													Button attributes = (Button) view.findViewById(R.id.nLevelList_member_attributes);
-													attributes.setTag(((SomeObject) item.getWrappedObject()).getTag());
-													return view;
+							NLevelItem child = new NLevelItem(new SomeObject(deviceName, deviceName, isDeviceAlive), grandParent,
+									new NLevelView() {
+										public View getView(NLevelItem item) {
+											View view = inflater.inflate(R.layout.n_level_list_member_item, listView, false);
+											ImageView imageView = (ImageView) view.findViewById(R.id.nLevelListMemberDiode);
+											if (trackDeviceStatus) {
+												if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
+													imageView.setImageResource(R.drawable.dioda_zielona);
+												} else {
+													imageView.setImageResource(R.drawable.dioda_czerwona);
 												}
-											});
+											} else {
+												imageView.setVisibility(View.INVISIBLE);
+											}
+											Button b = (Button) view.findViewById(R.id.nLevelList_member_button);
+											b.setTag(((SomeObject) item.getWrappedObject()).getTag());
+											TextView tv = (TextView) view.findViewById(R.id.nLevelList_member_textView);
+											tv.setClickable(true);
+											String name = ((SomeObject) item.getWrappedObject()).getName();
+											tv.setText(name);
+											tv.setTag(((SomeObject) item.getWrappedObject()).getTag());
+											tv.setOnLongClickListener(onLongClickListener);
+											Button properties = (Button) view.findViewById(R.id.nLevelList_member_properties);
+											properties.setTag(((SomeObject) item.getWrappedObject()).getTag());
+											Button attributes = (Button) view.findViewById(R.id.nLevelList_member_attributes);
+											attributes.setTag(((SomeObject) item.getWrappedObject()).getTag());
+											return view;
+										}
+									});
 							list.add(child);
 						}
 					}
@@ -819,8 +824,8 @@ public class SortedList extends CertificateExceptionActivity {
 						for (int j = 0; j < instancesCount; j++) {
 							instanceName = response.getString(serverName + "Instance" + j);
 							// prepare second level list item
-							final NLevelItem instanceLevel = new NLevelItem(new SomeObject(instanceName, "", false), serverLevel,
-									new NLevelView() {
+							final NLevelItem instanceLevel =
+									new NLevelItem(new SomeObject(instanceName, "", false), serverLevel, new NLevelView() {
 										public View getView(NLevelItem item) {
 											View view =
 													serverSortingInflater.inflate(R.layout.n_level_list_item_lev_2, listView, false);
@@ -866,9 +871,8 @@ public class SortedList extends CertificateExceptionActivity {
 												new NLevelItem(new SomeObject(deviceName, deviceName, isDeviceAlive), classLevel,
 														new NLevelView() {
 															public View getView(NLevelItem item) {
-																View view =
-																		serverSortingInflater.inflate(R.layout.n_level_list_member_item,
-																				listView, false);
+																View view = serverSortingInflater
+																		.inflate(R.layout.n_level_list_member_item, listView, false);
 																ImageView imageView =
 																		(ImageView) view.findViewById(R.id.nLevelListMemberDiode);
 																if (trackDeviceStatus) {
@@ -964,7 +968,6 @@ public class SortedList extends CertificateExceptionActivity {
 							// add third level list item
 							list.add(classLevel);
 
-
 							// get count of devices for class
 							devicesCount = response.getInt("domain" + i + "class" + k + "devCount");
 							if (devicesCount > 0) {
@@ -979,9 +982,8 @@ public class SortedList extends CertificateExceptionActivity {
 											new NLevelItem(new SomeObject(deviceName, deviceName, isDeviceAlive), classLevel,
 													new NLevelView() {
 														public View getView(NLevelItem item) {
-															View view =
-																	deviceSortingInflater.inflate(R.layout.n_level_list_member_item,
-																			listView, false);
+															View view = deviceSortingInflater
+																	.inflate(R.layout.n_level_list_member_item, listView, false);
 															ImageView imageView = (ImageView) view.findViewById(R.id
 																	.nLevelListMemberDiode);
 															if (trackDeviceStatus) {
@@ -1040,36 +1042,34 @@ public class SortedList extends CertificateExceptionActivity {
 							isDeviceAlive = response.getBoolean(deviceName + "isDeviceAlive");
 						}
 						NLevelItem child =
-								new NLevelItem(new SomeObject(deviceName, deviceName, isDeviceAlive), null,
-										new NLevelView() {
-											public View getView(NLevelItem item) {
-												View view = fullListInflater.inflate(R.layout.n_level_list_member_item, listView,
-														false);
-												ImageView imageView = (ImageView) view.findViewById(R.id.nLevelListMemberDiode);
-												if (trackDeviceStatus) {
-													if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
-														imageView.setImageResource(R.drawable.dioda_zielona);
-													} else {
-														imageView.setImageResource(R.drawable.dioda_czerwona);
-													}
-												} else {
-													imageView.setVisibility(View.INVISIBLE);
-												}
-												Button b = (Button) view.findViewById(R.id.nLevelList_member_button);
-												b.setTag(((SomeObject) item.getWrappedObject()).getTag());
-												TextView tv = (TextView) view.findViewById(R.id.nLevelList_member_textView);
-												tv.setClickable(true);
-												String name = ((SomeObject) item.getWrappedObject()).getName();
-												tv.setText(name);
-												tv.setTag(((SomeObject) item.getWrappedObject()).getTag());
-												tv.setOnLongClickListener(onLongClickListener);
-												Button properties = (Button) view.findViewById(R.id.nLevelList_member_properties);
-												properties.setTag(((SomeObject) item.getWrappedObject()).getTag());
-												Button attributes = (Button) view.findViewById(R.id.nLevelList_member_attributes);
-												attributes.setTag(((SomeObject) item.getWrappedObject()).getTag());
-												return view;
+								new NLevelItem(new SomeObject(deviceName, deviceName, isDeviceAlive), null, new NLevelView() {
+									public View getView(NLevelItem item) {
+										View view = fullListInflater.inflate(R.layout.n_level_list_member_item, listView, false);
+										ImageView imageView = (ImageView) view.findViewById(R.id.nLevelListMemberDiode);
+										if (trackDeviceStatus) {
+											if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
+												imageView.setImageResource(R.drawable.dioda_zielona);
+											} else {
+												imageView.setImageResource(R.drawable.dioda_czerwona);
 											}
-										});
+										} else {
+											imageView.setVisibility(View.INVISIBLE);
+										}
+										Button b = (Button) view.findViewById(R.id.nLevelList_member_button);
+										b.setTag(((SomeObject) item.getWrappedObject()).getTag());
+										TextView tv = (TextView) view.findViewById(R.id.nLevelList_member_textView);
+										tv.setClickable(true);
+										String name = ((SomeObject) item.getWrappedObject()).getName();
+										tv.setText(name);
+										tv.setTag(((SomeObject) item.getWrappedObject()).getTag());
+										tv.setOnLongClickListener(onLongClickListener);
+										Button properties = (Button) view.findViewById(R.id.nLevelList_member_properties);
+										properties.setTag(((SomeObject) item.getWrappedObject()).getTag());
+										Button attributes = (Button) view.findViewById(R.id.nLevelList_member_attributes);
+										attributes.setTag(((SomeObject) item.getWrappedObject()).getTag());
+										return view;
+									}
+								});
 						list.add(child);
 
 					}
@@ -1096,9 +1096,12 @@ public class SortedList extends CertificateExceptionActivity {
 	/**
 	 * Filter currently shown list of devices with selected patern.
 	 *
-	 * @param response JSON response from RESTful srever.
-	 * @param sortCase Method of sorting devices.
-	 * @param pattern  String containing regular expression filter.
+	 * @param response
+	 * 		JSON response from RESTful srever.
+	 * @param sortCase
+	 * 		Method of sorting devices.
+	 * @param pattern
+	 * 		String containing regular expression filter.
 	 */
 	private void filterDeviceList(JSONObject response, int sortCase, String pattern) {
 		Pattern p = Pattern.compile(".*" + pattern.toLowerCase() + ".*");
@@ -1143,36 +1146,36 @@ public class SortedList extends CertificateExceptionActivity {
 								if (trackDeviceStatus) {
 									isDeviceAlive = response.getBoolean(className + "isDeviceAlive" + j);
 								}
-								NLevelItem child =
-										new NLevelItem(new SomeObject(deviceName, deviceName, isDeviceAlive), grandParent,
-												new NLevelView() {
-													public View getView(NLevelItem item) {
-														View view = inflater.inflate(R.layout.n_level_list_member_item, listView, false);
-														ImageView imageView = (ImageView) view.findViewById(R.id.nLevelListMemberDiode);
-														if (trackDeviceStatus) {
-															if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
-																imageView.setImageResource(R.drawable.dioda_zielona);
-															} else {
-																imageView.setImageResource(R.drawable.dioda_czerwona);
-															}
-														} else {
-															imageView.setVisibility(View.INVISIBLE);
-														}
-														Button b = (Button) view.findViewById(R.id.nLevelList_member_button);
-														b.setTag(((SomeObject) item.getWrappedObject()).getTag());
-														TextView tv = (TextView) view.findViewById(R.id.nLevelList_member_textView);
-														tv.setClickable(true);
-														String name = ((SomeObject) item.getWrappedObject()).getName();
-														tv.setText(name);
-														tv.setTag(((SomeObject) item.getWrappedObject()).getTag());
-														tv.setOnLongClickListener(onLongClickListener);
-														Button properties = (Button) view.findViewById(R.id.nLevelList_member_properties);
-														properties.setTag(((SomeObject) item.getWrappedObject()).getTag());
-														Button attributes = (Button) view.findViewById(R.id.nLevelList_member_attributes);
-														attributes.setTag(((SomeObject) item.getWrappedObject()).getTag());
-														return view;
+								NLevelItem child = new NLevelItem(new SomeObject(deviceName, deviceName, isDeviceAlive),
+										grandParent,
+										new NLevelView() {
+											public View getView(NLevelItem item) {
+												View view = inflater.inflate(R.layout.n_level_list_member_item, listView, false);
+												ImageView imageView = (ImageView) view.findViewById(R.id.nLevelListMemberDiode);
+												if (trackDeviceStatus) {
+													if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
+														imageView.setImageResource(R.drawable.dioda_zielona);
+													} else {
+														imageView.setImageResource(R.drawable.dioda_czerwona);
 													}
-												});
+												} else {
+													imageView.setVisibility(View.INVISIBLE);
+												}
+												Button b = (Button) view.findViewById(R.id.nLevelList_member_button);
+												b.setTag(((SomeObject) item.getWrappedObject()).getTag());
+												TextView tv = (TextView) view.findViewById(R.id.nLevelList_member_textView);
+												tv.setClickable(true);
+												String name = ((SomeObject) item.getWrappedObject()).getName();
+												tv.setText(name);
+												tv.setTag(((SomeObject) item.getWrappedObject()).getTag());
+												tv.setOnLongClickListener(onLongClickListener);
+												Button properties = (Button) view.findViewById(R.id.nLevelList_member_properties);
+												properties.setTag(((SomeObject) item.getWrappedObject()).getTag());
+												Button attributes = (Button) view.findViewById(R.id.nLevelList_member_attributes);
+												attributes.setTag(((SomeObject) item.getWrappedObject()).getTag());
+												return view;
+											}
+										});
 								list.add(child);
 							}
 						}
@@ -1223,8 +1226,8 @@ public class SortedList extends CertificateExceptionActivity {
 						for (int j = 0; j < instancesCount; j++) {
 							instanceName = response.getString(serverName + "Instance" + j);
 							// prepare second level list item
-							final NLevelItem instanceLevel = new NLevelItem(new SomeObject(instanceName, "", false), serverLevel,
-									new NLevelView() {
+							final NLevelItem instanceLevel =
+									new NLevelItem(new SomeObject(instanceName, "", false), serverLevel, new NLevelView() {
 										public View getView(NLevelItem item) {
 											View view =
 													serverSortingInflater.inflate(R.layout.n_level_list_item_lev_2, listView, false);
@@ -1253,7 +1256,6 @@ public class SortedList extends CertificateExceptionActivity {
 											}
 										});
 								thirdLevelPresent = false;
-
 
 								// get count of devices for class
 								devicesCount = response.getInt("Se" + i + "In" + j + "Cl" + k + "DCnt");
@@ -1286,9 +1288,8 @@ public class SortedList extends CertificateExceptionActivity {
 													new NLevelItem(new SomeObject(deviceName, deviceName, isDeviceAlive), classLevel,
 															new NLevelView() {
 																public View getView(NLevelItem item) {
-																	View view =
-																			serverSortingInflater.inflate(R.layout.n_level_list_member_item,
-																					listView, false);
+																	View view = serverSortingInflater
+																			.inflate(R.layout.n_level_list_member_item, listView, false);
 																	ImageView imageView =
 																			(ImageView) view.findViewById(R.id.nLevelListMemberDiode);
 																	if (trackDeviceStatus) {
@@ -1311,12 +1312,10 @@ public class SortedList extends CertificateExceptionActivity {
 																	tv.setOnLongClickListener(onLongClickListener);
 																	Button properties =
 																			(Button) view.findViewById(R.id.nLevelList_member_properties);
-																	properties
-																			.setTag(((SomeObject) item.getWrappedObject()).getTag());
+																	properties.setTag(((SomeObject) item.getWrappedObject()).getTag());
 																	Button attributes =
 																			(Button) view.findViewById(R.id.nLevelList_member_attributes);
-																	attributes
-																			.setTag(((SomeObject) item.getWrappedObject()).getTag());
+																	attributes.setTag(((SomeObject) item.getWrappedObject()).getTag());
 																	return view;
 																}
 															});
@@ -1325,7 +1324,6 @@ public class SortedList extends CertificateExceptionActivity {
 										}
 									}
 								}
-
 
 							}
 						}
@@ -1372,7 +1370,6 @@ public class SortedList extends CertificateExceptionActivity {
 						// add frist level list item
 						//list.add(serverLevel);
 
-
 						// get number of classes in the instance
 						classCount = response.getInt("domain" + i + "classCount");
 						for (int k = 0; k < classCount; k++) {
@@ -1392,7 +1389,6 @@ public class SortedList extends CertificateExceptionActivity {
 							secondLevelPresent = false;
 							// add second level list item
 							//list.add(classLevel);
-
 
 							// get count of devices for class
 							devicesCount = response.getInt("domain" + i + "class" + k + "devCount");
@@ -1420,11 +1416,10 @@ public class SortedList extends CertificateExceptionActivity {
 												new NLevelItem(new SomeObject(deviceName, deviceName, isDeviceAlive), classLevel,
 														new NLevelView() {
 															public View getView(NLevelItem item) {
-																View view =
-																		deviceSortingInflater.inflate(R.layout.n_level_list_member_item,
-																				listView, false);
-																ImageView imageView = (ImageView) view.findViewById(R.id
-																		.nLevelListMemberDiode);
+																View view = deviceSortingInflater
+																		.inflate(R.layout.n_level_list_member_item, listView, false);
+																ImageView imageView =
+																		(ImageView) view.findViewById(R.id.nLevelListMemberDiode);
 																if (trackDeviceStatus) {
 																	if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
 																		imageView.setImageResource(R.drawable.dioda_zielona);
@@ -1457,7 +1452,6 @@ public class SortedList extends CertificateExceptionActivity {
 								}
 							}
 
-
 						}
 
 					}
@@ -1488,36 +1482,34 @@ public class SortedList extends CertificateExceptionActivity {
 								isDeviceAlive = response.getBoolean(deviceName + "isDeviceAlive");
 							}
 							NLevelItem child =
-									new NLevelItem(new SomeObject(deviceName, deviceName, isDeviceAlive), null,
-											new NLevelView() {
-												public View getView(NLevelItem item) {
-													View view =
-															fullListInflater.inflate(R.layout.n_level_list_member_item, listView, false);
-													ImageView imageView = (ImageView) view.findViewById(R.id.nLevelListMemberDiode);
-													if (trackDeviceStatus) {
-														if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
-															imageView.setImageResource(R.drawable.dioda_zielona);
-														} else {
-															imageView.setImageResource(R.drawable.dioda_czerwona);
-														}
-													} else {
-														imageView.setVisibility(View.INVISIBLE);
-													}
-													Button b = (Button) view.findViewById(R.id.nLevelList_member_button);
-													b.setTag(((SomeObject) item.getWrappedObject()).getTag());
-													TextView tv = (TextView) view.findViewById(R.id.nLevelList_member_textView);
-													tv.setClickable(true);
-													String name = ((SomeObject) item.getWrappedObject()).getName();
-													tv.setText(name);
-													tv.setTag(((SomeObject) item.getWrappedObject()).getTag());
-													tv.setOnLongClickListener(onLongClickListener);
-													Button properties = (Button) view.findViewById(R.id.nLevelList_member_properties);
-													properties.setTag(((SomeObject) item.getWrappedObject()).getTag());
-													Button attributes = (Button) view.findViewById(R.id.nLevelList_member_attributes);
-													attributes.setTag(((SomeObject) item.getWrappedObject()).getTag());
-													return view;
+									new NLevelItem(new SomeObject(deviceName, deviceName, isDeviceAlive), null, new NLevelView() {
+										public View getView(NLevelItem item) {
+											View view = fullListInflater.inflate(R.layout.n_level_list_member_item, listView, false);
+											ImageView imageView = (ImageView) view.findViewById(R.id.nLevelListMemberDiode);
+											if (trackDeviceStatus) {
+												if (((SomeObject) item.getWrappedObject()).getIsAlive()) {
+													imageView.setImageResource(R.drawable.dioda_zielona);
+												} else {
+													imageView.setImageResource(R.drawable.dioda_czerwona);
 												}
-											});
+											} else {
+												imageView.setVisibility(View.INVISIBLE);
+											}
+											Button b = (Button) view.findViewById(R.id.nLevelList_member_button);
+											b.setTag(((SomeObject) item.getWrappedObject()).getTag());
+											TextView tv = (TextView) view.findViewById(R.id.nLevelList_member_textView);
+											tv.setClickable(true);
+											String name = ((SomeObject) item.getWrappedObject()).getName();
+											tv.setText(name);
+											tv.setTag(((SomeObject) item.getWrappedObject()).getTag());
+											tv.setOnLongClickListener(onLongClickListener);
+											Button properties = (Button) view.findViewById(R.id.nLevelList_member_properties);
+											properties.setTag(((SomeObject) item.getWrappedObject()).getTag());
+											Button attributes = (Button) view.findViewById(R.id.nLevelList_member_attributes);
+											attributes.setTag(((SomeObject) item.getWrappedObject()).getTag());
+											return view;
+										}
+									});
 							list.add(child);
 						}
 					}
@@ -1540,6 +1532,13 @@ public class SortedList extends CertificateExceptionActivity {
 		}
 	}
 
+	/**
+	 * Enable or disable list view, filter and refresh button from user actions. Useful while loading device list from
+	 * server.
+	 *
+	 * @param enabled
+	 * 		If true, user can interact with interface, if false, elements are loced.
+	 */
 	private void enableUserInterface(boolean enabled) {
 		if (enabled) {
 			ProgressBar progressBar = (ProgressBar) findViewById(R.id.sortedList_progressBar);
@@ -1576,6 +1575,5 @@ public class SortedList extends CertificateExceptionActivity {
 			filterTextView.setFocusableInTouchMode(false);
 		}
 	}
-
 
 }

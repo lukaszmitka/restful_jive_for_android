@@ -8,16 +8,17 @@ import android.widget.Spinner;
 
 import java.lang.reflect.Method;
 
+/**
+ * Spinner that does not perform any action while onCreate, and can execute action while selecting the same item twice.
+ */
 public class NoSelectionSpinner extends Spinner {
-
-	private static Method s_pSelectionChangedMethod = null;
 
 	static {
 		try {
 			Class noparams[] = {};
 			Class targetClass = AdapterView.class;
 
-			s_pSelectionChangedMethod = targetClass.getDeclaredMethod("selectionChanged", noparams);
+			Method s_pSelectionChangedMethod = targetClass.getDeclaredMethod("selectionChanged", noparams);
 			if (s_pSelectionChangedMethod != null) {
 				s_pSelectionChangedMethod.setAccessible(true);
 			}
@@ -27,8 +28,6 @@ public class NoSelectionSpinner extends Spinner {
 			throw new RuntimeException(e);
 		}
 	}
-
-	private int lastSelected = 0;
 
 	public NoSelectionSpinner(Context context) {
 		super(context);

@@ -26,10 +26,6 @@ public class DevicePanelActivity extends WifiMonitorFragmentActivity implements 
 	 */
 	private ViewPager viewPager;
 	/**
-	 * Adapter for controlling tabs.
-	 */
-	private DevicePanelTabsPagerAdapter mAdapter;
-	/**
 	 * Action bar of the activity
 	 */
 	private ActionBar actionBar;
@@ -50,7 +46,14 @@ public class DevicePanelActivity extends WifiMonitorFragmentActivity implements 
 	 */
 	private String tangoPort;
 	private Context context;
-	private String userName, userPassword;
+	/**
+	 * User name.
+	 */
+	private String userName;
+	/**
+	 * User password.
+	 */
+	private String userPassword;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +81,10 @@ public class DevicePanelActivity extends WifiMonitorFragmentActivity implements 
 		// Initilization
 		viewPager = (ViewPager) findViewById(R.id.device_panel_pager);
 		actionBar = getActionBar();
-		mAdapter = new DevicePanelTabsPagerAdapter(getSupportFragmentManager());
+		/*
+	  Adapter for controlling tabs.
+	 */
+		DevicePanelTabsPagerAdapter mAdapter = new DevicePanelTabsPagerAdapter(getSupportFragmentManager());
 
 		viewPager.setAdapter(mAdapter);
 		actionBar.setHomeButtonEnabled(false);
@@ -126,6 +132,11 @@ public class DevicePanelActivity extends WifiMonitorFragmentActivity implements 
 		return deviceName;
 	}
 
+	/**
+	 * Get context of an activity.
+	 *
+	 * @return Activity context.
+	 */
 	public Context getContext() {
 		return context;
 	}
@@ -139,16 +150,36 @@ public class DevicePanelActivity extends WifiMonitorFragmentActivity implements 
 		return restHost;
 	}
 
+	/**
+	 * Get name of currently selected tango host
+	 *
+	 * @return Tango host name.
+	 */
 	public String getTangoHost() {
 		return tangoHost;
 	}
 
+	/**
+	 * Get number of corrently selected tango port.
+	 *
+	 * @return tango port number.
+	 */
 	public String getTangoPort() {
 		return tangoPort;
 	}
 
+	/**
+	 * Get name of currently operating user.
+	 *
+	 * @return User name
+	 */
 	protected String getUserName() {return userName;}
 
+	/**
+	 * Get password of currently operating user.
+	 *
+	 * @return Password,
+	 */
 	protected String getUserPassword() {return userPassword;}
 
 	@Override
@@ -164,10 +195,7 @@ public class DevicePanelActivity extends WifiMonitorFragmentActivity implements 
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
+		return id == R.id.action_settings || super.onOptionsItemSelected(item);
 	}
 
 	@Override
